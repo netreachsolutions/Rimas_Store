@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import axios from '../api/axios'; // Assuming axios is configured
+import React, { useState, useEffect } from "react";
+import axios from "../api/axios"; // Assuming axios is configured
 
 const AddProductToCategory = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   // Fetch categories and products on component mount
   useEffect(() => {
     const fetchCategoriesAndProducts = async () => {
       try {
-        const categoryResponse = await axios.get('/api/category', {
+        const categoryResponse = await axios.get("/api/category", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCategories(categoryResponse.data);
 
-        const productResponse = await axios.get('/api/users/products');
+        const productResponse = await axios.get("/api/users/products");
         setProducts(productResponse.data.products);
       } catch (error) {
-        console.error('Error fetching categories or products:', error);
+        console.error("Error fetching categories or products:", error);
       }
     };
     fetchCategoriesAndProducts();
@@ -31,7 +31,7 @@ const AddProductToCategory = () => {
     setSelectedProducts((prevSelectedProducts) => {
       if (prevSelectedProducts.includes(productId)) {
         // Remove productId from selectedProducts
-        return prevSelectedProducts.filter(id => id !== productId);
+        return prevSelectedProducts.filter((id) => id !== productId);
       } else {
         // Add productId to selectedProducts
         return [...prevSelectedProducts, productId];
@@ -41,26 +41,30 @@ const AddProductToCategory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     console.log("Selected products: ", selectedProducts);
 
     if (selectedProducts.length === 0) {
-      alert('Please select at least one product.');
+      alert("Please select at least one product.");
       return;
     }
 
     try {
-      const response = await axios.post('/api/category/addProduct', {
-        productIds: selectedProducts, // Sending array of selected product IDs
-        categoryId: selectedCategory,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        "/api/category/addProduct",
+        {
+          productIds: selectedProducts, // Sending array of selected product IDs
+          categoryId: selectedCategory,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       alert(response.data.message);
     } catch (error) {
-      console.error('Error adding products to category:', error);
-      alert('Failed to add products to category.');
+      console.error("Error adding products to category:", error);
+      alert("Failed to add products to category.");
     }
   };
 
@@ -70,7 +74,9 @@ const AddProductToCategory = () => {
       <form onSubmit={handleSubmit}>
         {/* Category Selector */}
         <div className="mb-6">
-          <label className="block text-lg font-medium mb-2">Select Category:</label>
+          <label className="block text-lg font-medium mb-2">
+            Select Category:
+          </label>
           <select
             className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={selectedCategory}
@@ -94,7 +100,10 @@ const AddProductToCategory = () => {
           ) : (
             <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
-                <li key={product.product_id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                <li
+                  key={product.product_id}
+                  className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
                   <input
                     type="checkbox"
                     checked={selectedProducts.includes(product.product_id)} // Maintain checkbox state
@@ -108,7 +117,9 @@ const AddProductToCategory = () => {
                   />
                   <div>
                     <p className="font-medium text-gray-900">{product.name}</p>
-                    <p className="text-sm text-gray-500">{product.description}</p>
+                    <p className="text-sm text-gray-500">
+                      {product.description}
+                    </p>
                   </div>
                 </li>
               ))}

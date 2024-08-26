@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import NavBar from "./NavBar"
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -81,7 +82,9 @@ const Profile = () => {
   }
 
   return (
+    <><NavBar />
     <div className="container mx-auto my-10 p-6 bg-white shadow-md rounded-lg">
+      
       <h2 className="text-3xl font-bold mb-6 text-center">Profile</h2>
       <div className="border-b border-gray-300 pb-4">
         <p className="text-lg mb-2"><strong>Email:</strong> {profileData.email}</p>
@@ -171,7 +174,8 @@ const Profile = () => {
           </button>
         </form>
       </div>
-    </div>
+    </div></>
+    
   );
 };
 

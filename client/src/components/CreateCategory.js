@@ -1,15 +1,15 @@
-// src/components/ProductUpload.js
-import React, { useState } from 'react';
-import axios from '../api/axios';
+// src/components/CategoryUpload.js
+import React, { useState } from "react";
+import axios from "../api/axios";
 
 const CreateCategory = () => {
   const [categoryData, setcategoryData] = useState({
-    name: '',
-    description: ''
+    name: "",
+    description: "",
   });
 
-  const token = localStorage.getItem('token');
-  const [imageUrl, setImageUrl] = useState('');
+  const token = localStorage.getItem("token");
+  const [imageUrl, setImageUrl] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,26 +22,25 @@ const CreateCategory = () => {
 
   const handleImageUpload = async () => {
     const formData = new FormData();
-    formData.append('file', categoryData.image);
+    formData.append("file", categoryData.image);
 
     try {
-      const response = await axios.post('/api/image/upload', formData, {
+      const response = await axios.post("/api/image/upload", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       setImageUrl(response.data.imageUrl);
-      console.log('imageUrl'+response.data.imageUrl)
-      alert('success')
+      console.log("imageUrl" + response.data.imageUrl);
+      alert("success");
     } catch (error) {
-      alert('error')
-      console.error('Error uploading image:', error);
+      alert("error");
+      console.error("Error uploading image:", error);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
 
     // if (!imageUrl) {
     //   alert('Please upload an image first');
@@ -60,31 +59,35 @@ const CreateCategory = () => {
     //       'Content-Type': 'application/json',
     //       Authorization: `Bearer ${token}`, // Include the Bearer token in the headers
     //     },
-    //     body: JSON.stringify(categoryDetails), // Send the product data as a JSON string
+    //     body: JSON.stringify(categoryDetails), // Send the Category data as a JSON string
     //   });
-  
+
     //   // Check if the response is OK (status code 200-299)
     //   if (!response.ok) {
     //     throw new Error(`Error: ${response.status}`);
     //   }
-  
+
     //   const data = await response.json(); // Parse the response JSON
     //   console.log(data);
     //   alert(data.message); // Show the message from the response
     // } catch (error) {
-    //   console.error('Error saving product:', error);
-    //   alert('Failed to save product.');
+    //   console.error('Error saving Category:', error);
+    //   alert('Failed to save Category.');
     // }
 
     try {
-      alert('hihi')
-      const response = await axios.post('/api/category/create', categoryDetails, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log(response)
+      alert("hihi");
+      const response = await axios.post(
+        "/api/category/create",
+        categoryDetails,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(response);
       alert(response.data.message);
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error("Error saving Category:", error);
     }
   };
 
@@ -95,14 +98,14 @@ const CreateCategory = () => {
         <input
           type="text"
           name="name"
-          placeholder="Product Name"
+          placeholder="Category Name"
           value={categoryData.name}
           onChange={handleChange}
           required
         />
         <textarea
           name="description"
-          placeholder="Product Description"
+          placeholder="Category Description"
           value={categoryData.description}
           onChange={handleChange}
           required
