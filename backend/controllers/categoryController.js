@@ -35,3 +35,25 @@ exports.retrieveAllCategories = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 }
+
+exports.getAllCategoriesWithCount = async (req, res) =>{
+    try{
+        const categoriesWithCount = await CategoryService.getAllCategoriesWithCount(db);
+        res.json(categoriesWithCount)
+    }catch (error){
+        console.error('Error during fetch:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+exports.deleteCategoriesByIDs = async (req, res) =>{
+    try{
+        const categoryIDs = req.body.selectedCategories
+        console.log("\nREQ BODY:", req.body)
+        await CategoryService.deleteCategoriesWithProducts(db, categoryIDs);
+        res.json({ message: "Deleted Categories with successfully" })
+    }catch (error){
+        console.error('Error during deleting categories:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
