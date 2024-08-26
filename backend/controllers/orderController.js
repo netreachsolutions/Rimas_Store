@@ -1,0 +1,90 @@
+const db = require('../config/db');
+const CartService = require('../services/cartService');
+const OrderService = require('../services/orderService');
+const orderService = require('../services/orderService');
+const paymentService = require('../services/paymentService');
+
+exports.createOrder = async (req, res) => {
+    const { payment_intent, address_id, currency } = req.body;
+    const { customerId } = req.tokenAssets; // Ensure customer ID is attached to the token
+
+    try {
+        // Step 1: Validate Payment Intent
+        const isPaymentValid = await paymentService.validatePaymentIntent(payment_intent);
+        if (!isPaymentValid) {
+            return res.status(400).json({ message: 'Invalid payment intent' });
+        }
+
+        // Step 2: Fetch cart items from the database using cart_id
+        const cartItems = await CartService.viewCart(db, customerId);
+        if (!cartItems || cartItems.length === 0) {
+            return res.status(400).json({ message: 'Cart is empty or invalid' });
+        }
+
+        // Step 3: Calculate total price of the order (including shipping)
+        const totalAmount = cartItems.reduce((total, item) => total + item.quantity * item.price, 0);
+        const shippingCost = 299; // Example shipping cost in cents
+        const finalTotalAmount = totalAmount + shippingCost;
+
+        // Step 4: Create Order in the database (transaction)
+        const orderId = await orderService.createOrder(db.promise(), customerId, address_id, cartItems, finalTotalAmount, shippingCost);
+
+        // Step 5: Mark payment as completed and associate with the order
+        await paymentService.recordPayment(db, payment_intent, orderId, finalTotalAmount, currency);
+
+        // Step 6: Clear the cart after order creation
+        await CartService.clearCart(db, customerId);
+
+        // Step 7: Send order confirmation response
+        res.status(201).json({
+            success: true,
+            message: 'Order created successfully',
+            orderId: orderId,
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ message: 'Failed to create order' });
+    }
+};
+
+exports.getAllOrders = async (req, res) => {
+    try {
+      // Call the service to get all orders
+      const orders = await OrderService.getAllOrders(db);
+  
+      // Send the orders as a response
+      res.status(200).json({ orders });
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      res.status(500).json({ message: 'Failed to fetch orders' });
+    }
+  };
+
+  exports.updateDeliveryStatus = async (req, res) => {
+    const { order_id } = req.params;
+    const { delivery_status } = req.body;
+
+    try {
+        await orderService.updateDeliveryStatus(db, order_id, delivery_status);
+        res.status(200).json({ message: 'Delivery status updated successfully' });
+    } catch (error) {
+        console.error('Error updating delivery status:', error);
+        res.status(500).json({ message: 'Failed to update delivery status' });
+    }
+};
+
+exports.getOrderDetails = async (req, res) => {
+    const { orderId } = req.params;
+  
+    try {
+      const orderDetails = await orderService.getOrderDetails(db, orderId);
+      if (!orderDetails) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      console.log(orderDetails);
+      res.status(200).json({ orderDetails });
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      res.status(500).json({ message: 'Failed to fetch order details' });
+    }
+  };
