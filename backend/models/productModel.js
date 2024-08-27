@@ -39,6 +39,7 @@ const createProduct = (db, productData, callback) => {
  }
   
  const getProductsByCategoryId = (db, categoryId, callback) => {
+  console.log(categoryId)
   const query = `
       SELECT p.product_id, p.name, p.description, p.price, p.stock, p.created_at, pi.image_url
       FROM products p

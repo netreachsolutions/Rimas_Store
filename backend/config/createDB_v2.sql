@@ -97,7 +97,8 @@ CREATE TABLE product_category (
     category_id INT NOT NULL,
     product_id INT NOT NULL,
 	FOREIGN KEY (category_id) REFERENCES categories(category_id),
-	FOREIGN KEY (product_id) REFERENCES products(product_id)
+	FOREIGN KEY (product_id) REFERENCES products(product_id),
+    UNIQUE (category_id, product_id)
 );
 
 -- Create order_items table

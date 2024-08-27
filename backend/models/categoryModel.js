@@ -89,11 +89,38 @@ const deleteCategoriesWithProducts = (db, categoryIds, callback) => {
   });
 };
 
+const getCategoryByID = (db, categoryID, callback)=>{
+  const query = `SELECT category_id, category_name, description, image_url FROM categories WHERE category_id = ${categoryID};`;
+
+  db.query(query, categoryID,callback);
+}
+
+const getAllProductsNotInCategory = (db, categoryID, callback) => {
+  const query = `
+    SELECT p.product_id, p.name, p.description, p.price, p.stock, p.created_at
+    FROM products p
+    LEFT JOIN product_category pc ON p.product_id = pc.product_id AND pc.category_id = ?
+    WHERE pc.product_id IS NULL;
+  `;
+
+  db.query(query, [categoryID], callback);
+};
+
+
+const deleteSelectedProductsInCategory = (db, categoryID, productIDs, callback)=>{
+  const query = `DELETE FROM product_category WHERE category_id = ? AND product_id IN (?);`
+
+  db.query(query, [categoryID, productIDs], callback)
+}
+
 
 module.exports = {
   createCategory,
   findAllCategories,
   addProductsToCategory,
   getAllCategoriesWithCount,
-  deleteCategoriesWithProducts
+  deleteCategoriesWithProducts,
+  getCategoryByID,
+  deleteSelectedProductsInCategory,
+  getAllProductsNotInCategory
 };

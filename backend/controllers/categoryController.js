@@ -57,3 +57,43 @@ exports.deleteCategoriesByIDs = async (req, res) =>{
         res.status(500).json({ message: error.message });
     }
 }
+
+exports.getCategory = async (req, res) => {
+    const {categoryId} = req.params;
+
+    try{
+        console.log("Request controller: ",req.params)
+        const category = await CategoryService.getCategoryByID(db,categoryId);
+        res.json(category)
+    } 
+    catch (error){
+        console.error("Error fetching category: ",error);
+        res.status(400).json({ message: error.message })
+    }  
+}
+
+exports.deleteProducts = async (req, res) => {
+    try{
+        const productIds = req.body.productIds;
+        const categoryID = req.body.categoryId;
+        await CategoryService.deleteProductsInCategory(db, categoryID, productIds);
+        res.json({"message":"Deleted products from category sucessfully"});
+    } 
+    catch (error){
+        console.error("Error fetching category: ",error);
+        res.status(500).json({ message: error.message });
+    }  
+}
+
+exports.getAllProductsNotInCategory = async (req, res) => {
+    const {categoryId} = req.params;
+
+    try{
+        const products = await CategoryService.getAllProductsNotInCategoryService(db, categoryId);
+        res.json(products);
+    } 
+    catch (error){
+        console.error("Error fetching products: ",error);
+        res.status(400).json({ message: error.message });
+    }  
+}

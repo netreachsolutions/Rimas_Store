@@ -4,9 +4,13 @@ const {
   findAllCategories,
   addProductsToCategory,
   getAllCategoriesWithCount,
-  deleteCategoriesWithProducts
-
+  deleteCategoriesWithProducts,
+  getCategoryByID,
+  deleteSelectedProductsInCategory,
+  getAllProductsNotInCategory
 } = require("../models/categoryModel");
+const { reject } = require("bcrypt/promises");
+const { getCategory } = require("../controllers/categoryController");
 
 class CategoryService {
   static async createCategory(db, categoryData) {
@@ -45,11 +49,37 @@ class CategoryService {
     })
   }
   
-  static async deleteCategoriesWithProducts(db, categoryIds){
-    console.log(categoryIds);
+  static async deleteCategoriesWithProducts(db, categoryId){
     return new Promise((resolve, reject) =>{
-      deleteCategoriesWithProducts(db, categoryIds, (err, result) => {
+      deleteCategoriesWithProducts(db, categoryId, (err, result) => {
         if (err) return reject(err);
+        resolve(result);
+      })
+    })
+  }
+
+  static async getCategoryByID(db, categoryId){
+    return new Promise((resolve,reject)=>{
+      getCategoryByID(db,categoryId, (err,result)=>{
+        if(err) return reject(err);
+        resolve(result);
+      })
+    })
+  }
+
+  static async deleteProductsInCategory(db,categoryId,productIds){
+    return new Promise((resolve,reject)=>{
+      deleteSelectedProductsInCategory(db, categoryId, productIds, (err,result)=>{
+        if(err) return reject(err);
+        resolve(result);
+      })
+    })
+  }
+
+  static async getAllProductsNotInCategoryService(db, categoryId){
+    return new Promise((resolve,reject)=>{
+      getAllProductsNotInCategory(db, categoryId, (err,result)=>{
+        if(err) return reject(err);
         resolve(result);
       })
     })
