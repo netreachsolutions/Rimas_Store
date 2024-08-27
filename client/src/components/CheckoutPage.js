@@ -4,6 +4,7 @@ import axios from '../api/axios';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from './CheckoutForm';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 const stripePromise = loadStripe('pk_test_51PApsjGBaVIQ3lGmE2o5Glfe1tOUor4CJiHmfLb2yxLUqXyzErTGruVfE2g2RsmicoxnETNdohTlN8b94QoAIghE00uMMRRfwB');
 
@@ -16,6 +17,7 @@ const CheckoutPage = () => {
   const [cartId, setCartId] = useState(null);
   const [clientSecret, setClientSecret] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(''); // Added to track payment method choice
 
   useEffect(() => {
     const fetchAddressesAndCart = async () => {
@@ -48,19 +50,26 @@ const CheckoutPage = () => {
 
   const handleDeliverySubmit = async (e) => {
     e.preventDefault();
+    handleNextStep(); // Move to the payment selection step
+  };
 
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await axios.post(
-        '/api/orders/create-intent',
-        { paymentMethodType: 'card', currency: 'USD', cart_id: cartId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setClientSecret(response.data.clientSecret);
-      handleNextStep();
-    } catch (error) {
-      console.error("Error creating payment intent", error);
+  const handlePaymentSelectionSubmit = async () => {
+    if (paymentMethod === 'card') {
+      // If card is selected, create Stripe payment intent
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.post(
+          '/api/orders/create-intent',
+          { paymentMethodType: 'card', currency: 'USD', cart_id: cartId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setClientSecret(response.data.clientSecret);
+        handleNextStep();
+      } catch (error) {
+        console.error("Error creating payment intent", error);
+      }
+    } else {
+      handleNextStep(); // For PayPal, no need to create a payment intent; just proceed to PayPal buttons
     }
   };
 
@@ -89,18 +98,50 @@ const CheckoutPage = () => {
           ))}
         <button
           type="submit"
-          className="bg-blue text-white px-6 py-2 rounded hover:bg-blue transition duration-300"
+          className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300"
         >
-          Continue to Payment
+          Continue to Payment Selection
         </button>
       </form>
+    </div>
+  );
+
+  const renderPaymentSelectionStep = () => (
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Select Payment Method</h2>
+      <div className="mb-4">
+        <label>
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="card"
+            onChange={(e) => setPaymentMethod(e.target.value)}
+          />
+          Pay with Card (Stripe)
+        </label>
+        <label className="ml-4">
+          <input
+            type="radio"
+            name="paymentMethod"
+            value="paypal"
+            onChange={(e) => setPaymentMethod(e.target.value)}
+          />
+          Pay with PayPal
+        </label>
+      </div>
+      <button
+        onClick={handlePaymentSelectionSubmit}
+        className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300"
+      >
+        Continue to Payment
+      </button>
     </div>
   );
 
   const renderPaymentStep = () => (
     <div>
       <h2 className="text-2xl font-bold mb-4">Payment Information</h2>
-      {clientSecret ? (
+      {paymentMethod === 'card' && clientSecret && (
         <Elements stripe={stripePromise} options={{ clientSecret }}>
           <CheckoutForm
             clientSecret={clientSecret}
@@ -109,8 +150,41 @@ const CheckoutPage = () => {
             setPaymentSuccess={setPaymentSuccess}
           />
         </Elements>
-      ) : (
-        <div>Loading payment...</div>
+      )}
+
+      {paymentMethod === 'paypal' && (
+        <PayPalScriptProvider
+          options={{
+            "client-id": "AduDOTDNJSWRqOsSVLRZorTUX0jl071FpQBAtrHu-6Xg8sYnFT2ob1RxSZ54fVSrUlMQPe3WdROjH9Nq", // Replace with your PayPal client ID
+            "currency": "USD",
+            "intent": "capture"
+          }}
+        >
+          <PayPalButtons
+            createOrder={async () => {
+              const response = await fetch("/api/orders", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ cart: cartItems }),
+              });
+              const orderData = await response.json();
+              return orderData.id; // Return the PayPal order ID
+            }}
+            onApprove={async (data) => {
+              const response = await fetch(`/api/orders/${data.orderID}/capture`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
+              const orderData = await response.json();
+              setPaymentSuccess(true);
+              console.log("PayPal transaction completed", orderData);
+            }}
+          />
+        </PayPalScriptProvider>
       )}
     </div>
   );
@@ -139,8 +213,9 @@ const CheckoutPage = () => {
       ) : (
         <div>
           {currentStep === 1 && renderDeliveryStep()}
-          {currentStep === 2 && renderPaymentStep()}
-          {currentStep === 3 && renderReviewStep()}
+          {currentStep === 2 && renderPaymentSelectionStep()}
+          {currentStep === 3 && renderPaymentStep()}
+          {currentStep === 4 && renderReviewStep()}
         </div>
       )}
     </div>

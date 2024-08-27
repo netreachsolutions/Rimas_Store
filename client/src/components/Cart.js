@@ -98,7 +98,7 @@ const Cart = () => {
   return (
     <>
       <NavBar />
-      <div className="cart container mx-auto my-8 p-4">
+      <div className="cart container mx-auto my-8 p-4 max-w-[1200px]">
         <h1 className="text-3xl font-bold mb-4">Your Cart</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {cartItems.map((item) => (
@@ -140,7 +140,7 @@ const Cart = () => {
               </div>
               <button
                 onClick={() => handleRemoveItem(item.cart_item_id)}
-                className="bg-red-500 text-white px-3 py-2 mt-4 rounded hover:bg-red-700 transition duration-300"
+                className="bg-red-400 text-white px-3 py-2 mt-4 rounded hover:bg-red-700 transition duration-300"
               >
                 Remove
               </button>
@@ -150,7 +150,7 @@ const Cart = () => {
         <div className="flex justify-end mt-8">
           <button
             onClick={handleProceedToCheckout}
-            className="bg-blue text-white px-6 py-2 rounded hover:bg-blue-700 transition duration-300"
+            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-700 transition duration-300"
           >
             Proceed to Checkout
           </button>
