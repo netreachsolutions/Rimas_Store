@@ -50,7 +50,7 @@ exports.getAllProducts = async (req, res) => {
   exports.getProductsByCategory = async (req, res) => {
     const { categoryId } = req.params;
     try {
-        const products = await ProductService.getProductsByCategory(req.db, categoryId);
+        const products = await ProductService.getProductsByCategory(db, categoryId);
         res.json(products);
     } catch (error) {
         console.error('Error fetching products by category:', error);

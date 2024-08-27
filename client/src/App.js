@@ -42,7 +42,8 @@ function App() {
           <Route element={<AdminProtectedRoute />}>
             <Route path="/upload" element={<UploadProduct />} />
             <Route path="/category" element={<Categories />} />
-            <Route path="/addToCategory" element={<AddProductToCategory />} />
+            <Route path="/category/create" element={<CreateCategory />} />
+            <Route path="/category/:categoryID" element={<AddProductToCategory />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/order/:id" element={<OrderDetails />} />
             <Route path="/admin" element={<AdminHome />} />

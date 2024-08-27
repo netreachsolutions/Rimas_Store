@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../api/axios";
 import AdminSideBar from "./AdminSideBar";
+import { Link } from "react-router-dom";
 import AddProductToCategory from "./AddProductToCategory";
 import CreateCategory from "./CreateCategory";
 
@@ -79,48 +80,59 @@ const Categories = () => {
   return (
     <div className="flex flex-row">
       <AdminSideBar />
+
       <div>
-      <table className="table-auto w-full border-collapse">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border px-4 py-2">Category Image</th>
-            <th className="border px-4 py-2">Category</th>
-            <th className="border px-4 py-2">Description</th>
-            <th className="border px-4 py-2">Number of items</th>
-            <th className="border px-4 py-2">DELETE</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map(category => { 
-            
-            return (
-              <React.Fragment key={category.category_id}>
-                <tr>
-                  <td className="border px-4 py-2 text-center">{category.image_url}</td>
-                  <td className="border px-4 py-2 text-center">{category.category_name}</td>
-                  <td className="border px-4 py-2 text-center">{category.description}</td>
-                  <td className="border px-4 py-2 text-center">{category.product_count}</td>
-                  <input
-                    type="checkbox"
-                    checked={selectedCategories.includes(category.category_id)} // Maintain checkbox state
-                    onChange={() => handleCategorySelection(category.category_id)} // Update state on change
-                    className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  />
-                </tr>
-              </React.Fragment>
-                )
-              }
-            )
-          }
-          <button className="border border-black" onClick={handleDeletingCategories}>CONFIRM DELETE</button>
-        </tbody>
-      </table>
+        <table className="table-auto w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border px-4 py-2">Category Image</th>
+              <th className="border px-4 py-2">Category</th>
+              <th className="border px-4 py-2">Description</th>
+              <th className="border px-4 py-2">Number of items</th>
+              <th className="border px-4 py-2">DELETE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map(category => { 
+              
+              return (
+                <React.Fragment key={category.category_id}>
+                  <tr className="h-20">
+                    <td className="border px-4 py-2 text-center">{category.image_url}</td>
+                    <td className="border px-4 py-2 text-center">
+                      <Link to={"./"+category.category_id}>{category.category_name}</Link>
+                      </td>
+                    <td className="border px-4 py-2 text-center">{category.description}</td>
+                    <td className="border px-4 py-2 text-center">{category.product_count}</td>
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category.category_id)} // Maintain checkbox state
+                      onChange={() => handleCategorySelection(category.category_id)} // Update state on change
+                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                  </tr>
+                </React.Fragment>
+                  )
+                }
+              )
+            }
+            </tbody>
+        </table>
+        <div className="flex flex-row justify-between px-10">
+          <button>
+            <Link to={"./"}>EDIT CATEGORY</Link>
+          </button>
+          <button className="border border-black" onClick={handleDeletingCategories}>
+              CONFIRM DELETE
+          </button>
+        </div>
+      </div>
 
         {/* <CreateCategory />
         <AddProductToCategory /> */}
-      </div>
+      
     </div>
-  );
+    );
 };
 
 export default Categories;

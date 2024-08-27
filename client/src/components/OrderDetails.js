@@ -10,6 +10,7 @@ const OrderDetails = () => {
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -29,6 +30,7 @@ const OrderDetails = () => {
 
     fetchOrderDetails();
   }, []);
+  
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
