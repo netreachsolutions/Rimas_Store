@@ -126,7 +126,7 @@ exports.getAllOrders = async (req, res) => {
 
 exports.getOrderDetails = async (req, res) => {
     const { orderId } = req.params;
-  
+    console.log('Order ID: '+orderId)
     try {
       const orderDetails = await orderService.getOrderDetails(db, orderId);
       if (!orderDetails) {

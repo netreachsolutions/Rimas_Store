@@ -6,7 +6,8 @@ import { IoArrowBackOutline } from "react-icons/io5";
 
 
 const OrderDetails = () => {
-  const { orderID } = useParams();
+  const { id } = useParams();
+  console.log(id);
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,7 +17,7 @@ const OrderDetails = () => {
     const fetchOrderDetails = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`/api/orders/${orderID}/details`, {
+        const response = await axios.get(`/api/orders/${id}/details`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log(response.data);

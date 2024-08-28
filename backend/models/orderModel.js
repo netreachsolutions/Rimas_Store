@@ -61,7 +61,7 @@ const selectOrderDetails = (db, orderId, callback) => {
   LEFT JOIN deliveries d ON o.order_id = d.order_id
   LEFT JOIN addresses a ON d.address_id = a.address_id
   LEFT JOIN payments p ON o.order_id = p.order_id
-  WHERE o.order_id = 7;
+  WHERE o.order_id = ?;
   `;
   db.query(query, [orderId], callback);
 };
