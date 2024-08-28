@@ -85,7 +85,7 @@ const Orders = () => {
   return (
     <div className='flex'>
     <AdminSideBar/>
-    <div className="container mx-auto my-8 p-4 flex-grow">
+    <div className="container mx-auto my-8 p-4 flex-grow ml-64">
       <h2 className="text-2xl font-bold mb-4">All Orders</h2>
       <table className="table-auto w-full border-collapse">
         <thead>

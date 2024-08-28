@@ -81,11 +81,10 @@ const Categories = () => {
     <div className="flex flex-row">
       <AdminSideBar />
 
-      <div>
+      <div className="container mx-auto my-8 p-4 flex-grow ml-64">
         <table className="table-auto w-full border-collapse">
           <thead>
             <tr className="bg-gray-200">
-              <th className="border px-4 py-2">Category Image</th>
               <th className="border px-4 py-2">Category</th>
               <th className="border px-4 py-2">Description</th>
               <th className="border px-4 py-2">Number of items</th>
@@ -98,7 +97,6 @@ const Categories = () => {
               return (
                 <React.Fragment key={category.category_id}>
                   <tr className="h-20">
-                    <td className="border px-4 py-2 text-center">{category.image_url}</td>
                     <td className="border px-4 py-2 text-center">
                       <Link to={"./"+category.category_id}>{category.category_name}</Link>
                       </td>
@@ -119,10 +117,10 @@ const Categories = () => {
             </tbody>
         </table>
         <div className="flex flex-row justify-between px-10">
-          <button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">
             <Link to={"./"}>EDIT CATEGORY</Link>
           </button>
-          <button className="border border-black" onClick={handleDeletingCategories}>
+          <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mr-2" onClick={handleDeletingCategories}>
               CONFIRM DELETE
           </button>
         </div>

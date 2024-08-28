@@ -41,12 +41,30 @@ const createProduct = (db, productData, callback) => {
  const getProductsByCategoryId = (db, categoryId, callback) => {
   console.log(categoryId)
   const query = `
-      SELECT p.product_id, p.name, p.description, p.price, p.stock, p.created_at, pi.image_url
-      FROM products p
-      INNER JOIN product_category pc ON p.product_id = pc.product_id
-      INNER JOIN categories c ON pc.category_id = c.category_id
-      LEFT JOIN product_image pi ON p.product_id = pi.product_id AND pi.priority = 1
-      WHERE c.category_id = ?
+SELECT 
+    p.product_id, 
+    p.name, 
+    p.description, 
+    p.price, 
+    p.stock, 
+    p.created_at, 
+    pi.image_url
+FROM 
+    products p
+INNER JOIN 
+    product_category pc ON p.product_id = pc.product_id
+INNER JOIN 
+    categories c ON pc.category_id = c.category_id
+LEFT JOIN 
+    product_image pi ON p.product_id = pi.product_id
+WHERE 
+    c.category_id = 2
+ORDER BY 
+    pi.priority IS NULL,  -- Orders rows with NULL priority last
+    pi.priority DESC, 
+    pi.image_url ASC
+LIMIT 1;
+
   `;
   db.query(query, [categoryId], callback);
 };

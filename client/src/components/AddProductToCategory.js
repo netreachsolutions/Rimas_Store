@@ -129,7 +129,7 @@ const AddProductToCategory = () => {
   return (
     <div className="flex flex-row">
       <AdminSideBar />
-      <div >
+      <div className="container mx-auto my-8 p-4 flex-grow ml-64">
         <Link to={'/category'}>
           <span className='flex gap-1 items-center rounded-xl py-1 px-1.5 bg-gray-50 w-max  text-gray-500'>
           <IoArrowBackOutline />
