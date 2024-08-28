@@ -18,3 +18,18 @@ exports.createPaymentIntent = async (req, res) => {
         res.status(400).json({ message: error.message });
       }
   };
+
+exports.createPaypalOrder = async (req, res) => {
+  console.log('create paypal order request recieved!');
+  const customerId = req.tokenAssets.customerId; 
+  
+  try {
+    const response = await paymentService.createPaypalOrderFromCart(db, customerId);
+    console.log(response)
+    res.send(response);
+  } catch (error) {
+    console.error('Error creating paypal order:', error);
+    res.status(400).json({ message: error.message });
+  }
+
+}

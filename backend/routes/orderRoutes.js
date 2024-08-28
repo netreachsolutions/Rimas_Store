@@ -11,6 +11,9 @@ router.get('/', authMiddleware('admin'), orderController.getAllOrders)
 router.put('/:order_id/status', authMiddleware('admin'), orderController.updateDeliveryStatus);
 router.get('/:orderId/details', authMiddleware('admin'), orderController.getOrderDetails);
 
+router.get('/create-paypal-order', authMiddleware('customer'), paymentController.createPaypalOrder)
+router.post("/confirm-paypal", authMiddleware('customer'), orderController.confirmPayapalOrder)
+
 
 
 module.exports = router;

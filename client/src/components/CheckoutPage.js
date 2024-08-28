@@ -18,11 +18,11 @@ const CheckoutPage = () => {
   const [clientSecret, setClientSecret] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(''); // Added to track payment method choice
-
+  
   useEffect(() => {
     const fetchAddressesAndCart = async () => {
-      const token = localStorage.getItem('token');
       
+      const token = localStorage.getItem('token');
       try {
         const profileResponse = await axios.get('/api/users/profile', {
           headers: { Authorization: `Bearer ${token}` },
@@ -162,24 +162,33 @@ const CheckoutPage = () => {
         >
           <PayPalButtons
             createOrder={async () => {
-              const response = await fetch("/api/orders", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ cart: cartItems }),
-              });
-              const orderData = await response.json();
-              return orderData.id; // Return the PayPal order ID
+              const token = localStorage.getItem('token');
+              const response = await axios.get(
+                '/api/orders/create-paypal-order',
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              console.log('server response: ')
+              console.log(response.data)
+              const orderData = await response.data;
+
+              if (orderData.id) {
+                return orderData.id; // Return the PayPal order ID
+              } else {
+                throw new Error('Order ID not found in server response');
+              }           
             }}
             onApprove={async (data) => {
-              const response = await fetch(`/api/orders/${data.orderID}/capture`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
+              const token = localStorage.getItem('token');
+              const response = await axios.post(
+                '/api/orders/confirm-paypal',
+                {                  
+                  paypalOrderId: data.orderID, 
+                  address_id: deliveryDetails.address_id, 
+                  currency: 'USD'
                 },
-              });
-              const orderData = await response.json();
+                { headers: { Authorization: `Bearer ${token}` } }
+              )
+              const orderData = response.data; // Access the parsed data directly
               setPaymentSuccess(true);
               console.log("PayPal transaction completed", orderData);
             }}

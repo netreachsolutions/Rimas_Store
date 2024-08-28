@@ -2,6 +2,7 @@ const db = require('../config/db');
 const CartService = require('../services/cartService');
 const OrderService = require('../services/orderService');
 const orderService = require('../services/orderService');
+const PaymentService = require('../services/paymentService');
 const paymentService = require('../services/paymentService');
 
 exports.createOrder = async (req, res) => {
@@ -45,6 +46,56 @@ exports.createOrder = async (req, res) => {
         console.error('Error creating order:', error);
         res.status(500).json({ message: 'Failed to create order' });
     }
+};
+
+exports.confirmPayapalOrder = async (req, res) => {
+  const { paypalOrderId, address_id, currency } = req.body;
+  const { customerId } = req.tokenAssets; // Ensure customer ID is attached to the token
+
+  try {
+      // Get access token
+      const accessToken = await PaymentService.generateAccessToken();
+
+          // Retrieve the cart items for the customer
+    const cartItems = await CartService.viewCart(db, customerId);
+
+      // Calculate the total amount in the cart
+      let totalAmount = 0;
+      cartItems.forEach(item => {
+        totalAmount += item.price * 100 * item.quantity; // Convert price to cents and sum up
+      });
+
+      const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
+      totalAmount += shippingCost; // Add shipping cost to the total amount
+
+      // Step 1: Validate Payment Intent
+      const isPaymentValid = await paymentService.validatePaypalOrder(paypalOrderId, accessToken, totalAmount);
+      if (!isPaymentValid.valid) {
+          return res.status(400).json({ message: 'Invalid paypal order' });
+      }
+
+      // attempt payment capture
+      await paymentService.capturePaypalPayment(paypalOrderId, accessToken);
+
+      // Step 4: Create Order in the database (transaction)
+      const orderId = await orderService.createOrder(db.promise(), customerId, address_id, cartItems, totalAmount, shippingCost);
+
+      // Step 5: Mark payment as completed and associate with the order
+      await paymentService.recordPayment(db, paypalOrderId, orderId, totalAmount, currency);
+
+      // Step 6: Clear the cart after order creation
+      await CartService.clearCart(db, customerId);
+
+      // Step 7: Send order confirmation response
+      res.status(201).json({
+          success: true,
+          message: 'Order created successfully',
+          orderId: orderId,
+      });
+  } catch (error) {
+      console.error('Error creating order:', error);
+      res.status(500).json({ message: 'Failed to create order' });
+  }
 };
 
 exports.getAllOrders = async (req, res) => {
