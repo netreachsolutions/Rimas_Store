@@ -25,24 +25,23 @@ const findOrdersByCustomerId = (db, customerId) => {
 
 const selectAllOrders = (db, callback) => {
   const query = `
-    SELECT 
-      orders.order_id AS orderID,
-      orders.created_at AS orderDateTime,
-      CONCAT(customers.first_name, ' ', customers.last_name) AS customerName,
-      (SUM(order_items.quantity * order_items.price) + orders.delivery_amount) AS totalAmount,
-      deliveries.delivery_status AS deliveryStatus
-    FROM 
-      orders
-    JOIN customers ON orders.customer_id = customers.customer_id
-    LEFT JOIN order_items ON orders.order_id = order_items.order_id
-    LEFT JOIN payments ON orders.order_id = payments.order_id
-    LEFT JOIN deliveries ON orders.order_id = deliveries.order_id
-    GROUP BY 
-      orders.order_id, orders.created_at, customerName, deliveries.delivery_status
-    ORDER BY 
-      orders.created_at DESC;
+SELECT 
+  orders.order_id AS orderID,
+  orders.created_at AS orderDateTime,
+  CONCAT(customers.first_name, ' ', customers.last_name) AS customerName,
+  TRIM(TRAILING '.00' FROM FORMAT(SUM(order_items.quantity * order_items.price) + orders.delivery_amount/100, 2)) AS totalAmount,
+  deliveries.delivery_status AS deliveryStatus
+FROM 
+  orders
+JOIN customers ON orders.customer_id = customers.customer_id
+LEFT JOIN order_items ON orders.order_id = order_items.order_id
+LEFT JOIN payments ON orders.order_id = payments.order_id
+LEFT JOIN deliveries ON orders.order_id = deliveries.order_id
+GROUP BY 
+  orders.order_id, orders.created_at, customerName, deliveries.delivery_status
+ORDER BY 
+  orders.created_at DESC;
   `;
-  const testQuery = 'SELECT * FROM orders;'
   return db.query(query, callback);
 };
 
