@@ -43,11 +43,15 @@ class NotificationService {
           <p>A new order has been placed.</p>
           <p>Order ID: ${order.order_id}</p>
           <p>Total amount: ${order.payment_amount}</p>
+          <p>https://rimastores.com/order/${order.order_id}</p>
           <br>
           <p>Rimas Store Admin</p>
         `,
       };
       await sendEmail(merchantEmailMsg);
+
+      const merchantSmsText = `New Order Received \nA new order has been placed.\nOrder ID: ${order.order_id} \nTotal amount: ${order.payment_amount}\n https://rimastores.com/order/${order.order_id}`;
+      await sendSMS(merchantSmsText, process.env.MERCHANT_NUMBER);
 
       return { success: true };
     } catch (error) {
@@ -97,6 +101,7 @@ class NotificationService {
         `,
       };
       await sendEmail(merchantEmailMsg);
+
 
       return { success: true };
     } catch (error) {
