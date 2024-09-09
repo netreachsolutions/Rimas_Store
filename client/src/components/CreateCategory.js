@@ -1,23 +1,27 @@
-// src/components/CategoryUpload.js
 import React, { useState } from "react";
 import axios from "../api/axios";
+import AdminSideBar from "./AdminSideBar";
+import { Link, useNavigate } from "react-router-dom";
+import { IoArrowBackOutline } from "react-icons/io5";
 
 const CreateCategory = () => {
-  const [categoryData, setcategoryData] = useState({
+  const [categoryData, setCategoryData] = useState({
     name: "",
     description: "",
+    type: "color", // Default value for categoryType
   });
 
   const token = localStorage.getItem("token");
   const [imageUrl, setImageUrl] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setcategoryData({ ...categoryData, [name]: value });
+    setCategoryData({ ...categoryData, [name]: value});
   };
 
   const handleImageChange = (e) => {
-    setcategoryData({ ...categoryData, image: e.target.files[0] });
+    setCategoryData({ ...categoryData, image: e.target.files[0] });
   };
 
   const handleImageUpload = async () => {
@@ -31,10 +35,9 @@ const CreateCategory = () => {
         },
       });
       setImageUrl(response.data.imageUrl);
-      console.log("imageUrl" + response.data.imageUrl);
-      alert("success");
+      alert("Image uploaded successfully!");
     } catch (error) {
-      alert("error");
+      alert("Failed to upload image.");
       console.error("Error uploading image:", error);
     }
   };
@@ -42,41 +45,12 @@ const CreateCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // if (!imageUrl) {
-    //   alert('Please upload an image first');
-    //   return;
-    // }
-
     const categoryDetails = {
       ...categoryData,
       imageUrl,
     };
 
-    // try {
-    //   const response = await fetch('http://localhost:4242/api/category/create', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //       Authorization: `Bearer ${token}`, // Include the Bearer token in the headers
-    //     },
-    //     body: JSON.stringify(categoryDetails), // Send the Category data as a JSON string
-    //   });
-
-    //   // Check if the response is OK (status code 200-299)
-    //   if (!response.ok) {
-    //     throw new Error(`Error: ${response.status}`);
-    //   }
-
-    //   const data = await response.json(); // Parse the response JSON
-    //   console.log(data);
-    //   alert(data.message); // Show the message from the response
-    // } catch (error) {
-    //   console.error('Error saving Category:', error);
-    //   alert('Failed to save Category.');
-    // }
-
     try {
-      alert("hihi");
       const response = await axios.post(
         "/api/category/create",
         categoryDetails,
@@ -84,38 +58,83 @@ const CreateCategory = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log(response);
-      alert(response.data.message);
+      alert("Category created successfully!");
+      navigate(`/category/${response.data.insertId}`);
     } catch (error) {
       console.error("Error saving Category:", error);
+      alert("Failed to save Category.");
     }
   };
 
   return (
-    <div>
-      <h1>Create Category</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Category Name"
-          value={categoryData.name}
-          onChange={handleChange}
-          required
-        />
-        <textarea
-          name="description"
-          placeholder="Category Description"
-          value={categoryData.description}
-          onChange={handleChange}
-          required
-        />
-        {/* <input type="file" onChange={handleImageChange} />
-        <button type="button" onClick={handleImageUpload} disabled='true'>
-          Upload Image
-        </button> */}
-        <button type="submit">Create Category</button>
-      </form>
+    <div className="flex">
+      <AdminSideBar />
+
+      <div className="mx-auto flex-grow md:ml-64 w-full h-full">
+        <Link to="/category">
+          <span className="flex gap-1 items-center rounded-xl py-1 px-1.5 bg-gray-50 w-max mt-5 ml-4 text-gray-500">
+            <IoArrowBackOutline />
+            Back to Categories
+          </span>
+        </Link>
+        <div className="max-w-2xl m-auto mt-10 p-6 bg-white shadow-md rounded-lg">
+          <h1 className="text-2xl font-bold text-center mb-6">Create Category</h1>
+          <form onSubmit={handleSubmit} className="space-y-6 m-auto">
+            <div>
+              <label className="block mb-2 text-sm font-medium">Category Type</label>
+              <select
+                name="type"
+                value={categoryData.type}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="color">Color</option>
+                <option value="brand">Brand</option>
+                <option value="gender">Gender</option>
+                <option value="size">Size</option>
+                <option value="apparel">Apparel</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium">Category Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Category Name"
+                value={categoryData.name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 text-sm font-medium">Upload Image</label>
+              <input
+                type="file"
+                onChange={handleImageChange}
+                className="w-full"
+              />
+              <button
+                type="button"
+                onClick={handleImageUpload}
+                className="mt-4 w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700"
+              >
+                Upload Image
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+            >
+              Create Category
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,16 @@
 // services/userService.js
-const { getAllProductsWithImage, createProduct, createProductImage, findProductByIdWithImages, getProductsByCategoryId } = require('../models/productModel')
+const { 
+  getAllProductsWithImage, 
+  createProduct,
+  createProductImage,
+  findProductByIdWithImages,
+  getProductsByCategoryId,
+  getProductsByCategoryIdsAndPriceRange
+ } = require('../models/productModel');
+
+ const {
+  setProductCategories
+ } = require('../models/categoryModel');
 
 class ProductService {
   static async allProducts(db) {
@@ -29,7 +40,7 @@ class ProductService {
   }
 
   static async newProduct(db, productData) {
-    const { name, description, price, stock, imageUrl } = productData;
+    const { name, description, price, stock, imageUrl, categories } = productData;
   
     return new Promise((resolve, reject) => {
       // First, create the product
@@ -49,8 +60,14 @@ class ProductService {
             return reject(err); // Reject if there's an error creating the product image
           }
   
-          console.log(`Image created for product with ID: ${productId}`);
-  
+
+
+          setProductCategories(db, productId, categories, (err, result) => {
+            if (err) {
+              console.error('Error creating product image:', err);
+              return reject(err); // Reject if there's an error creating the product image
+            }
+          });
           // Resolve the promise after both product and image are successfully created
           resolve({
             productId,
@@ -67,9 +84,26 @@ class ProductService {
             if (err) {
                 return reject(err);
             }
+            console.log(products)
             resolve(products);
         });
     });
+
+  }
+// The calling function in your service/controller
+static async getProductsWithFilters(db, filters) {
+  console.log(filters);
+  const { categoryIds, minPrice, maxPrice } = filters;
+  return new Promise((resolve, reject) => {
+    getProductsByCategoryIdsAndPriceRange(db, categoryIds, minPrice, maxPrice, (err, products) => {
+      if (err) {
+        return reject(err);
+      }
+      console.log('products:')
+      console.log(products)
+      resolve(products);
+    });
+  });
 }
 
 }

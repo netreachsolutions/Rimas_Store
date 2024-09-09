@@ -18,6 +18,7 @@ import Orders from "./components/Orders";
 import OrderDetails from "./components/OrderDetails";
 import AdminHome from "./components/AdminHome";
 import Categories from "./components/Categories";
+import ProductSearch from "./components/ProductSearch";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/adminLogin" element={<AdminLogin />} />
           <Route path="/products/:id" element={<ProductDetails />} />
           <Route path="/" element={<Home />} />
+          <Route path="/products/search" element={<ProductSearch/>} />
           {/* <Route path="/profile" element={<Profile/>} /> */}
 
           {/* protected routes */}
@@ -42,6 +44,7 @@ function App() {
           <Route element={<AdminProtectedRoute />}>
             <Route path="/upload" element={<UploadProduct />} />
             <Route path="/category" element={<Categories />} />
+            <Route path="/admin/products" element={<Products/>}/>
             <Route path="/category/create" element={<CreateCategory />} />
             <Route path="/category/:categoryID" element={<AddProductToCategory />} />
             <Route path="/orders" element={<Orders />} />

@@ -53,11 +53,23 @@ const {
           // Step 2: Find the items in the cart
           findCartItemsByCartId(db, cartId, (err, cartItems) => {
             if (err) return reject(err);
+
             resolve(cartItems);
+            
           });
         });
       });
     }
+
+    static calcultatePrice(cartItems) {
+        let itemsAmount = 0;
+        cartItems.forEach(item => {
+          itemsAmount += item.price * item.quantity; // Assuming each item has price and quantity fields
+        });
+        const deliveryAmount = 2.99;
+        return {total: itemsAmount+deliveryAmount, items: itemsAmount, delivery: deliveryAmount};
+    }
+
 
     static async viewCartById(db, cartId) {
       return new Promise((resolve, reject) => {

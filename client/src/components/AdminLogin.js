@@ -24,7 +24,7 @@ const AdminLogin = () => {
       const currentTimestamp = new Date().toISOString();
       setFormData({ ...formData, timestamp: currentTimestamp});
       const response = await axios.post(`api/admin/login`, formData);
-      alert(response.data.accessToken);
+      // alert(response.data.accessToken);
       localStorage.setItem('token', response.data.accessToken);
       navigate(from, { replace: true });
     } catch (error) {
@@ -34,8 +34,16 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
+    <div className="max-w-md mx-auto p-6 flex items-center flex-col justify-center h-screen">
+                    <section className="section_middle mx-auto mb-6 flex justify-center items-center text-[40px]">
+          <h1 className="m-0">RIMAS</h1>
+          <img
+            className="h-[60px]   mx-[2px]"
+            src="/images/diamond.png"
+            alt="Diamond Logo"
+          />
+          <h1 className="m-0">STORE</h1>
+        </section>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="text"
@@ -59,7 +67,7 @@ const AdminLogin = () => {
           type="submit"
           className="w-full py-2 px-4 font-semibold text-white bg-black rounded-md hover:bg-gray-700"
         >
-          Login
+          Login as Merchant
         </button>
       </form>
     </div>

@@ -13,7 +13,7 @@ module.exports = (requiredRole) => (req, res, next) => {
   }
   
   const tokenAssets = AuthService.validateAccessToken(token);
-  console.log('requiredRole='+requiredRole+' requestRole='+tokenAssets.role)
+  // console.log('requiredRole='+requiredRole+' requestRole='+tokenAssets.role)
   if (!tokenAssets) {
     return res.sendStatus(403); // Forbidden if token is invalid
   }

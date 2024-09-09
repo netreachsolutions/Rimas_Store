@@ -4,6 +4,9 @@ const OrderService = require('../services/orderService');
 const orderService = require('../services/orderService');
 const PaymentService = require('../services/paymentService');
 const paymentService = require('../services/paymentService');
+const customerService = require('../services/customerService');
+const notificationService = require('../services/notificationService');
+const {sendEmail, sendSMS} = require('../config/emailConfig');
 
 exports.createOrder = async (req, res) => {
     const { payment_intent, address_id, currency } = req.body;
@@ -36,7 +39,32 @@ exports.createOrder = async (req, res) => {
         // Step 6: Clear the cart after order creation
         await CartService.clearCart(db, customerId);
 
-        // Step 7: Send order confirmation response
+        
+        // Step 7: Send email confirmation to user 
+        await notificationService.sendOrderProcessingNotification(db, orderId)
+        // const customerProfile = await customerService.getCustomerProfile(db, customerId);
+        // const emailMsg = {
+        //   to: customerProfile.email,
+        //   subject: 'RIMAS Order Confirmation',
+        //   text: `Thank you for your order! Your order number is #${orderId}.`,
+        //   html: `
+        //     <h1>Order Confirmation</h1>
+        //     <p>Thank you for your purchase, ${customerProfile.customer_name}!</p>
+        //     <p>Your order number is #${orderId}.</p>
+        //     <p>We'll notify you once your order has been shipped.</p>
+        //     <br>
+        //     <p>Rimas Store Limited</p>
+        //   `,
+        // };
+        // await sendEmail(emailMsg);
+
+        // if (customerProfile.phone_number) {
+        //   await sendSMS(`Order Confirmed! \n#Your order number is #${orderId}\n\nRimas Store Ltd.`, customerProfile.phone_number)
+
+        // }
+
+
+        // Step 8: Send order confirmation response
         res.status(201).json({
             success: true,
             message: 'Order created successfully',
@@ -86,7 +114,30 @@ exports.confirmPayapalOrder = async (req, res) => {
       // Step 6: Clear the cart after order creation
       await CartService.clearCart(db, customerId);
 
-      // Step 7: Send order confirmation response
+      // Step 7: Send email confirmation to user 
+      await notificationService.sendOrderProcessingNotification(db, orderId)
+      // const customerProfile = await customerService.getCustomerProfile(db, customerId);
+      // const emailMsg = {
+      //   to: customerProfile.email,
+      //   subject: 'RIMAS Order Confirmation',
+      //   text: `Thank you for your order! Your order number is #${orderId}.`,
+      //   html: `
+      //     <h1>Order Confirmation</h1>
+      //     <p>Thank you for your purchase, ${customerProfile.customer_name}!</p>
+      //     <p>Your order number is #${orderId}.</p>
+      //     <p>We'll notify you once your order has been shipped.</p>
+      //     <br>
+      //     <p>Rimas Store Limited</p>
+      //   `,
+      // };
+      // await sendEmail(emailMsg);
+
+      // if (customerProfile.phone_number) {
+      //   await sendSMS(`Order Confirmed! \n#Your order number is #${orderId}\n\nRimas Store Ltd.`, customerProfile.phone_number)
+
+      // }
+
+      // Step 8: Send order confirmation response
       res.status(201).json({
           success: true,
           message: 'Order created successfully',
@@ -117,7 +168,12 @@ exports.getAllOrders = async (req, res) => {
 
     try {
         await orderService.updateDeliveryStatus(db, order_id, delivery_status);
+
+        await notificationService.sendOrderDispatchedNotification(db, order_id);
+
+        
         res.status(200).json({ message: 'Delivery status updated successfully' });
+
     } catch (error) {
         console.error('Error updating delivery status:', error);
         res.status(500).json({ message: 'Failed to update delivery status' });

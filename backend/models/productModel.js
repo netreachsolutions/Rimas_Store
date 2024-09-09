@@ -23,12 +23,12 @@ const createProduct = (db, productData, callback) => {
   };
 
   const getAllProducts = (db, callback) => {
-    const query = 'SELECT * FROM products';
+    const query = 'SELECT * FROM products WHERE is_active = TRUE';
     db.query(query, callback);
   };
 
   const getAllProductsWithImage = (db, callback) => {
-    const query = 'SELECT products.product_id, products.name, products.description, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MAX(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL)));';
+    const query = 'SELECT products.product_id, products.name, products.description, products.is_active, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MAX(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL)));';
     db.query(query, callback);
   };
 
@@ -58,7 +58,7 @@ INNER JOIN
 LEFT JOIN 
     product_image pi ON p.product_id = pi.product_id
 WHERE 
-    c.category_id = 2
+    c.category_id = ?
 ORDER BY 
     pi.priority IS NULL,  -- Orders rows with NULL priority last
     pi.priority DESC, 
@@ -69,6 +69,59 @@ LIMIT 1;
   db.query(query, [categoryId], callback);
 };
 
+const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
+  let query = `
+    SELECT 
+        DISTINCT p.product_id, 
+        p.name, 
+        p.description, 
+        p.price, 
+        p.stock, 
+        p.created_at, 
+        pi.image_url
+    FROM 
+        products p
+    LEFT JOIN 
+        product_category pc ON p.product_id = pc.product_id
+    LEFT JOIN 
+        categories c ON pc.category_id = c.category_id
+    LEFT JOIN 
+        product_image pi ON p.product_id = pi.product_id
+    WHERE 1 = 1`; // Always true, makes adding conditions easier
+
+  const queryParams = [];
+
+  if (categoryIds && categoryIds.length > 0) {
+    query += ` AND p.product_id IN (
+      SELECT product_id FROM product_category WHERE category_id IN (?) GROUP BY product_id HAVING COUNT(DISTINCT category_id) = ?
+    )`;
+    queryParams.push(categoryIds, categoryIds.length);
+  }
+
+  if (minPrice !== null) {
+    query += ` AND p.price >= ?`;
+    queryParams.push(minPrice);
+  }
+
+  if (maxPrice !== null) {
+    query += ` AND p.price <= ?`;
+    queryParams.push(maxPrice);
+  }
+
+  query += `
+    ORDER BY 
+        pi.priority IS NULL,  -- Orders rows with NULL priority last
+        pi.priority DESC, 
+        pi.image_url ASC;
+  `;
+
+  console.log(queryParams);  // Log parameters for debugging
+  console.log(query);         // Log query for debugging
+
+  db.query(query, queryParams, callback);
+};
+
+
 
   module.exports = {
     createProduct,
@@ -77,6 +130,7 @@ LIMIT 1;
     createProductImage,
     getAllProductsWithImage,
     findProductByIdWithImages,
-    getProductsByCategoryId
+    getProductsByCategoryId,
+    getProductsByCategoryIdsAndPriceRange
   };
   

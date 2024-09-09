@@ -3,9 +3,10 @@ const CategoryService = require('../services/categoryService');
 
 exports.createCategory = async (req, res) => {
     try {
-        const {name, description} = req.body;
-        await CategoryService.createCategory(db, {name, description});
-        res.status(201).json({ message: "Category created successfully" });
+        const {name, type} = req.body;
+        console.log('Type: '+type);
+        const category = await CategoryService.createCategory(db, {name, type});
+        res.status(201).json(category);
       } catch (error) {
         console.error('Error during category creation:', error);
         res.status(500).json({ message: 'Category creation failed' });
@@ -30,6 +31,17 @@ exports.retrieveAllCategories = async (req, res) => {
         const categories = await CategoryService.getAllCategories(db)
         res.json(categories);
         
+    } catch (error) {
+        console.error('Error during fetch:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
+exports.retrieveCategoriesByType = async (req, res) => {
+    try {
+        const categories = await CategoryService.getCategoriesByType(db);
+        console.log(categories)
+        res.json(categories);
     } catch (error) {
         console.error('Error during fetch:', error);
         res.status(400).json({ message: error.message });

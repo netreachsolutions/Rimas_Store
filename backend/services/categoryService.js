@@ -40,6 +40,32 @@ class CategoryService {
     });
   }
 
+  static async getCategoriesByType(db) {
+    return new Promise((resolve, reject) => {
+      findAllCategories(db, (err, result) => {
+        console.log(result);
+        if (err) return reject(err);
+  
+        // Restructure the result by grouping categories by their type
+        const categoriesByType = result.reduce((acc, category) => {
+          const { type, category_id, category_name } = category;
+  
+          // Ensure the accumulator has an array for this type
+          if (!acc[type]) {
+            acc[type] = [];
+          }
+          console.log(type)
+          // Add the category to the array for its type
+          acc[type].push({ category_id, category_name });
+  
+          return acc;
+        }, {});
+  
+        resolve(categoriesByType);
+      });
+    });
+  }
+  
   static async getAllCategoriesWithCount(db){
     return new Promise((resolve, reject) =>{
       getAllCategoriesWithCount(db, (err, result) => {

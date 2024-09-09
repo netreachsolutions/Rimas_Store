@@ -1,5 +1,6 @@
 const cartService = require('../services/cartService');
 const db = require('../config/db');
+const CartService = require('../services/cartService');
 
 exports.addToCart = async (req, res) => {
   try {
@@ -17,7 +18,8 @@ exports.viewCart = async (req, res) => {
   try {
     const customerId = req.tokenAssets.customerId;
     const cartItems = await cartService.viewCart(db, customerId);
-    res.json({ cartItems });
+    const price = cartService.calcultatePrice(cartItems);
+    res.json({ cartItems, price });
   } catch (error) {
     console.error('Error viewing cart:', error);
     res.status(500).json({ message: 'Failed to retrieve cart' });

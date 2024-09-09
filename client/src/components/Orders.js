@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from '../api/axios'; // Adjust the import based on your project structure
 import { Link } from 'react-router-dom';
 import AdminSideBar from './AdminSideBar';
+import AdminSideBarMobile from './AdminSideBarMobile';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -84,8 +85,9 @@ const Orders = () => {
 
   return (
     <div className='flex'>
-    <AdminSideBar/>
-    <div className="container mx-auto my-8 p-4 flex-grow ml-64">
+      <AdminSideBarMobile/>
+    {/* <AdminSideBar/> */}
+    <div className="container mx-auto my-8 p-4 flex-grow md:ml-64">
       <h2 className="text-2xl font-bold mb-4">All Orders</h2>
       <table className="table-auto w-full border-collapse">
         <thead>

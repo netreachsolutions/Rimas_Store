@@ -19,12 +19,26 @@ const createCartItem = (db, cartItemData, callback) => {
 
 const findCartItemsByCartId = (db, cartId, callback) => {
   const query = `
-    SELECT cart_items.*, products.name 
-    FROM cart_items 
-    JOIN products ON cart_items.product_id = products.product_id 
-    WHERE cart_id = ?`;
+    SELECT 
+      cart_items.*, 
+      products.name, 
+      product_image.image_url 
+    FROM 
+      cart_items 
+    JOIN 
+      products ON cart_items.product_id = products.product_id 
+    LEFT JOIN 
+      product_image ON cart_items.product_id = product_image.product_id 
+    WHERE 
+      cart_items.cart_id = ?
+    GROUP BY 
+      cart_items.cart_item_id, product_image.product_id
+    ORDER BY 
+      product_image.priority DESC
+  `;
   db.query(query, [cartId], callback);
 };
+
 
 const updateCartItemById = (db, cartItemId, quantity, callback) => {
   const query = 'UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?';

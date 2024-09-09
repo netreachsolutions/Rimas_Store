@@ -1,9 +1,26 @@
-import React from "react";
+import React, {useState} from "react";
 import { Link } from "react-router-dom";
 import { IoShirt } from "react-icons/io5";
 
-const AdminSideBar = () => {
+const AdminSideBarMobile = () => {
+    const [isOpen, setIsOpen] = useState(true); // State to toggle sidebar visibility
+
+    const toggleSidebar = () => {
+      setIsOpen(!isOpen); // Toggle the sidebar visibility
+    };
   return (
+
+     <>
+      {/* Hamburger Icon */}
+      <div className="fixed top-4 left-4 z-50">
+        <section className="md:hidden block">
+        <button onClick={toggleSidebar} className="text-gray-500 focus:outline-none">
+            <div className="w-[25px] h-[1px] bg-black" />
+            <div className="w-[25px] h-[1px] bg-black" />
+            <div className="w-[25px] h-[1px] bg-black" />
+          </button>
+        </section>
+      </div>
     <aside
       id="logo-sidebar"
       class="fixed top-0 left-0 z-40 w-64 hidden sm:block h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between"
@@ -192,7 +209,8 @@ const AdminSideBar = () => {
         </div>
       </div>
     </aside>
+    </>
   );
 };
 
-export default AdminSideBar;
+export default AdminSideBarMobile;

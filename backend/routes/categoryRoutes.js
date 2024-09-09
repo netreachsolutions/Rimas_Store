@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', categoryController.retrieveAllCategories);
 router.get('/categoriesWithCount', categoryController.getAllCategoriesWithCount);
+router.get('/type', categoryController.retrieveCategoriesByType),
 router.get('/:categoryId/products', productController.getProductsByCategory);
 router.get('/:categoryId', categoryController.getCategory);
 router.get('/:categoryId/productsNotInCategory', categoryController.getAllProductsNotInCategory);

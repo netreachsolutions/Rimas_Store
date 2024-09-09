@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import NavBar from "./NavBar"
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
+import Spinner from './Spinner';
 
 const Profile = () => {
   const [profileData, setProfileData] = useState(null);
@@ -78,7 +79,7 @@ const Profile = () => {
   };
 
   if (!profileData) {
-    return <div className="text-center text-lg font-semibold mt-8">Loading...</div>;
+    return <div className="text-center text-lg font-semibold mt-8"><Spinner/></div>;
   }
 
   return (

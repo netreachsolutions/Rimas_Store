@@ -50,6 +50,11 @@ const updateDeliveryStatus = (db, order_id, delivery_status, callback) => {
   db.query(query, [delivery_status, order_id], callback);
 };
 
+const getOrderCustomer = (db, orderId, callback) => {
+  const query = 'SELECT * FROM customers WHERE customer_id = (SELECT customer_id from orders WHERE order_id = ?)'
+  db.query(query, [orderId], callback)
+}
+
 const selectOrderDetails = (db, orderId, callback) => {
   const query = `
   SELECT o.order_id, o.created_at, o.delivery_amount AS total, o.customer_id,
@@ -74,4 +79,5 @@ module.exports = {
   selectAllOrders,
   updateDeliveryStatus,
   selectOrderDetails,
+  getOrderCustomer
 };

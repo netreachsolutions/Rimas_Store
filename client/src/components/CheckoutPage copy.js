@@ -14,10 +14,6 @@ const CheckoutPage = () => {
     address_id: '',
   });
   const [cartId, setCartId] = useState(null);
-  const [totalAmount, setTotalAmount] = useState(null);
-  const [itemsAmount, setItemsAmount] = useState(null);
-  const [deliveryAmount, setDeliveryAmount] = useState(null);
-
   const [clientSecret, setClientSecret] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(''); // Added to track payment method choice
@@ -39,10 +35,6 @@ const CheckoutPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCartItems(cartResponse.data.cartItems);
-        setTotalAmount(cartResponse.data.price.total);
-        setDeliveryAmount(cartResponse.data.price.delivery);
-        setItemsAmount(cartResponse.data.price.items);
-
         setCartId(cartResponse.data.cartId); // Assuming you have cartId in response
       } catch (error) {
         console.error("Error fetching profile or cart", error);
@@ -51,11 +43,6 @@ const CheckoutPage = () => {
 
     fetchAddressesAndCart();
   }, []);
-
-  function trimString(str) {
-    const maxChars = 12;
-    return str.length > maxChars ? str.substring(0, maxChars) + ".." : str;
-}
 
   const handleNextStep = () => {
     setCurrentStep((prevStep) => prevStep + 1);
@@ -88,6 +75,7 @@ const CheckoutPage = () => {
 
   const renderDeliveryStep = () => (
     <div>
+      <h2 className="text-2xl font-bold mb-4">1. Select Delivery Address</h2>
       <form onSubmit={handleDeliverySubmit}>
         {deliveryDetails.addresses &&
           deliveryDetails.addresses.map((address) => (
@@ -110,9 +98,9 @@ const CheckoutPage = () => {
           ))}
         <button
           type="submit"
-          className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300 ${currentStep == 1 ? 'auto' : 'hidden'}`}
+          className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300"
         >
-          Use this address
+          Continue to Payment Selection
         </button>
       </form>
     </div>
@@ -120,6 +108,7 @@ const CheckoutPage = () => {
 
   const renderPaymentSelectionStep = () => (
     <div>
+      <h2 className="text-2xl font-bold mb-4">2. Select Payment Method</h2>
       <div className="mb-4">
         <label className="block">
           <input
@@ -142,8 +131,8 @@ const CheckoutPage = () => {
       </div>
       <button
         onClick={handlePaymentSelectionSubmit}
-        className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300 ${currentStep == 2 ? 'auto' : 'hidden'}`}
-        >
+        className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300"
+      >
         Continue to Payment
       </button>
     </div>
@@ -151,6 +140,7 @@ const CheckoutPage = () => {
 
   const renderPaymentStep = () => (
     <div>
+      <h2 className="text-2xl font-bold mb-4">3. Payment Information</h2>
       {paymentMethod === 'card' && clientSecret && (
         <Elements stripe={stripePromise} options={{ clientSecret }}>
           <CheckoutForm
@@ -208,6 +198,7 @@ const CheckoutPage = () => {
 
   const renderReviewStep = () => (
     <div>
+      <h2 className="text-2xl font-bold mb-4">4. Review and Confirm</h2>
       <ul>
         {cartItems.map((item) => (
           <li key={item.cart_item_id}>
@@ -232,128 +223,30 @@ const CheckoutPage = () => {
   };
 
   return (
-    <>
-     <nav
-        className={`navbar md:px-[40px] px-[20px] z-50 w-full h-[80px] flex items-center justify-between top-0 left-0 relative bg-white`}
-      >
-
-
-        <section className="section_middle absolute left-1/2 transform -translate-x-1/2 flex items-center text-[20px] sm:text-[40px]">
-          <h1 className="m-0">RIMAS</h1>
-          <img
-            className="sm:h-[60px] h-[30px] md:mx-2 mx-[2px]"
-            src="/images/diamond.png"
-            alt="Diamond Logo"
-          />
-          <h1 className="m-0">STORE</h1>
-        </section>
-
-
-      </nav>
-    <div className="cart container mx-auto my-8 p-4 flex w-[80%] gap-2">
-    <div className="container  p-4 text-left">
-    {paymentSuccess ? (
-      <div className="text-left">
-        <h2 className="text-3xl font-bold mb-4 w-[60%]">Order Confirmed</h2>
-        <p>Thank you for your purchase! A confirmation email will be sent shortly.</p>
-      </div>
-    ) : (
-      <div>
-        <div className={`mb-4 ${currentStep >= 1 ? 'opacity-100' : 'opacity-50'}`}>
-        <h2 className="text-2xl font-bold mb-4">1. Select Delivery Address</h2>
-        <div className="ml-7">
-          {renderDeliveryStep()}
+    <div className="container mx-auto my-8 p-4">
+      {paymentSuccess ? (
+        <div className="text-center">
+          <h2 className="text-3xl font-bold mb-4">Order Confirmed</h2>
+          <p>Thank you for your purchase! A confirmation email will be sent shortly.</p>
         </div>
+      ) : (
+        <div>
+          <div className={`mb-4 ${currentStep >= 1 ? 'opacity-100' : 'opacity-50'}`}>
+            {renderDeliveryStep()}
+          </div>
+          <div className={`mb-4 ${currentStep >= 2 ? '```javascript
+opacity-100' : 'opacity-50'}`}>
+            {currentStep >= 2 && renderPaymentSelectionStep()}
+          </div>
+          <div className={`mb-4 ${currentStep >= 3 ? 'opacity-100' : 'opacity-50'}`}>
+            {currentStep >= 3 && renderPaymentStep()}
+          </div>
+          <div className={`mb-4 ${currentStep >= 4 ? 'opacity-100' : 'opacity-50'}`}>
+            {currentStep >= 4 && renderReviewStep()}
+          </div>
         </div>
-        <div className="h-[1px] w-full bg-gray-300 mb-2"/>
-        <div className={`mb-4 ${currentStep >= 2 ? 'opacity-100' : 'opacity-50'}`}>
-        <h2 className="text-2xl font-bold mb-4">2. Select Payment Method</h2>
-        <div className="ml-7">
-          {currentStep >= 2 && renderPaymentSelectionStep()}
-        </div>
-        </div>
-        <div className="h-[1px] w-full bg-gray-200 mb-2"/>
-        <div className={`mb-4 ${currentStep >= 3 ? 'opacity-100' : 'opacity-50'}`}>
-        <h2 className="text-2xl font-bold mb-4">3. Payment Information</h2>
-        <div className="ml-7">
-          {currentStep >= 3 && renderPaymentStep()}
-        </div>
-        </div>
-        <div className="h-[1px] w-full bg-gray-300 mb-2"/>
-        {/* <div className={`mb-4 ${currentStep >= 4 ? 'opacity-100' : 'opacity-50'}`}>
-        <h2 className="text-2xl font-bold mb-4">4. Review and Confirm</h2>
-        <div className="ml-7">
-          {currentStep >= 4 && renderReviewStep()}
-        </div>
-        </div>
-        <div className="h-[1px] w-full bg-gray-300 mb-2"/> */}
-
-      </div>
-    )}
-  </div>
-  <div className="flex justify-start flex-col font-bold w-[40%]">
-  {/* <div className="grid grid-cols-1 md:grid-cols-1 gap-5 w-[60%]"> */}
-      <span className="text-[20px] text-left mb-2">
-              Order Summary
-            </span>
-            <div className="">
-  {cartItems.map((item) => (
-    <div key={item.cart_item_id} className="flex flex-row gap-2 border px-4 py-1 h-[50px] items-center justify-between">
-  <div className="flex gap-5 items-center">
-    <div className="h-[40px] w-[40px]">
-    <img
-      src={item.image_url}
-      alt={item.name}
-      className="object-cover w-full rounded h-[100%]"
-    />
+      )}
     </div>
-    <div className="flex flex-col flex-grow text-left">
-      <h2 className="text-sm font-bold truncate max-w-[150px]">{trimString(item.name)}</h2>
-    </div>
-  </div>
-  <div className="flex items-center text-right my-2 text-sm">
-    <label
-      htmlFor={`quantity-${item.cart_item_id}`}
-      className="mr-2"
-    >
-      x{item.quantity}
-    </label>
-  </div>
-</div>
-  ))}
-</div>
-
-      <div className="h-[1px] w-full bg-gray-300 mb-1"/>
-         <div className="justify-between font-normal w-full flex my-0">
-            <span className="text-[15px]">
-              Items:
-            </span>
-            <span className="text-[15px]">£{itemsAmount}</span>
-
-          </div>
-          <div className="justify-between font-normal w-full flex mb-1">
-            <span className="text-[15px]">
-              Postage & Packing:
-            </span>
-            <span className="text-[15px]">£{deliveryAmount}</span>
-
-          </div>
-        <div className="h-[1px] w-full bg-gray-300 mb-1"/>
-
-          <div className="justify-between w-full flex my-1">
-            <span className="text-[20px]">
-              Total
-              <span className="text-[15px]"> (Exluding Delivery)</span>
-            </span>
-            <span className="text-[20px]">£{totalAmount}</span>
-
-          </div>
-          <div className="h-[1px] w-full bg-gray-300 mb-2"/>
-
-        </div>
-  </div>
-    </>
-  // </div>
   );
 };
 

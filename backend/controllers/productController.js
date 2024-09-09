@@ -18,9 +18,9 @@ exports.getAllProducts = async (req, res) => {
 
   exports.saveProduct = (req, res) => {
     console.log('Attemting to save product')
-    const { name, description, price, stock, imageUrl } = req.body;
+    const { name, description, price, stock, imageUrl, categories } = req.body;
     console.log(req.body)
-    ProductService.newProduct(db, { name, description, price, stock, imageUrl }, (err, result) => {
+    ProductService.newProduct(db, { name, description, price, stock, imageUrl, categories }, (err, result) => {
       if (err) {
         console.error('Error saving product:', err);
         return res.status(500).json({ message: 'Failed to save product' });
@@ -56,4 +56,18 @@ exports.getAllProducts = async (req, res) => {
         console.error('Error fetching products by category:', error);
         res.status(500).json({ message: 'Failed to fetch products' });
     }
-};
+
+  };
+
+  exports.getProductsByFilters = async (req, res) => {
+    const { filters } = req.body;
+    console.log('attemting to retrieve products by filters')
+    try {
+        const products = await ProductService.getProductsWithFilters(db, filters);
+        console.log(products)
+        res.json(products);
+    } catch (error) {
+        console.error('Error fetching products by filters:', error);
+        res.status(500).json({ message: 'Failed to fetch products' });
+    }
+  };

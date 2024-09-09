@@ -1,7 +1,7 @@
 // src/components/Login.js
 import React, { useState } from 'react';
 import axios from '../api/axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(`api/users/login`, formData);
-      alert(response.data.accessToken);
+      // alert(response.data.accessToken);
       localStorage.setItem('token', response.data.accessToken);
       navigate(from, { replace: true });
     } catch (error) {
@@ -32,8 +32,17 @@ const Login = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
+    <div className="max-w-md mx-auto p-6 flex items-center flex-col justify-center h-screen">
+              <section className="section_middle mx-auto mb-6 flex justify-center items-center text-[40px]">
+          <h1 className="m-0">RIMAS</h1>
+          <img
+            className="h-[60px]   mx-[2px]"
+            src="/images/diamond.png"
+            alt="Diamond Logo"
+          />
+          <h1 className="m-0">STORE</h1>
+        </section>
+      {/* <h2 className="text-2xl font-bold mb-4">Login</h2> */}
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="email"
@@ -60,6 +69,9 @@ const Login = () => {
           Login
         </button>
       </form>
+      <Link to='/register' className='mt-5'>
+      <span className='mt-5 underline'>Register</span>
+      </Link>
     </div>
   );
 };

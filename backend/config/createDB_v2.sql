@@ -72,6 +72,7 @@ CREATE TABLE products (
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
+    is_active BOOLEAN  DEFAULT TRUE NOT NULL;
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -85,11 +86,29 @@ CREATE TABLE product_image (
 
 -- Create categories table
 CREATE TABLE categories (
-	category_id INT AUTO_INCREMENT PRIMARY KEY,
-	category_name VARCHAR(255) NOT NULL,
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL,
     description VARCHAR(255),
-    image_url VARCHAR(255)
+    image_url VARCHAR(255),
+    type ENUM('color', 'brand', 'gender', 'size', 'apparel') NOT NULL,
 );
+
+CREATE VIEW customer_products AS
+SELECT 
+    p.product_id, 
+    p.name, 
+    p.description, 
+    p.price, 
+    p.stock, 
+    p.created_at,
+    p.is_active,
+    pi.image_url
+FROM 
+    products p
+LEFT JOIN 
+    product_image pi ON p.product_id = pi.product_id AND pi.priority = 1
+WHERE 
+    p.is_active = TRUE;
 
 -- Create product_category table
 CREATE TABLE product_category (

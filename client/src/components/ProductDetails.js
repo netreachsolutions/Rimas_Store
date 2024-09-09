@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../api/axios';
 import NavBar from './NavBar';
+import Spinner from './Spinner';
 
 const ProductDetails = () => {
   const { id } = useParams();  // Get the product ID from the URL
@@ -9,6 +10,7 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);  // State for quantity
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -52,14 +54,23 @@ const ProductDetails = () => {
       });
       alert('Product added to cart!');
     } catch (error) {
+      if (error.response.status == 403) {
+        navigate('/login');
+      } else {
+
+        alert('Failed to add product to cart');
+      }
       console.error('Error adding to cart:', error);
-      alert('Failed to add product to cart');
     }
   };
 
 
   if (loading) {
-    return <div>Loading...</div>;
+    return         <>
+    <NavBar />
+    <div className="mt-4">
+      <Spinner/></div>
+    </>;
   }
 
   if (error) {

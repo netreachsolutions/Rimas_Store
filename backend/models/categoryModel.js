@@ -1,15 +1,20 @@
 // models/categoryModel.js
 
 const createCategory = (db, categoryData, callback) => {
-  const { name, description, image_url } = categoryData;
+  const { name, description, image_url, type } = categoryData;
   const query =
-    "INSERT INTO categories (category_name, description, image_url) VALUES (?, ?, ?);";
-  db.query(query, [name, description, image_url], callback);
+    "INSERT INTO categories (category_name, image_url, type) VALUES (?, ?, ?);";
+  db.query(query, [name, image_url, type], callback);
 };
 
 const findAllCategories = (db, callback) => {
   const query = "SELECT * FROM categories";
   db.query(query, callback);
+};
+
+const findCategoriesByType = (db, type, callback) => {
+  const query = "SELECT * FROM categories WHERE type = ?";
+  db.query(query, [type], callback);
 };
 
 const addProductsToCategory = (db, categoryId, productIds, callback) => {
@@ -31,7 +36,7 @@ const addProductsToCategory = (db, categoryId, productIds, callback) => {
 
 const getAllCategoriesWithCount = (db,callback) =>{
 
-  const query = "SELECT c.category_id, c.image_url, c.category_name, c.description, COUNT(pc.product_id) AS product_count FROM categories c LEFT JOIN product_category pc ON c.category_id = pc.category_id GROUP BY c.category_id, c.image_url,c.category_name, c.description;";
+  const query = "SELECT c.category_id, c.image_url, c.category_name, COUNT(pc.product_id) AS product_count FROM categories c LEFT JOIN product_category pc ON c.category_id = pc.category_id GROUP BY c.category_id, c.image_url,c.category_name;";
 
   db.query(query, callback);
 }
@@ -90,14 +95,14 @@ const deleteCategoriesWithProducts = (db, categoryIds, callback) => {
 };
 
 const getCategoryByID = (db, categoryID, callback)=>{
-  const query = `SELECT category_id, category_name, description, image_url FROM categories WHERE category_id = ${categoryID};`;
+  const query = `SELECT category_id, category_name, image_url FROM categories WHERE category_id = ${categoryID};`;
 
   db.query(query, categoryID,callback);
 }
 
 const getAllProductsNotInCategory = (db, categoryID, callback) => {
   const query = `
-    SELECT p.product_id, p.name, p.description, p.price, p.stock, p.created_at
+    SELECT p.product_id, p.name, p.price, p.stock, p.created_at
     FROM products p
     LEFT JOIN product_category pc ON p.product_id = pc.product_id AND pc.category_id = ?
     WHERE pc.product_id IS NULL;
@@ -113,6 +118,29 @@ const deleteSelectedProductsInCategory = (db, categoryID, productIDs, callback)=
   db.query(query, [categoryID, productIDs], callback)
 }
 
+const setProductCategories = (db, productId, categoryIds, callback) => {
+
+      // Prepare an array to store the SQL values for inserting new categories
+      const values = [];
+
+      // Construct the values array for each categoryId
+      categoryIds.forEach((categoryId) => {
+        values.push(categoryId, productId);
+      });
+
+      // Create the SQL query with placeholders for each category
+      const placeholders = categoryIds.map(() => "(?, ?)").join(", ");
+      const insertProductCategoriesQuery = `
+        INSERT INTO product_category (category_id, product_id) 
+        VALUES ${placeholders};
+      `;
+
+      // Insert the new categories for the product
+      db.query(insertProductCategoriesQuery, values, callback);
+    };
+
+
+
 
 module.exports = {
   createCategory,
@@ -122,5 +150,7 @@ module.exports = {
   deleteCategoriesWithProducts,
   getCategoryByID,
   deleteSelectedProductsInCategory,
-  getAllProductsNotInCategory
+  getAllProductsNotInCategory,
+  findCategoriesByType,
+  setProductCategories
 };

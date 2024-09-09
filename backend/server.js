@@ -9,6 +9,7 @@ const imageRoutes = require("./routes/imageRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
+const productRoutes = require("./routes/productRoutes");
 const { errorHandler } = require("./utils/errorHandler");
 
 
@@ -30,7 +31,7 @@ app.use("/api/image", imageRoutes);
 app.use("/api/carts", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/category", categoryRoutes);
-
+app.use("/api/products", productRoutes)
 
 app.use(errorHandler);
 

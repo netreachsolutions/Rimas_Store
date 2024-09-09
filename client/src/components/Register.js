@@ -8,6 +8,7 @@ const Register = () => {
     first_name: '',
     last_name: '',
     password: '',
+    phone_number: ''
   });
 
   const handleChange = (e) => {
@@ -47,6 +48,15 @@ const Register = () => {
           className="w-full px-3 py-2 border rounded"
           required
         />
+          <input
+            type="text"
+            name="phone_number"
+            placeholder="Phone Number"
+            value={formData.phone_number}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded"
+            required
+          />
         <input
           type="email"
           name="email"
