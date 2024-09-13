@@ -10,6 +10,8 @@ router.post("/confirm", authMiddleware("customer"), orderController.createOrder)
 router.get('/', authMiddleware('admin'), orderController.getAllOrders)
 router.put('/:order_id/status', authMiddleware('admin'), orderController.updateDeliveryStatus);
 router.get('/:orderId/details', authMiddleware('admin'), orderController.getOrderDetails);
+router.get('/:orderId/items', authMiddleware('admin'), orderController.getOrderItems);
+
 
 router.get('/create-paypal-order', authMiddleware('customer'), paymentController.createPaypalOrder)
 router.post("/confirm-paypal", authMiddleware('customer'), orderController.confirmPayapalOrder)

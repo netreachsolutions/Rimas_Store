@@ -1,7 +1,7 @@
 // services/userService.js
 const { resolve } = require('path');
 const { findAddressByCustomerId, createAddress, setAllCustomerAddressFalse, setDefaultAddress } = require('../models/addressModel');
-const { findCustomerById } = require('../models/customerModel')
+const { findCustomerById, findCustomerByEmail } = require('../models/customerModel')
 const AuthService = require("../services/authService");
 
 
@@ -28,6 +28,23 @@ class CustomerService {
           // Resolve with the combined customer and addresses
           resolve(customer);
         });
+      });
+    });
+  }
+
+  static async getCustomerByEmail(db, email) {
+    return new Promise((resolve, reject) => {
+      // Fetch customer details
+      findCustomerByEmail(db, email, (err, customerResults) => {
+        if (err) return reject(err);
+  
+        if (customerResults.length === 0) {
+          return reject(new Error("Customer not found"));
+        }
+  
+        const customer = customerResults[0];
+  
+        resolve(customer);
       });
     });
   }

@@ -12,6 +12,18 @@ const findAllCategories = (db, callback) => {
   db.query(query, callback);
 };
 
+const findAllCategoriesWithGroupName = (db, callback) => {
+  const query = `
+    SELECT categories.*, category_groups.group_name, product_type_categories.product_type_id
+    FROM category_groups
+    JOIN categories ON category_groups.category_group_id = categories.category_group_id
+    LEFT JOIN product_type_categories ON category_groups.category_group_id = product_type_categories.category_group_id
+  `;
+  db.query(query, callback);
+};
+
+
+
 const findCategoriesByType = (db, type, callback) => {
   const query = "SELECT * FROM categories WHERE type = ?";
   db.query(query, [type], callback);
@@ -100,6 +112,14 @@ const getCategoryByID = (db, categoryID, callback)=>{
   db.query(query, categoryID,callback);
 }
 
+const getCategoriesByIDs = (db, categoryIDs, callback) => {
+  const query = `SELECT category_id, category_name, image_url 
+                 FROM categories 
+                 WHERE category_id IN (?);`;
+  
+  db.query(query, [categoryIDs], callback);
+}
+
 const getAllProductsNotInCategory = (db, categoryID, callback) => {
   const query = `
     SELECT p.product_id, p.name, p.price, p.stock, p.created_at
@@ -145,6 +165,7 @@ const setProductCategories = (db, productId, categoryIds, callback) => {
 module.exports = {
   createCategory,
   findAllCategories,
+  findAllCategoriesWithGroupName,
   addProductsToCategory,
   getAllCategoriesWithCount,
   deleteCategoriesWithProducts,
@@ -152,5 +173,6 @@ module.exports = {
   deleteSelectedProductsInCategory,
   getAllProductsNotInCategory,
   findCategoriesByType,
-  setProductCategories
+  setProductCategories,
+  getCategoriesByIDs
 };

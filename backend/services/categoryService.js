@@ -2,12 +2,14 @@
 const {
   createCategory,
   findAllCategories,
+  findAllCategoriesWithGroupName,
   addProductsToCategory,
   getAllCategoriesWithCount,
   deleteCategoriesWithProducts,
   getCategoryByID,
   deleteSelectedProductsInCategory,
-  getAllProductsNotInCategory
+  getAllProductsNotInCategory,
+  getCategoriesByIDs
 } = require("../models/categoryModel");
 const { reject } = require("bcrypt/promises");
 const { getCategory } = require("../controllers/categoryController");
@@ -40,23 +42,32 @@ class CategoryService {
     });
   }
 
+  static async getCategoriesByIds(db, categoryIds) {
+    return new Promise((resolve, reject) => {
+      getCategoriesByIDs(db, categoryIds, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+  }
+
   static async getCategoriesByType(db) {
     return new Promise((resolve, reject) => {
-      findAllCategories(db, (err, result) => {
+      findAllCategoriesWithGroupName(db, (err, result) => {
         console.log(result);
         if (err) return reject(err);
   
         // Restructure the result by grouping categories by their type
         const categoriesByType = result.reduce((acc, category) => {
-          const { type, category_id, category_name } = category;
+          const { category_group_id, category_id, category_name, group_name } = category;
   
           // Ensure the accumulator has an array for this type
-          if (!acc[type]) {
-            acc[type] = [];
+          if (!acc[category_group_id]) {
+            acc[category_group_id] = {name: group_name, items:[]};
           }
-          console.log(type)
+          console.log(category_group_id)
           // Add the category to the array for its type
-          acc[type].push({ category_id, category_name });
+          acc[category_group_id].items.push({ category_id, category_name });
   
           return acc;
         }, {});

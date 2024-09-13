@@ -37,6 +37,18 @@ exports.retrieveAllCategories = async (req, res) => {
     }
 }
 
+exports.retrieveCategoriesByIds = async (req, res) => {
+    try {
+        const {categoryIds} = req.body;
+        const categories = await CategoryService.getCategoriesByIds(db, categoryIds)
+        res.json(categories);
+        
+    } catch (error) {
+        console.error('Error during fetch:', error);
+        res.status(400).json({ message: error.message });
+    }
+}
+
 exports.retrieveCategoriesByType = async (req, res) => {
     try {
         const categories = await CategoryService.getCategoriesByType(db);
@@ -62,7 +74,7 @@ exports.deleteCategoriesByIDs = async (req, res) =>{
     try{
         const categoryIDs = req.body.selectedCategories
         console.log("\nREQ BODY:", req.body)
-        await CategoryService.deleteCategoriesWithProducts(db, categoryIDs);
+        await CategoryService.deleteCategoriesByIDs(db, categoryIDs);
         res.json({ message: "Deleted Categories with successfully" })
     }catch (error){
         console.error('Error during deleting categories:', error);

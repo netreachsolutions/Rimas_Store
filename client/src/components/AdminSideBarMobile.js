@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { IoShirt } from "react-icons/io5";
 
 const AdminSideBarMobile = () => {
-    const [isOpen, setIsOpen] = useState(true); // State to toggle sidebar visibility
+    const [isOpen, setIsOpen] = useState(false); // State to toggle sidebar visibility
 
     const toggleSidebar = () => {
       setIsOpen(!isOpen); // Toggle the sidebar visibility
@@ -14,7 +14,7 @@ const AdminSideBarMobile = () => {
       {/* Hamburger Icon */}
       <div className="fixed top-4 left-4 z-50">
         <section className="md:hidden block">
-        <button onClick={toggleSidebar} className="text-gray-500 focus:outline-none">
+        <button onClick={toggleSidebar} className="text-gray-500 focus:outline-none flex flex-col gap-2">
             <div className="w-[25px] h-[1px] bg-black" />
             <div className="w-[25px] h-[1px] bg-black" />
             <div className="w-[25px] h-[1px] bg-black" />
@@ -23,7 +23,9 @@ const AdminSideBarMobile = () => {
       </div>
     <aside
       id="logo-sidebar"
-      class="fixed top-0 left-0 z-40 w-64 hidden sm:block h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between"
+      className={`fixed top-0 left-0 z-50 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700 flex flex-col justify-between ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      } transition-transform duration-300 ease-in-out`}
       aria-label="Sidebar"
     >
       <h5
@@ -38,6 +40,7 @@ const AdminSideBarMobile = () => {
         data-drawer-hide="drawer-navigation"
         aria-controls="drawer-navigation"
         class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 end-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+        onClick={toggleSidebar}
       >
         <svg
           aria-hidden="true"
@@ -59,10 +62,10 @@ const AdminSideBarMobile = () => {
           <li>
             <a
               href="#"
-              className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-gray-500 group"
             >
               <svg
-                className="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-500 "
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -150,7 +153,7 @@ const AdminSideBarMobile = () => {
               </a>
             </Link>
           </li>
-          <li>
+          <li className="hidden">
             <a
               href="#"
               className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -173,7 +176,7 @@ const AdminSideBarMobile = () => {
               <span className="flex-1 ml-5 whitespace-nowrap">Sign In</span>
             </a>
           </li>
-          <li>
+          <li className="hidden">
             <a
               href="#"
               className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
@@ -214,3 +217,256 @@ const AdminSideBarMobile = () => {
 };
 
 export default AdminSideBarMobile;
+
+
+
+
+import React, { useState, useEffect } from 'react';
+import axios from '../api/axios'; // Adjust the import based on your project structure
+import NavBar from './NavBar';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import Spinner from './Spinner';
+import imageConfig from '../config/imageConfig';
+import { RxCross2 } from "react-icons/rx";
+import { FaFilter } from "react-icons/fa6";
+
+const ProductSearch = (props) => {
+  const [products, setProducts] = useState([]);
+  const [gender, setGender] = useState(null);
+  const [size, setSize] = useState(null);
+  const [color, setColor] = useState(null);
+  const [apparel, setApparel] = useState(null);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [categoriesByType, setCategoriesByType] = useState({});
+  const [selectedFeature, setSelectedFeature] = useState('brand');
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false); // Sidebar visibility state
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const featured = {
+    // Featured object here...
+  };
+
+  const updateUrlParams = (categoryIds) => {
+    setSearchParams({ categoryIds: categoryIds.join(',') });
+  };
+
+  const featuredItemClick = (feature, next) => {
+    setSelectedCategories((prevSelected) => {
+      if (!prevSelected.some((selected) => selected.category_id === feature.id)) {
+        const updatedCategories = [...prevSelected, { category_id: feature.id, category_name: feature.english }];
+        updateUrlParams(updatedCategories.map((category) => category.category_id)); 
+        return updatedCategories;
+      }
+      return prevSelected; 
+    });
+    setSelectedFeature(next);
+  };
+
+  useEffect(() => {
+    // Fetch categories and selected categories from URL
+  }, []);
+
+  useEffect(() => {
+    // Fetch relevant products based on selected filters
+  }, [minPrice, maxPrice, selectedCategories]);
+
+  const handleCategoryClick = (category, setCategory) => {
+    setCategory((prev) => {
+      if (prev === category.category_id) {
+        setSelectedCategories((prevSelected) => {
+          const updatedCategories = prevSelected.filter((c) => c.category_id !== category.category_id);
+          updateUrlParams(updatedCategories.map((c) => c.category_id)); 
+          return updatedCategories;
+        });
+        return null;
+      } else {
+        setSelectedCategories((prevSelected) => {
+          if (!prevSelected.some((selected) => selected.category_id === category.category_id)) {
+            const updatedCategories = [...prevSelected, category];
+            updateUrlParams(updatedCategories.map((c) => c.category_id)); 
+            return updatedCategories;
+          }
+          return prevSelected;
+        });
+        return category.category_id;
+      }
+    });
+  };
+
+  const handleRemoveCategory = (categoryToRemove) => {
+    setSelectedCategories((prevSelected) => {
+      const updatedCategories = prevSelected.filter((category) => category.category_id !== categoryToRemove.category_id);
+      updateUrlParams(updatedCategories.map((c) => c.category_id)); 
+      return updatedCategories;
+    });
+  };
+
+  const renderCategoryList = (categories, selectedCategory, setCategory) => (
+    <ul className="space-y-2 font-medium">
+      {categories.items.map((category) => (
+        <li key={category.category_id}>
+          <div
+            onClick={() => handleCategoryClick(category, setCategory)}
+            className={`flex items-center p-2 text-[13px] text-gray-900 rounded-lg hover:bg-gray-200 group cursor-pointer ${
+              selectedCategory === category.category_id ? 'bg-gray-200' : ''
+            }`}
+          >
+            <input
+              type="radio"
+              checked={selectedCategory === category.category_id}
+              readOnly
+              className="mr-2"
+            />
+            <span className="ml-5">{category.category_name}</span>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+
+  return (
+    <>
+      <NavBar background="white" className="z-50 ml-64" />
+      <div className="container mx-auto my-1 p-4">
+        {/* Sidebar */}
+        <aside
+          id="logo-sidebar"
+          className={`fixed top-[80px] left-0 z-20 w-64 h-screen bg-gray-50 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ${
+            isSidebarVisible ? 'translate-x-0' : '-translate-x-full'  // Toggle sidebar visibility
+          }`}
+          aria-label="Sidebar"
+        >
+          <div className="flex-1 px-3 py-4 overflow-y-auto ">
+            {categoriesByType['1'] && (
+              <div className="w-full mb-6">
+                <div className="line h-[1px] bg-gray-400 my-3" />
+                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                  Gender
+                </h1>
+                {renderCategoryList(categoriesByType['1'], gender, setGender)}
+              </div>
+            )}
+            {categoriesByType['2'] && (
+              <div className="w-full mb-6">
+                <div className="line h-[1px] bg-gray-400 my-3" />
+                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                  Size
+                </h1>
+                {renderCategoryList(categoriesByType['2'], size, setSize)}
+              </div>
+            )}
+            {categoriesByType['3'] && (
+              <div className="w-full mb-6">
+                <div className="line h-[1px] bg-gray-400 my-3" />
+                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                  Brand
+                </h1>
+                {renderCategoryList(categoriesByType['3'], color, setColor)}
+              </div>
+            )}
+            {categoriesByType.apparel && (
+              <div className="w-full mb-6">
+                <div className="line h-[1px] bg-gray-400 my-3" />
+                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                  Apparel
+                </h1>
+                {renderCategoryList(categoriesByType.apparel, apparel, setApparel)}
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <div className="md:ml-64">
+          {/* Featured items grid */}
+          <div
+            className={`grid m-auto px-[0px] py-[0px] mb-[0px] gap-0`}
+            style={{
+              gridTemplateColumns: `repeat(${Math.min(featured[selectedFeature]?.items.length, 4)}, 1fr)`,
+              height: selectedFeature ? '200px' : '0px', 
+            }}
+          >
+            {selectedFeature && featured[selectedFeature]?.items.map((brand, index) => (
+              <button
+                key={index}
+                className="relative h-full flex items-center justify-center bg-gray-200 rounded-[0px] overflow-hidden hover:cursor-pointer group"
+                onClick={() => featuredItemClick(brand, featured[selectedFeature].next)}
+              >
+                <img
+                  src={brand.image_url}
+                  className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-[120%]"
+                  alt={`${brand.english} | ${brand.arabic}`}
+                  style={{ objectPosition: "center" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 backdrop-blur-[0] to-transparent z-2"></div>
+                <h1 className="text-white text-[35px] md:[40px] font-bold text-center absolute bottom-5 z-10">
+                  {brand.english} | {brand.arabic}
+                </h1>
+              </button>
+            ))}
+          </div>
+
+          {/* Filter and category section */}
+          <div className="font-light w-full flex px-1 pt-3 justify-between items-end">
+            <div className='categories flex gap-1'>
+              {selectedCategories.map((category, index) => (
+                <div className='bg-gray-100 px-3 py-2 flex gap-1 font-normal items-center'>
+                  {category.category_name}
+                  <RxCross2  
+                    className='hover:cursor-pointer mt-[3px]'
+                    onClick={() => handleRemoveCategory(category)} 
+                  />
+                </div>
+              ))}
+              <div>
+                <span className="hidden sm:block font-light">{`${products.length} products`}</span>
+
+                {/* Toggle Filters button */}
+                <div className='sm:hidden flex items-end bg-gray-50 rounded px-2 py-1 border justify-between gap-7'
+                     onClick={() => setIsSidebarVisible(!isSidebarVisible)}>  {/* Toggle sidebar visibility */}
+                  Filters<FaFilter className='mb-1'/>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className='h-[1px] bg-gray-300 w-full mt-3 mb-0'/>
+
+          {loading ? (
+            <div className="mt-4">
+              <Spinner />
+            </div>
+          ) : error ? (
+            <div className="mt-4 text-red-500">{error}</div>
+          ) : (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <Link to={`/products/${product.product_id}`} key={product.product_id}>
+                  <div className="border p-4 rounded-md shadow hover:shadow-lg transition-shadow">
+                    <img
+                      src={product.image_url || 'placeholder-image-url'}
+                      alt={product.name}
+                      className="w-full h-40 object-cover mb-4"
+                    />
+                    <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
+                    <p className="text-gray-600 mb-2">{product.description}</p>
+                    <p className="text-gray-800 font-bold">${product.price}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default ProductSearch;
+

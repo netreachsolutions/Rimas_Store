@@ -71,6 +71,30 @@ const selectOrderDetails = (db, orderId, callback) => {
   db.query(query, [orderId], callback);
 };
 
+const selectOrderItems = (db, orderId, callback) => {
+  const query = `
+    SELECT 
+      order_items.*, 
+      products.name, 
+      product_image.image_url 
+    FROM 
+      order_items
+    JOIN 
+      orders ON order_items.order_id = orders.order_id
+    JOIN 
+      products ON order_items.product_id = products.product_id
+    LEFT JOIN 
+      product_image ON products.product_id = product_image.product_id 
+    WHERE 
+      order_items.order_id = ?
+    GROUP BY 
+      order_items.order_item_id, product_image.product_id
+    ORDER BY 
+      product_image.priority DESC;
+  `;
+  db.query(query, [orderId], callback);
+};
+
 module.exports = {
   createOrder,
   createOrderItem,
@@ -79,5 +103,6 @@ module.exports = {
   selectAllOrders,
   updateDeliveryStatus,
   selectOrderDetails,
-  getOrderCustomer
+  getOrderCustomer,
+  selectOrderItems
 };

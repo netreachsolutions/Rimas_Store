@@ -40,11 +40,11 @@ class ProductService {
   }
 
   static async newProduct(db, productData) {
-    const { name, description, price, stock, imageUrl, categories } = productData;
+    const { name, description, price, weight, stock, imageUrl, categories, product_type_id } = productData;
   
     return new Promise((resolve, reject) => {
       // First, create the product
-      createProduct(db, { name, description, price, stock }, (err, result) => {
+      createProduct(db, { name, description, price, weight, stock, product_type_id }, (err, result) => {
         if (err) {
           console.error('Error creating product:', err);
           return reject(err); // Reject if there's an error creating the product

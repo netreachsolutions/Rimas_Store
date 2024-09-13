@@ -5,22 +5,47 @@ const OrderService = require('./orderService');
 
 class NotificationService {
 
+  static async sendOTP(email, otp) {
+    try {
+      console.log(email);
+      // Email message for the customer
+      const customerEmailMsg = {
+        to: email,
+        subject: 'RIMAS Password Reset',
+        text: `Your one time code is ${otp}.`,
+        html: `
+          <h1>Password Reset</h1>
+          <p>You're one time code is: <b>${otp}</b></p>
+          <p>It will expire in 2 minutes</p>d
+          <br>
+          <p>Rimas Store Limited</p>
+        `,
+      };
+      await sendEmail(customerEmailMsg);
+    } catch (error) {
+      console.error('Error sending order processing notification:', error);
+      throw new Error('Failed to send order processing notification');
+    }
+
+
+  }
+
   static async sendOrderProcessingNotification(db, orderId) {
     try {
       // Fetch customer details
       const customer = await OrderService.getCustomerDetails(db, orderId);
       const order = await OrderService.getOrderDetails(db, orderId)
-
+      const amount = order.payment_amount/100;
       // Email message for the customer
       const customerEmailMsg = {
         to: customer.email,
         subject: 'RIMAS Order Confirmation',
-        text: `Thank you for your order! Your order number is #${orderId}. The total amount is ${order.payment_amount}.`,
+        text: `Thank you for your order! Your order number is #${orderId}. The total amount is ${amount}.`,
         html: `
           <h1>Order Confirmation</h1>
           <p>Thank you for your purchase, ${customer.first_name}!</p>
           <p>Your order number is #${order.order_id}.</p>
-          <p>Total amount: ${order.payment_amount}.</p>
+          <p>Total amount: ${amount}.</p>
           <p>We'll notify you once your order has been shipped.</p>
           <br>
           <p>Rimas Store Limited</p>
@@ -30,19 +55,19 @@ class NotificationService {
 
       // Send SMS to the customer if phone number exists
       if (customer.phone_number) {
-        const smsText = `Order Confirmed! \nOrder #${orderId} \nTotal: ${order.payment_amount} \nRimas Store Ltd.`;
+        const smsText = `Order Confirmed! \nOrder #${orderId} \nTotal: ${amount} \nRimas Store Ltd.`;
         await sendSMS(smsText, customer.phone_number);
       }
 
       const merchantEmailMsg = {
         to: process.env.MERCHANT_EMAIL,
         subject: `New Order #${order.order_id} Received`,
-        text: `A new order #${order.order_id} has been placed with a total amount of ${order.payment_amount}.`,
+        text: `A new order #${order.order_id} has been placed with a total amount of ${amount}.`,
         html: `
           <h1>New Order Received</h1>
           <p>A new order has been placed.</p>
           <p>Order ID: ${order.order_id}</p>
-          <p>Total amount: ${order.payment_amount}</p>
+          <p>Total amount: ${amount}</p>
           <p>https://rimastores.com/order/${order.order_id}</p>
           <br>
           <p>Rimas Store Admin</p>
@@ -51,7 +76,7 @@ class NotificationService {
       await sendEmail(merchantEmailMsg);
 
       const merchantSmsText = `New Order Received \nA new order has been placed.\nOrder ID: ${order.order_id} \nTotal amount: ${order.payment_amount}\n https://rimastores.com/order/${order.order_id}`;
-      await sendSMS(merchantSmsText, process.env.MERCHANT_NUMBER);
+      // await sendSMS(merchantSmsText, process.env.MERCHANT_NUMBER);
 
       return { success: true };
     } catch (error) {

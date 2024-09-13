@@ -1,9 +1,9 @@
 // models/productModel.js
 
 const createProduct = (db, productData, callback) => {
-    const { name, description, price, stock } = productData;
-    const query = 'INSERT INTO products (name, description, price, stock) VALUES (?, ?, ?, ?)';
-    db.query(query, [name, description, price, stock], callback);
+    const { name, description, price, weight, stock, product_type_id } = productData;
+    const query = 'INSERT INTO products (name, description, price, product_weight, stock, product_type_id) VALUES (?, ?, ?, ?, ?, ?)';
+    db.query(query, [name, description, price, weight, stock, product_type_id], callback);
   };
   
   const findProductById = (db, productId, callback) => {

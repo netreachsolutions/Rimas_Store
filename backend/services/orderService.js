@@ -5,7 +5,8 @@ const {
     selectAllOrders,
     updateDeliveryStatus,
     selectOrderDetails,
-    getOrderCustomer
+    getOrderCustomer,
+    selectOrderItems
 } = require('../models/orderModel');
 
 class OrderService {
@@ -91,6 +92,18 @@ class OrderService {
               return reject(err);
             }
             resolve(result[0]);
+          });
+        });
+      }
+
+      static async getOrderItems(db, orderId) {
+        return new Promise((resolve, reject) => {
+          selectOrderItems(db, orderId, (err, result) => {
+            if (err) {
+              console.error('Error fetching order details:', err);
+              return reject(err);
+            }
+            resolve(result);
           });
         });
       }

@@ -5,12 +5,14 @@ import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import AdminSideBar from './AdminSideBar';
 import { MdOutlineFileUpload } from "react-icons/md";
+import AdminSideBarMobile from './AdminSideBarMobile';
 
 const UploadProduct = () => {
   const [productData, setProductData] = useState({
     name: '',
     description: '',
     price: '',
+    weight: '',
     stock: '',
   });
 
@@ -25,17 +27,21 @@ const UploadProduct = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const fileInputRef = useRef(null); // Add a ref to the file input field
   const token = localStorage.getItem('token');
+  const [isThobe, setIsThobe] = useState(false);
 
   const [gender, setGender] = useState(null);
   const [size, setSize] = useState(null);
   const [color, setColor] = useState(null);
-  const [apparel, setApparel] = useState(null);
+  const [brand, setBrand] = useState(null);
+  const [finish, setFinish] = useState(null);
+  const [thobeWidth, setThobeWidth] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get('/api/category/type'); // Assuming this endpoint returns categories by type
         setCategoriesByType(response.data);
+        console.log(response.data['1'].items)
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -44,6 +50,16 @@ const UploadProduct = () => {
     fetchCategories();
   }, []);
 
+
+  const toggleThobe = () => {
+    setGender(null);
+    setSize(null);
+    setColor(null);
+    setBrand(null);
+    setFinish(null);
+    setThobeWidth(null);
+    setIsThobe(!isThobe); // Toggle the sidebar visibility
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
@@ -95,64 +111,33 @@ const UploadProduct = () => {
   };
 
   const handleCategoryClick = (category, setCategory) => {
-    const selectedCategoryId = category.category_id;
-
-    setCategory((prev) => (prev === selectedCategoryId ? null : selectedCategoryId));
-
+    // Toggle between selecting and deselecting the category
+    setCategory((prev) => (prev && prev.category_id === category.category_id ? null : category));
+  
     setSelectedCategories((prevSelected) => {
       // If the category ID is already selected, remove it, otherwise add it
-      if (prevSelected.includes(selectedCategoryId)) {
-        return prevSelected.filter((id) => id !== selectedCategoryId);
+      if (prevSelected.some((selected) => selected.category_id === category.category_id)) {
+        return prevSelected.filter((selected) => selected.category_id !== category.category_id);
       } else {
-        return [...prevSelected, selectedCategoryId];
+        return [...prevSelected, category.category_id];
       }
     });
     console.log(selectedCategories)
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!croppedImage) {
-      alert('Please crop and upload an image first');
-      return;
-    }
-
-    const productDetails = {
-      ...productData,
-      imageUrl: croppedImage,
-      categories: selectedCategories, // Add selected categories to the product details
-    };
-
-    try {
-      const response = await axios.post('/api/admin/saveProduct', productDetails, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      alert('Product saved successfully');
-      navigate('/admin');
-    } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product.');
-    }
-  };
-
   const renderCategoryList = (categories, selectedCategory, setCategory) => (
     <ul className="space-y-2 font-medium">
-      {categories.map((category) => (
+      {categories.items.map((category) => (
         <li key={category.category_id}>
           <div
             onClick={() => handleCategoryClick(category, setCategory)}
             className={`flex items-center p-2 text-[13px] text-gray-900 rounded-lg hover:bg-gray-200 group cursor-pointer ${
-              selectedCategory === category.category_id ? 'bg-gray-200' : ''
+              selectedCategory && selectedCategory.category_id === category.category_id ? 'bg-gray-200' : ''
             }`}
           >
             <input
               type="radio"
-              checked={selectedCategory === category.category_id}
+              checked={selectedCategory && selectedCategory.category_id === category.category_id}
               readOnly
               className="mr-2"
             />
@@ -162,28 +147,120 @@ const UploadProduct = () => {
       ))}
     </ul>
   );
+  
+  
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    if (!croppedImage) {
+      alert('Please crop and upload an image first');
+      return;
+    }
+  
+    // Generate product name for Thobe based on brand, width, and finish
+    let generatedName = productData.name; // Default name
+  
+    if (isThobe) {
+      console.log(brand)
+      // Check if the required categories (brand, width, finish) are selected
+      if (brand && thobeWidth && finish) {
+        // Generate the product name using the category_name properties
+        generatedName = `${brand.category_name} ${thobeWidth.category_name} ${finish.category_name}`.trim();
+      } else {
+        // Alert the user if any required Thobe categories are not selected
+        alert('Please select brand, width, and finish for the Thobe.');
+        return;
+      }
+    }
+  
+    let prod_type = isThobe ? 2 : 1;
+  
+    // Update product name in the product data
+    const productDetails = {
+      ...productData,
+      name: generatedName,
+      imageUrl: croppedImage,
+      categories: selectedCategories, // Add selected categories to the product details
+      product_type_id: prod_type,
+    };
+  
+    try {
+      const response = await axios.post('/api/admin/saveProduct', productDetails, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      alert('Product saved successfully');
+      navigate('/admin');
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Failed to save product.');
+    }
+  };
+  
+  
 
   return (
     <>
-      <AdminSideBar />
+      <AdminSideBarMobile />
       <div className='md:ml-64'>
         <div className="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg text-left">
           <h1 className="text-2xl font-bold text-center mb-6">New Product</h1>
+          <label className="block mb-2 text-sm font-medium">Is this a Thobe?</label>
+          <ul className="space-y-2 font-medium mb-2">
+
+          <li>
+          <div
+            onClick={toggleThobe}
+            className={`flex items-center p-2 text-[13px] text-gray-900 rounded-lg hover:bg-gray-200 group cursor-pointer ${
+              isThobe? 'bg-gray-200' : ''
+            }`}
+          >
+            <input
+              type="radio"
+              checked={isThobe}
+              readOnly
+              className="mr-2"
+            />
+            <span className="ml-5">Yes</span>
+          </div>
+        </li>
+        <li>
+          <div
+            onClick={toggleThobe}
+            className={`flex items-center p-2 text-[13px] text-gray-900 rounded-lg hover:bg-gray-200 group cursor-pointer ${
+              !isThobe? 'bg-gray-200' : ''
+            }`}
+          >
+            <input
+              type="radio"
+              checked={!isThobe}
+              readOnly
+              className="mr-2"
+            />
+            <span className="ml-5">No</span>
+          </div>
+        </li>
+        </ul>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block mb-2 text-sm font-medium">Product Name</label>
               <input
                 type="text"
                 name="name"
-                placeholder="e.g. Black Thobe"
+                placeholder={isThobe ? "Generated Automatically for Thobes" : "e.g. Black Thobe"}
                 value={productData.name}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isThobe}
                 required
               />
             </div>
 
-            <div>
+            {!isThobe && (<div>
               <label className="block mb-2 text-sm font-medium">Product Description</label>
               <textarea
                 name="description"
@@ -193,24 +270,24 @@ const UploadProduct = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
-            </div>
+            </div>)}
 
-            {categoriesByType.gender && (
+            {categoriesByType['1'] && (
               <div className="w-full mb-6">
                 <div className="line h-[1px] bg-gray-400 my-3" />
                 <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
                   Gender
                 </h1>
-                {renderCategoryList(categoriesByType.gender, gender, setGender)}
+                {renderCategoryList(categoriesByType['1'], gender, setGender)}
               </div>
             )}
-            {categoriesByType.size && (
+            {categoriesByType['2'] && (
               <div className="w-full mb-6">
                 <div className="line h-[1px] bg-gray-400 my-3" />
                 <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
                   Size
                 </h1>
-                {renderCategoryList(categoriesByType.size, size, setSize)}
+                {renderCategoryList(categoriesByType['2'], size, setSize)}
               </div>
             )}
             {categoriesByType.color && (
@@ -222,13 +299,31 @@ const UploadProduct = () => {
                 {renderCategoryList(categoriesByType.color, color, setColor)}
               </div>
             )}
-            {categoriesByType.apparel && (
+            {isThobe && categoriesByType['3'] && (
               <div className="w-full mb-6">
                 <div className="line h-[1px] bg-gray-400 my-3" />
                 <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
-                  Apparel
+                  Brand
                 </h1>
-                {renderCategoryList(categoriesByType.apparel, apparel, setApparel)}
+                {renderCategoryList(categoriesByType['3'], brand, setBrand)}
+              </div>
+            )}
+            {isThobe && categoriesByType['4'] && (
+              <div className="w-full mb-6">
+                <div className="line h-[1px] bg-gray-400 my-3" />
+                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                  Width
+                </h1>
+                {renderCategoryList(categoriesByType['4'], thobeWidth, setThobeWidth)}
+              </div>
+            )}
+            {isThobe && categoriesByType['5'] && (
+              <div className="w-full mb-6">
+                <div className="line h-[1px] bg-gray-400 my-3" />
+                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                  Finish
+                </h1>
+                {renderCategoryList(categoriesByType['5'], finish, setFinish)}
               </div>
             )}
 
@@ -253,6 +348,20 @@ const UploadProduct = () => {
                 name="stock"
                 placeholder="Stock"
                 value={productData.stock}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2 text```javascript
+                font-medium">Weight (Kg)</label>
+              <input
+                type="number"
+                name="weight"
+                placeholder="Weight in Kgs"
+                value={productData.weight}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -289,7 +398,7 @@ const UploadProduct = () => {
                       image={imageSrc}
                       crop={crop}
                       zoom={zoom}
-                      aspect={4 / 3}
+                      aspect={3 / 4}
                       onCropChange={setCrop}
                       onZoomChange={setZoom}
                       onCropComplete={onCropComplete}

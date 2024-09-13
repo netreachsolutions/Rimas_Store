@@ -10,19 +10,28 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const brands = [
     {
+      id: 20,
       english: 'Altamode',
       arabic: 'التمودة',
       image_url: imageConfig.brands.altamode
     },
     {
+      id: 20, // CHANGE AFTER CATEGORY CREATION
       english: 'Ratti',
       arabic: 'راتي',
       image_url: imageConfig.brands.ratti
     },
     {
-      english: 'Total English',
-      arabic: 'توتال إنجليش',
+      id: 19,
+      english: 'English',
+      arabic: 'إنجليش',
       image_url: imageConfig.brands.altamode
+    },
+    {
+      id: 18,
+      english: 'Italian',
+      arabic: 'ايطالي',
+      image_url: imageConfig.brands.italian
     }
   ];
 
@@ -68,21 +77,24 @@ const Home = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 m-auto bg-[#F6F5F8] px-[10px] py-[30px] pr-[20px] mb-[40px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 m-auto bg-[#F6F5F8] px-[10px] py-[30px]  mb-[40px]">
       {brands.map((brand, index) => (
-  <div key={index} className="relative w-full h-[300px] pb-[100%] flex items-center justify-center bg-gray-200 rounded-[50px] overflow-hidden">
-    <img
-      src={brand.image_url}
-      className="absolute top-0 left-0 w-full h-full object-cover"
-      alt={`${brand.english} | ${brand.arabic}`}
-      style={{ objectPosition: "top center" }}
-    />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 backdrop-blur-[0] to-transparent z-2"></div>
+        <Link to={`/products/search?categoryIds=${brand.id}`}>
+          <div key={index} className="relative  sm:h-[0px] h-[10px] pb-[100%] flex items-center justify-center bg-gray-200 rounded-[50px] overflow-hidden hover:cursor-pointer group">
+            <img
+              src={brand.image_url}
+              className="absolute top-0 left-0  object-cover transition-transform duration-500 ease-in-out group-hover:scale-[120%] "
+              alt={`${brand.english} | ${brand.arabic}`}
+              style={{ objectPosition: "top center" }}
+            />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 backdrop-blur-[0] to-transparent z-2"></div>
 
-    <h1 className="text-white text-[35px] md:[40px] font-bold text-center absolute bottom-5 z-10">
-      {brand.english} | {brand.arabic}
-    </h1>
-  </div>
+            <h1 className="text-white text-[35px] md:[40px] font-bold text-center absolute bottom-5 z-10">
+              {brand.english} | {brand.arabic}
+            </h1>
+          </div>
+        
+        </Link>
 ))}
 
       </div>

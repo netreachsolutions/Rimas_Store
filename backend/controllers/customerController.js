@@ -3,6 +3,8 @@ const AuthService = require("../services/authService");
 const db = require("../config/db");
 const customerService = require("../services/customerService");
 const authMiddleware = require("../middlewares/authMiddleware");
+const NotificationService = require("../services/notificationService");
+const { resolve } = require("path");
 
 exports.registerCustomer = async (req, res) => {
   try {
@@ -26,6 +28,43 @@ exports.loginCustomer = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.initiateOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const customerDetails = await customerService.getCustomerByEmail(db, email);
+    const otp = await AuthService.generateOTP(db, customerDetails.customer_id);
+    await NotificationService.sendOTP(customerDetails.email, otp);
+    res.send({message: 'email sent'});
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(400).json({ message: error.message });
+  }
+}
+
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { otp, email } = req.body;
+    const customerDetails = await customerService.getCustomerByEmail(db, email);
+    const response = await AuthService.verifyOTP(db, customerDetails.customer_id, otp);
+    res.json(response);
+  } catch (error) {
+    res.status(403).json({message: error.message})
+  }
+}
+
+exports.updatePassword = async (req, res) => {
+  //opdate password with token verification
+}
+
+// exports.requestAccess = async (req, res) => {
+//   try {
+//     const { customerId };
+
+//   } catch (error) {
+
+//   }
+// }
 
 exports.customerProfile = async (req, res) => {
     try {

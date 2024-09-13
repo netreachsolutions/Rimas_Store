@@ -72,6 +72,9 @@ const Login = () => {
       <Link to='/register' className='mt-5'>
       <span className='mt-5 underline'>Register</span>
       </Link>
+      <Link to='/reset' className='mt-5'>
+      <span className='mt-5 underline'>Forgot Password</span>
+      </Link>
     </div>
   );
 };

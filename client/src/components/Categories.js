@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { FaPencilAlt } from "react-icons/fa";
 import AddProductToCategory from "./AddProductToCategory";
 import CreateCategory from "./CreateCategory";
+import AdminSideBarMobile from "./AdminSideBarMobile";
 
 const Categories = () => {
   const [categories, setCategories] = useState([])
@@ -81,9 +82,9 @@ const Categories = () => {
 
   return (
     <div className="flex flex-row">
-      <AdminSideBar />
+      <AdminSideBarMobile />
 
-      <div className="container mx-auto my-8 p-4 flex-grow ml-64">
+      <div className="container mx-auto my-8 p-4 flex-grow md:ml-64">
       <Link to={'./create'}>
       <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mr-2" >
               CREATE NEW

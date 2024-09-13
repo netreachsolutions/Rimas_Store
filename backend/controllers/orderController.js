@@ -26,7 +26,7 @@ exports.createOrder = async (req, res) => {
         }
 
         // Step 3: Calculate total price of the order (including shipping)
-        const totalAmount = cartItems.reduce((total, item) => total + item.quantity * item.price, 0);
+        const totalAmount = cartItems.reduce((total, item) => total + (item.quantity * item.price * 100), 0);
         const shippingCost = 299; // Example shipping cost in cents
         const finalTotalAmount = totalAmount + shippingCost;
 
@@ -94,7 +94,7 @@ exports.confirmPayapalOrder = async (req, res) => {
       });
 
       const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
-      totalAmount += shippingCost; // Add shipping cost to the total amount
+      totalAmount = (totalAmount*100) + shippingCost; // Add shipping cost to the total amount
 
       // Step 1: Validate Payment Intent
       const isPaymentValid = await paymentService.validatePaypalOrder(paypalOrderId, accessToken, totalAmount);
@@ -195,3 +195,20 @@ exports.getOrderDetails = async (req, res) => {
       res.status(500).json({ message: 'Failed to fetch order details' });
     }
   };
+
+  exports.getOrderItems = async (req, res) => {
+    const { orderId } = req.params;
+    console.log('Order ID: '+orderId)
+    try {
+      const orderItems = await orderService.getOrderItems(db, orderId);
+      if (!orderItems) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      console.log(orderItems);
+      res.status(200).json({ orderItems });
+    } catch (error) {
+      console.error('Error fetching order details:', error);
+      res.status(500).json({ message: 'Failed to fetch order details' });
+    }
+  };
+

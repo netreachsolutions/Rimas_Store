@@ -3,6 +3,7 @@ import axios from "../api/axios";
 import AdminSideBar from "./AdminSideBar";
 import { Link, useNavigate } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
+import AdminSideBarMobile from "./AdminSideBarMobile";
 
 const CreateCategory = () => {
   const [categoryData, setCategoryData] = useState({
@@ -68,9 +69,9 @@ const CreateCategory = () => {
 
   return (
     <div className="flex">
-      <AdminSideBar />
+      <AdminSideBarMobile />
 
-      <div className="mx-auto flex-grow md:ml-64 w-full h-full">
+      <div className="mx-auto flex-grow md:ml-64 w-full h-full md:ml-64">
         <Link to="/category">
           <span className="flex gap-1 items-center rounded-xl py-1 px-1.5 bg-gray-50 w-max mt-5 ml-4 text-gray-500">
             <IoArrowBackOutline />

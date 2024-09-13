@@ -60,20 +60,29 @@ CREATE TABLE deliveries (
 	delivery_id INT AUTO_INCREMENT PRIMARY KEY,
 	order_id INT NOT NULL,
     address_id INT NOT NULL,
-	delivery_status ENUM('processing', 'dispatched', 'arrived') DEFAULT 'processing',
+	delivery_status ENUM('processing', 'dispatched') DEFAULT 'processing',
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (address_id) REFERENCES addresses(address_id)
+);
+
+-- Create product_types table
+CREATE TABLE product_types (
+    product_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_type_name VARCHAR(255) NOT NULL,
+    description TEXT
 );
 
 -- Create products table
 CREATE TABLE products (
     product_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_type_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
     is_active BOOLEAN  DEFAULT TRUE NOT NULL;
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    FOREIGN KEY (product_type_id) REFERENCES product_types(product_type_id)
 );
 
 CREATE TABLE product_image (
@@ -87,10 +96,19 @@ CREATE TABLE product_image (
 -- Create categories table
 CREATE TABLE categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_group_id INT NOT NULL,
     category_name VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     image_url VARCHAR(255),
-    type ENUM('color', 'brand', 'gender', 'size', 'apparel') NOT NULL,
+    FOREIGN KEY (category_group_id) REFERENCES category_groups(category_group_id)
+);
+
+CREATE TABLE product_type_categories (
+    product_type_category_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_type_id INT NOT NULL,
+    category_group_id INT NOT NULL,
+    FOREIGN KEY (product_type_id) REFERENCES product_types(product_type_id),
+    FOREIGN KEY (category_group_id) REFERENCES category_groups(category_group_id)
 );
 
 CREATE VIEW customer_products AS
@@ -149,3 +167,11 @@ CREATE TABLE cart_items (
     FOREIGN KEY (cart_id) REFERENCES carts(cart_id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
+
+-- Create otp table
+CREATE TABLE otp (
+	otp_id INT AUTO_INCREMENT PRIMARY KEY,
+	customer_id INT NOT NULL,
+    code_hash VARCHAR(255),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+)

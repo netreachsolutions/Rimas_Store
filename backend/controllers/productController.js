@@ -18,9 +18,9 @@ exports.getAllProducts = async (req, res) => {
 
   exports.saveProduct = (req, res) => {
     console.log('Attemting to save product')
-    const { name, description, price, stock, imageUrl, categories } = req.body;
+    const { name, description, price, weight, stock, imageUrl, categories, product_type_id } = req.body;
     console.log(req.body)
-    ProductService.newProduct(db, { name, description, price, stock, imageUrl, categories }, (err, result) => {
+    ProductService.newProduct(db, { name, description, price, weight, stock, imageUrl, categories, product_type_id }, (err, result) => {
       if (err) {
         console.error('Error saving product:', err);
         return res.status(500).json({ message: 'Failed to save product' });

@@ -6,6 +6,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const router = express.Router();
 
 router.get('/', categoryController.retrieveAllCategories);
+router.post('/select', categoryController.retrieveCategoriesByIds);
 router.get('/categoriesWithCount', categoryController.getAllCategoriesWithCount);
 router.get('/type', categoryController.retrieveCategoriesByType),
 router.get('/:categoryId/products', productController.getProductsByCategory);

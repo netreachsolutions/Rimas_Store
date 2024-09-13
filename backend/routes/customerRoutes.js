@@ -9,6 +9,8 @@ const router = express.Router({mergeParams: true});
 
 router.post("/register", customerController.registerCustomer);
 router.post("/login", customerController.loginCustomer);
+router.post("/otp", customerController.initiateOTP);
+router.post("/otp/verify", customerController.verifyOTP);
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
 router.post("/address/new", authMiddleware('customer'), customerController.addAddress);

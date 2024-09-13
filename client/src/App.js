@@ -19,6 +19,7 @@ import OrderDetails from "./components/OrderDetails";
 import AdminHome from "./components/AdminHome";
 import Categories from "./components/Categories";
 import ProductSearch from "./components/ProductSearch";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/products/:id" element={<ProductDetails />} />
           <Route path="/" element={<Home />} />
           <Route path="/products/search" element={<ProductSearch/>} />
+          <Route path="/reset" element={<ResetPassword />} />
           {/* <Route path="/profile" element={<Profile/>} /> */}
 
           {/* protected routes */}
@@ -49,7 +51,7 @@ function App() {
             <Route path="/category/:categoryID" element={<AddProductToCategory />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/order/:id" element={<OrderDetails />} />
-            <Route path="/admin" element={<AdminHome />} />
+            <Route path="/admin" element={<Orders />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -76,8 +76,12 @@ const Orders = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
-  }
+    return( 
+    <div>
+      <AdminSideBarMobile/>
+      <div>Loading...</div>;
+    </div>
+  )}
 
   if (error) {
     return <div>{error}</div>;
@@ -93,7 +97,7 @@ const Orders = () => {
         <thead>
           <tr className="bg-gray-200">
             <th className="border px-4 py-2">Order ID</th>
-            <th className="border px-4 py-2">Order Date/Time</th>
+            <th className="border px-4 py-2 sm:block hidden">Order Date/Time</th>
             <th className="border px-4 py-2">Customer Name</th>
             <th className="border px-4 py-2">Total Amount</th>
             <th className="border px-4 py-2">Delivery Status</th>
@@ -105,7 +109,7 @@ const Orders = () => {
             <React.Fragment key={order.orderID}>
               <tr>
                 <td className="border px-4 py-2 text-center">{order.orderID}</td>
-                <td className="border px-4 py-2 text-center">{order.orderDateTime}</td>
+                <td className="border px-4 py-2 text-center sm:block hidden">{order.orderDateTime}</td>
                 <td className="border px-4 py-2 text-center">{order.customerName}</td>
                 <td className="border px-4 py-2 text-center">${order.totalAmount}</td>
                 <td className="border px-4 py-2 text-center">{order.deliveryStatus}</td>

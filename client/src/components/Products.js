@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "../api/axios";
 import AdminSideBar from "./AdminSideBar";
 import { RiLinkM } from "react-icons/ri";
+import AdminSideBarMobile from "./AdminSideBarMobile";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -37,8 +38,8 @@ const Products = () => {
 
   return (
     <>
-      <AdminSideBar/>
-      <div className="ml-64">
+      <AdminSideBarMobile/>
+      <div className="md:ml-64">
         
         {/* Tab Bar */}
         <div className="flex justify-between py-0 w-[95%] m-auto border-b-1 mt-8">
