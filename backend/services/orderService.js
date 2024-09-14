@@ -10,38 +10,102 @@ const {
 } = require('../models/orderModel');
 
 class OrderService {
+    // static async createOrder(db, customerId, addressId, cartItems, totalAmount, shippingCost) {
+    //     return new Promise((resolve, reject) => {
+    //         try {
+    //             // Step 1: Create the order
+    //             // const [orderResult] = await createOrder(db, {
+    //             //     customer_id: customerId,
+    //             //     delivery_amount: shippingCost
+    //             // });
+    //             createOrder(db, {
+    //                 customer_id: customerId,
+    //                 delivery_amount: shippingCost
+    //             }, (err, result) => {
+    //                 if (err) return reject('order creation error: '+err);
+    //                 const [orderResult] = result; 
+    //             });
+
+    //             const orderId = orderResult.insertId;
+
+    //             // Step 2: Create order items
+    //             for (const item of cartItems) {
+
+    //                 // await createOrderItem(db, {
+    //                 //     order_id: orderId,
+    //                 //     product_id: item.product_id,
+    //                 //     quantity: item.quantity,
+    //                 //     price: item.price
+    //                 // });
+    //                 createOrderItem(db, {
+    //                     order_id: orderId,
+    //                     product_id: item.product_id,
+    //                     quantity: item.quantity,
+    //                     price: item.price
+    //                 }, (err, result) => {
+    //                     if (err) return reject('order item creation error: '+err);
+    //                 });
+    //             }
+
+
+    //             // Step 3: Create delivery record
+    //             // await createDelivery(db, {
+    //             //     order_id: orderId,
+    //             //     address_id: addressId
+    //             // });
+    //             createDelivery(db, {
+    //                 order_id: orderId,
+    //                 address_id: addressId
+    //             }, (err, result) => {
+    //                 if (err) return reject('delivery creation error: '+err);
+    //             });
+
+    //             // If everything is successful, resolve with the order ID
+    //             resolve(orderId);
+    //         } catch (err) {
+    //             reject(err); // Handle error
+    //         }
+    //     });
+    // }
+
     static createOrder(db, customerId, addressId, cartItems, totalAmount, shippingCost) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                // Step 1: Create the order
-                const [orderResult] = await createOrder(db, {
-                    customer_id: customerId,
-                    delivery_amount: shippingCost
-                });
+        return new Promise((resolve, reject) => {
+            // Step 1: Create the order
+            createOrder(db, { customer_id: customerId, delivery_amount: shippingCost }, (err, orderResult) => {
+                if (err) {
+                    return reject('Order creation error: ' + err);
+                }
 
                 const orderId = orderResult.insertId;
 
-                // Step 2: Create order items
+                // Step 2: Create order items in parallel
+                let itemsProcessed = 0;
                 for (const item of cartItems) {
-                    await createOrderItem(db, {
+                    createOrderItem(db, {
                         order_id: orderId,
                         product_id: item.product_id,
                         quantity: item.quantity,
                         price: item.price
+                    }, (err) => {
+                        if (err) {
+                            return reject('Order item creation error: ' + err);
+                        }
+
+                        itemsProcessed++;
+                        if (itemsProcessed === cartItems.length) {
+                            // Step 3: Create delivery record once all items are processed
+                            createDelivery(db, { order_id: orderId, address_id: addressId }, (err) => {
+                                if (err) {
+                                    return reject('Delivery creation error: ' + err);
+                                }
+
+                                // If everything is successful, resolve with the order ID
+                                resolve(orderId);
+                            });
+                        }
                     });
                 }
-
-                // Step 3: Create delivery record
-                await createDelivery(db, {
-                    order_id: orderId,
-                    address_id: addressId
-                });
-
-                // If everything is successful, resolve with the order ID
-                resolve(orderId);
-            } catch (err) {
-                reject(err); // Handle error
-            }
+            });
         });
     }
 

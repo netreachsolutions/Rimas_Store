@@ -1,13 +1,23 @@
 // models/cartModel.js
 
+const { queryDatabase } = require('../config/pool');
+
 const createCart = (db, customerId, callback) => {
   const query = 'INSERT INTO carts (customer_id) VALUES (?)';
-  db.query(query, [customerId], callback);
+  // db.query(query, [customerId], callback);
+  queryDatabase(query, [customerId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 const findCartByCustomerId = (db, customerId, callback) => {
   const query = 'SELECT * FROM carts WHERE customer_id = ?';
-  db.query(query, [customerId], callback);
+  // db.query(query, [customerId], callback);
+  queryDatabase(query, [customerId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 
@@ -36,23 +46,39 @@ const findCartItemsByCartId = (db, cartId, callback) => {
     ORDER BY 
       product_image.priority DESC
   `;
-  db.query(query, [cartId], callback);
+  // db.query(query, [cartId], callback);
+  queryDatabase(query, [cartId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 
 const updateCartItemById = (db, cartItemId, quantity, callback) => {
   const query = 'UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?';
-  db.query(query, [quantity, cartItemId], callback);
+  // db.query(query, [quantity, cartItemId], callback);
+  queryDatabase(query, [quantity, cartItemId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 const deleteCartItemById = (db, cartItemId, callback) => {
   const query = 'DELETE FROM cart_items WHERE cart_item_id = ?';
-  db.query(query, [cartItemId], callback);
+  // db.query(query, [cartItemId], callback);
+  queryDatabase(query, [cartItemId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
-const clearCartItems = (db, customerID, callback) => {
+const clearCartItems = (db, customerId, callback) => {
   const query = 'DELETE FROM carts WHERE customer_id = ?';
-  db.query(query, [customerID], callback);
+  // db.query(query, [customerID], callback);
+  queryDatabase(query, [customerId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 }
 
 module.exports = {

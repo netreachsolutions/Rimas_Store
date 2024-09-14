@@ -1,26 +1,45 @@
 // models/orderModel.js
 
-const createOrder = (db, orderData) => {
+const { queryDatabase } = require('../config/pool');
+
+
+const createOrder = (db, orderData, callback) => {
   const { customer_id, delivery_amount } = orderData;
   const query = 'INSERT INTO orders (customer_id, delivery_amount, created_at) VALUES (?, ?, NOW())';
-  return db.query(query, [customer_id, delivery_amount]);
+  // return db.query(query, [customer_id, delivery_amount]);
+  queryDatabase(query, [customer_id, delivery_amount], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
-const createOrderItem = (db, orderItemData) => {
+const createOrderItem = (db, orderItemData, callback) => {
   const { order_id, product_id, quantity, price } = orderItemData;
   const query = 'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)';
-  return db.query(query, [order_id, product_id, quantity, price]);
+  // return db.query(query, [order_id, product_id, quantity, price]);
+  queryDatabase(query, [order_id, product_id, quantity, price], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
-const createDelivery = (db, deliveryData) => {
+const createDelivery = (db, deliveryData, callback) => {
   const { order_id, address_id } = deliveryData;
   const query = 'INSERT INTO deliveries (order_id, address_id, delivery_status) VALUES (?, ?, "processing")';
-  return db.query(query, [order_id, address_id]);
+  // return db.query(query, [order_id, address_id]);
+  queryDatabase(query, [order_id, address_id], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
-const findOrdersByCustomerId = (db, customerId) => {
+const findOrdersByCustomerId = (db, customerId, callback) => {
   const query = 'SELECT * FROM orders WHERE customer_id = ?';
-  return db.query(query, [customerId]);
+  // return db.query(query, [customerId]);
+  queryDatabase(query, [customerId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 const selectAllOrders = (db, callback) => {
@@ -42,17 +61,30 @@ GROUP BY
 ORDER BY 
   orders.created_at DESC;
   `;
-  return db.query(query, callback);
+  // return db.query(query, callback);
+  queryDatabase(query, [], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
+
 };
 
 const updateDeliveryStatus = (db, order_id, delivery_status, callback) => {
   const query = 'UPDATE deliveries SET delivery_status = ? WHERE order_id = ?';
-  db.query(query, [delivery_status, order_id], callback);
+  // db.query(query, [delivery_status, order_id], callback);
+  queryDatabase(query, [delivery_status, order_id], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 const getOrderCustomer = (db, orderId, callback) => {
   const query = 'SELECT * FROM customers WHERE customer_id = (SELECT customer_id from orders WHERE order_id = ?)'
-  db.query(query, [orderId], callback)
+  // db.query(query, [orderId], callback)
+  queryDatabase(query, [orderId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 }
 
 const selectOrderDetails = (db, orderId, callback) => {
@@ -68,7 +100,11 @@ const selectOrderDetails = (db, orderId, callback) => {
   LEFT JOIN payments p ON o.order_id = p.order_id
   WHERE o.order_id = ?;
   `;
-  db.query(query, [orderId], callback);
+  // db.query(query, [orderId], callback);
+  queryDatabase(query, [orderId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 const selectOrderItems = (db, orderId, callback) => {
@@ -92,7 +128,11 @@ const selectOrderItems = (db, orderId, callback) => {
     ORDER BY 
       product_image.priority DESC;
   `;
-  db.query(query, [orderId], callback);
+  // db.query(query, [orderId], callback);
+  queryDatabase(query, [orderId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 module.exports = {

@@ -1,14 +1,24 @@
 // models/productModel.js
+const { queryDatabase } = require('../config/pool');
+
 
 const createProduct = (db, productData, callback) => {
     const { name, description, price, weight, stock, product_type_id } = productData;
     const query = 'INSERT INTO products (name, description, price, product_weight, stock, product_type_id) VALUES (?, ?, ?, ?, ?, ?)';
-    db.query(query, [name, description, price, weight, stock, product_type_id], callback);
+    // db.query(query, [name, description, price, weight, stock, product_type_id], callback);
+    queryDatabase(query, [name, description, price, weight, stock, product_type_id], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
   };
   
   const findProductById = (db, productId, callback) => {
     const query = 'SELECT * FROM products WHERE product_id = ?';
-    db.query(query, [productId], callback);
+    // db.query(query, [productId], callback);
+    queryDatabase(query, [productId], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
   };
 
   const findProductByIdWithImages = (db, productId, callback) => {
@@ -19,23 +29,39 @@ const createProduct = (db, productData, callback) => {
       WHERE products.product_id = ?
       ORDER BY product_image.priority DESC LIMIT 1;
     `;
-    db.query(query, [productId], callback);
+    // db.query(query, [productId], callback);
+    queryDatabase(query, [productId], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
   };
 
   const getAllProducts = (db, callback) => {
     const query = 'SELECT * FROM products WHERE is_active = TRUE';
     db.query(query, callback);
+    queryDatabase(query, [], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
   };
 
-  const getAllProductsWithImage = (db, callback) => {
+  const getAllProductsWithImage = async (db, callback) => {
     const query = 'SELECT products.product_id, products.name, products.description, products.is_active, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MAX(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL)));';
-    db.query(query, callback);
+    // Use queryDatabase and pass in a callback
+    queryDatabase(query, [], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
   };
 
  const createProductImage = (db, imageData, callback) => {
     const {productId, imageUrl} = imageData;
     const query = 'INSERT INTO product_image (product_id, image_url) VALUES (?, ?)';
-    db.query(query, [productId, imageUrl], callback)
+    // db.query(query, [productId, imageUrl], callback)
+    queryDatabase(query, [productId, imageUrl], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
  }
   
  const getProductsByCategoryId = (db, categoryId, callback) => {
@@ -63,10 +89,14 @@ ORDER BY
     pi.priority IS NULL,  -- Orders rows with NULL priority last
     pi.priority DESC, 
     pi.image_url ASC
-LIMIT 1;
+;
 
   `;
-  db.query(query, [categoryId], callback);
+  // db.query(query, [categoryId], callback);
+  queryDatabase(query, [categoryId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
@@ -118,7 +148,11 @@ const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPri
   console.log(queryParams);  // Log parameters for debugging
   console.log(query);         // Log query for debugging
 
-  db.query(query, queryParams, callback);
+  // db.query(query, queryParams, callback);
+  queryDatabase(query, queryParams, (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
 };
 
 

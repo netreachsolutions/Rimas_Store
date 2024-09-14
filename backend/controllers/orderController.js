@@ -31,7 +31,7 @@ exports.createOrder = async (req, res) => {
         const finalTotalAmount = totalAmount + shippingCost;
 
         // Step 4: Create Order in the database (transaction)
-        const orderId = await orderService.createOrder(db.promise(), customerId, address_id, cartItems, finalTotalAmount, shippingCost);
+        const orderId = await orderService.createOrder(db, customerId, address_id, cartItems, finalTotalAmount, shippingCost);
 
         // Step 5: Mark payment as completed and associate with the order
         await paymentService.recordPayment(db, payment_intent, orderId, finalTotalAmount, currency);

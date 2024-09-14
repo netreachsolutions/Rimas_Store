@@ -91,7 +91,7 @@ class AuthService {
         console.log(password)
         const isValidPassword = await bcrypt.compare(password, process.env.ADMIN_PASS);
         console.log(isValidPassword)
-        if (!isValidPassword || username!='admin') {
+        if (!isValidPassword || username.toLowerCase()!='admin') {
           console.log('Invalid email or password')
           return reject(new Error('Invalid email or password'));
         }
