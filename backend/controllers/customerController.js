@@ -54,7 +54,20 @@ exports.verifyOTP = async (req, res) => {
 }
 
 exports.updatePassword = async (req, res) => {
-  //opdate password with token verification
+  console.log('authenticated')
+  try {
+    const { customerId } = req.tokenAssets;
+    const {email, pass} = req.body;
+    const customerDetails = await customerService.getCustomerByEmail(db, email);
+    if (customerDetails.customer_id != customerId) {
+      res.status(403).json({message: 'unauthorised'})
+    }
+    await AuthService.resetCustomerPassword(customerId, pass);
+    res.json('success')
+  } catch (error) {
+    console.log(error)
+    res.status(403).json({message: error.message})
+  }
 }
 
 // exports.requestAccess = async (req, res) => {

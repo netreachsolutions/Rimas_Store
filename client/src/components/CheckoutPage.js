@@ -4,10 +4,14 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "./CheckoutForm";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import NewAddress from "./NewAddress";
+import { useNavigate } from "react-router-dom";
 
 const stripePromise = loadStripe('pk_test_51PApsjGBaVIQ3lGmE2o5Glfe1tOUor4CJiHmfLb2yxLUqXyzErTGruVfE2g2RsmicoxnETNdohTlN8b94QoAIghE00uMMRRfwB');
 
 const CheckoutPage = () => {
+  const navigate = useNavigate();
+  const [backdropPosition, setBackdropPosition] = useState('hidden');
   const [cartItems, setCartItems] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [deliveryDetails, setDeliveryDetails] = useState({
@@ -86,36 +90,81 @@ const CheckoutPage = () => {
     }
   };
 
+  const handleAddressAdded = async () => {
+    setBackdropPosition('hidden');
+    const token = localStorage.getItem('token');
+    try {
+      const profileResponse = await axios.get('/api/users/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDeliveryDetails((prev) => ({
+        ...prev,
+        addresses: profileResponse.data.addresses,
+      }));
+    } catch (error) {
+      console.error('Error refreshing profile data:', error);
+    }
+  };
+
+  const handleAddressSelection = (e) => {
+    setDeliveryDetails((prev) => ({
+      ...prev,
+      address_id: e.target.value,
+    }))
+
+  }
+
   const renderDeliveryStep = () => (
     <div>
-      <form onSubmit={handleDeliverySubmit}>
-        {deliveryDetails.addresses &&
-          deliveryDetails.addresses.map((address) => (
-            <div key={address.address_id} className="mb-2">
-              <label className="block">
-                <input
-                  type="radio"
-                  name="address"
-                  value={address.address_id}
-                  onChange={(e) =>
-                    setDeliveryDetails((prev) => ({
-                      ...prev,
-                      address_id: e.target.value,
-                    }))
-                  }
-                />
-                {address.first_line}, {address.city}, {address.postcode}, {address.country}
-              </label>
-            </div>
-          ))}
-        <button
-          type="submit"
-          className={`bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300 ${currentStep == 1 ? 'auto' : 'hidden'}`}
+    { (currentStep == 1 ? (
+          <form onSubmit={handleDeliverySubmit}>
+            {deliveryDetails.addresses &&
+              deliveryDetails.addresses.map((address) => (
+                <div key={address.address_id} className="mb-2">
+                  <label className="block">
+                    <input
+                      type="radio"
+                      name="address"
+                      value={address.address_id}
+                      onChange={(e) =>
+                        handleAddressSelection(e)
+                      }
+                    />
+                    {address.first_line}, {address.city}, {address.postcode}, {address.country}
+                  </label>
+                </div>
+              ))}
+                          <div className="mb-2">
+                  <button 
+                    className={`${currentStep == 1 ? 'auto' : 'hidden'} w-max text-blue-500 hover:underline hover:cursor-pointer`}
+                    onClick={() => setBackdropPosition('fixed')}
+                    >
+                    + New Address
+                  </button>
+                </div>
+            <button
+              type="submit"
+              className={`bg-blue-500 mr-2 text-white px-6 py-2 rounded hover:bg-blue-600 transition duration-300 ${currentStep == 1 ? 'auto' : 'hidden'}`}
+            >
+              Use this address
+            </button>
+          </form>
+      
+    ) : (
+      <div className="flex gap-5">
+        <div>{deliveryDetails.addresses[0].first_line}, {deliveryDetails.addresses[0].city}, {deliveryDetails.addresses[0].postcode}, {deliveryDetails.addresses[0].country}</div>
+        <button 
+          className={`w-max text-blue-500 hover:underline hover:cursor-pointer`}
+          onClick={() => setCurrentStep(1)}
         >
-          Use this address
-        </button>
-      </form>
-    </div>
+          Change
+        </button>      
+      </div>
+
+    )
+    
+  )}
+  </div>
   );
 
   const renderPaymentSelectionStep = () => (
@@ -232,13 +281,31 @@ const CheckoutPage = () => {
   };
 
   return (
-    <>
+    
+    <div className="h-max w-full">
+                <div 
+        className={`${backdropPosition} z-10 inset-0 bg-black opacity-50 w-full`}
+        onClick={() => setBackdropPosition('hidden')}
+      />
+          {( backdropPosition == 'fixed' ? (
+        <NewAddress 
+          className={`z-[100] mx-auto`}
+          onAddressAdded={handleAddressAdded} // Pass the callback to hide form on successful submission
+        />
+
+      ) : null
+        
+
+      )}
      <nav
-        className={`navbar md:px-[40px] px-[20px] z-50 w-full h-[80px] flex items-center justify-between top-0 left-0 relative bg-white`}
+        className={`navbar md:px-[40px] px-[20px] w-full h-[80px] flex items-center justify-between top-0 left-0 relative bg-white`}
       >
 
 
-        <section className="section_middle absolute left-1/2 transform -translate-x-1/2 flex items-center text-[20px] sm:text-[40px]">
+        <section className="section_middle absolute left-1/2 hover:cursor-pointer transform -translate-x-1/2 flex items-center text-[20px] sm:text-[40px]"
+          onClick={() => navigate('/')}
+        >
+
           <h1 className="m-0">RIMAS</h1>
           <img
             className="sm:h-[60px] h-[30px] md:mx-2 mx-[2px]"
@@ -250,7 +317,7 @@ const CheckoutPage = () => {
 
 
       </nav>
-    <div className="cart container mx-auto my-8 p-4 flex w-[80%] gap-2">
+    <div className="cart container mx-auto my-8 p-4 flex flex-col md:flex-row w-[95%] md:w-[80%] gap-2">
     <div className="container  p-4 text-left">
     {paymentSuccess ? (
       <div className="text-left">
@@ -291,7 +358,7 @@ const CheckoutPage = () => {
       </div>
     )}
   </div>
-  <div className="flex justify-start flex-col font-bold w-[40%]">
+  <div className="flex justify-start flex-col font-bold md:w-[40%]">
   {/* <div className="grid grid-cols-1 md:grid-cols-1 gap-5 w-[60%]"> */}
       <span className="text-[20px] text-left mb-2">
               Order Summary
@@ -352,7 +419,7 @@ const CheckoutPage = () => {
 
         </div>
   </div>
-    </>
+    </div>
   // </div>
   );
 };

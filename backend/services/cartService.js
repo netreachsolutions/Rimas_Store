@@ -61,13 +61,42 @@ const {
       });
     }
 
-    static calcultatePrice(cartItems) {
+    // static calcultatePrice(cartItems) {
+    //     let itemsAmount = 0;
+    //     cartItems.forEach(item => {
+    //       itemsAmount += item.price * item.quantity; // Assuming each item has price and quantity fields
+    //     });
+    //     const deliveryAmount = 2.99;
+    //     return {total: itemsAmount+deliveryAmount, items: itemsAmount, delivery: deliveryAmount};
+    // }
+
+    static calculatePrice(cartItems) { 
+      try {
+        // const cartItems = await CartService.viewCart(db, customerId);
+        // Calculate the total amount
         let itemsAmount = 0;
+        let netWeight = 0;
         cartItems.forEach(item => {
           itemsAmount += item.price * item.quantity; // Assuming each item has price and quantity fields
+          netWeight += item.product_weight;
+          console.log(item.product_weight)
         });
-        const deliveryAmount = 2.99;
-        return {total: itemsAmount+deliveryAmount, items: itemsAmount, delivery: deliveryAmount};
+  
+        let shippingCost =0;
+        console.log(netWeight)
+        if (netWeight < 2000) {
+          shippingCost = 1.99;
+        } else {
+          shippingCost = 4.99;
+        }
+  
+        return {total: itemsAmount+shippingCost, items: itemsAmount, delivery: shippingCost};
+  
+        return totalAmount;
+      } catch (error) {
+        console.error('Error creating payment intent:', error);
+        throw new Error(error.message);
+      }
     }
 
 

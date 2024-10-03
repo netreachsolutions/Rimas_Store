@@ -2,9 +2,16 @@
 import React, { useState } from 'react';
 import axios from '../api/axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAlert } from '../context/AlertContext'; // import the useAlert hook
+import { PiCircleNotch } from "react-icons/pi";
+
+
 
 const Login = () => {
-  const [formData, setFormData] = useState({
+  const [isProcessing, setIsProcessing] = useState(false);
+  const {showAlert} = useAlert();
+  const [formData, setFormData] = 
+  useState({
     email: '',
     password: '',
   });
@@ -20,15 +27,19 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsProcessing(true);
     try {
       const response = await axios.post(`api/users/login`, formData);
       // alert(response.data.accessToken);
       localStorage.setItem('token', response.data.accessToken);
+      showAlert('Login Success!', 'success');
       navigate(from, { replace: true });
     } catch (error) {
       console.error('Error logging in:', error);
-      alert('Login failed. Please try again.');
+      showAlert('Login failed. Please try again.', 'danger');
+      // alert('Login failed. Please try again.');
     }
+    setIsProcessing(false);
   };
 
   return (
@@ -64,9 +75,11 @@ const Login = () => {
         />
         <button
           type="submit"
-          className="w-full py-2 px-4 font-semibold text-white bg-black rounded-md hover:bg-gray-700"
+          className="w-full py-2 px-4 font-semibold text-white bg-black rounded-md hover:bg-gray-700 disabled:bg-gray-700"
+          disabled={isProcessing}
         >
-          Login
+          {isProcessing ? (<PiCircleNotch className='animate-spin text-[30px] m-auto'/>) : (<span>Login</span>)}
+          
         </button>
       </form>
       <Link to='/register' className='mt-5'>

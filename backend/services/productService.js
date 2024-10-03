@@ -4,8 +4,10 @@ const {
   createProduct,
   createProductImage,
   findProductByIdWithImages,
+  findProductImages,
   getProductsByCategoryId,
-  getProductsByCategoryIdsAndPriceRange
+  getProductsByCategoryIdsAndPriceRange,
+  createProductImages
  } = require('../models/productModel');
 
  const {
@@ -34,49 +36,68 @@ class ProductService {
         if (results.length === 0) {
           return resolve(null); // Product not found
         }
-        resolve(results[0]); // Return the first product (since we are querying by ID, there should only be one)
+        const productData = results[0]
+        findProductImages(productId, (err, imageResults) => {
+          if (err) {
+            return reject(err);
+          }
+          productData.images = imageResults;
+          console.log(productData.images)
+          console.log(imageResults)
+          resolve(productData);
+        });
+        // resolve(results[0]); // Return the first product (since we are querying by ID, there should only be one)
       });
     });
   }
 
   static async newProduct(db, productData) {
-    const { name, description, price, weight, stock, imageUrl, categories, product_type_id } = productData;
-  
+    const { name, description, price, weight, stock, uploadedImageUrls, categories, product_type_id } = productData;
+
+    console.log(uploadedImageUrls);
+
     return new Promise((resolve, reject) => {
-      // First, create the product
-      createProduct(db, { name, description, price, weight, stock, product_type_id }, (err, result) => {
-        if (err) {
-          console.error('Error creating product:', err);
-          return reject(err); // Reject if there's an error creating the product
-        }
-  
-        const productId = result.insertId; // Get the newly created product ID
-        console.log(`Product created with ID: ${productId}`);
-  
-        // Now, create the product image using the product ID
-        createProductImage(db, { productId, imageUrl }, (err, imageResult) => {
-          if (err) {
-            console.error('Error creating product image:', err);
-            return reject(err); // Reject if there's an error creating the product image
-          }
-  
-
-
-          setProductCategories(db, productId, categories, (err, result) => {
+        // First, create the product
+        createProduct(db, { name, description, price, weight, stock, product_type_id }, (err, result) => {
             if (err) {
-              console.error('Error creating product image:', err);
-              return reject(err); // Reject if there's an error creating the product image
+                console.error('Error creating product:', err);
+                return reject(err); // Reject if there's an error creating the product
             }
-          });
-          // Resolve the promise after both product and image are successfully created
-          resolve({
-            productId,
-            message: 'Product and image created successfully',
-          });
+
+            const productId = result.insertId; // Get the newly created product ID
+            console.log(`Product created with ID: ${productId}`);
+
+            // Now, create the product images using the product ID
+            createProductImages(productId, uploadedImageUrls, (err, imageResult) => {
+                if (err) {
+                    console.error('Error creating product images:', err);
+                    return reject(err); // Reject if there's an error creating the product image
+                }
+                console.log('Product images created');
+
+                // Now, set the product categories
+                setProductCategories(db, productId, categories, (err, result) => {
+                    if (err) {
+                        console.error('Error creating product categories:', err);
+                        return reject(err); // Reject if there's an error creating the product categories
+                    }
+                    console.log('Created categories');
+
+                    // Only resolve the promise when everything is done
+                    resolve({
+                        productId,
+                        message: 'Product, images, and categories created successfully',
+                    });
+
+                    console.log('Promise resolved'); // This should now log
+                });
+            });
         });
-      });
     });
-  }
+}
+
+
+  
 
   static async getProductsByCategory(db, categoryId) {
     return new Promise((resolve, reject) => {

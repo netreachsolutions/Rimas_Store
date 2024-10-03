@@ -5,35 +5,60 @@ import NavBar from "./NavBar";
 import imageConfig from '../config/imageConfig';
 import Typing from 'react-typing-effect';
 import Footer from "./Footer";
+import { FaSearch } from "react-icons/fa";
+import TypeForm from "./TypeForm";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
+  const [formVisibility, setFormVisibility] = useState(false)
   const brands = [
     {
       id: 20,
       english: 'Altamode',
       arabic: 'التمودة',
-      image_url: imageConfig.brands.altamode
-    },
-    {
-      id: 20, // CHANGE AFTER CATEGORY CREATION
+      image_url: imageConfig.brands.altamode,
+      next: 'finish'
+  },
+  {
+      id: 20,
       english: 'Ratti',
       arabic: 'راتي',
-      image_url: imageConfig.brands.ratti
-    },
-    {
+      image_url: imageConfig.brands.ratti,
+      next: 'finish'
+  },
+  {
       id: 19,
       english: 'English',
       arabic: 'إنجليش',
-      image_url: imageConfig.brands.altamode
-    },
-    {
+      image_url: imageConfig.brands.altamode,
+      next: 'finish'
+  },
+  {
       id: 18,
-      english: 'Italian',
+      english: 'Switzerland',
       arabic: 'ايطالي',
-      image_url: imageConfig.brands.italian
-    }
+      image_url: imageConfig.brands.italian,
+      next: 'finish'
+  },
+  {
+      id: 18,
+      english: 'Sahra',
+      arabic: 'ايطالي',
+      image_url: imageConfig.brands.italian,
+      next: 'width'
+  },
+  {
+      id: 18,
+      english: 'Other',
+      arabic: 'ايطالي',
+      image_url: imageConfig.brands.italian,
+      next: 'width'
+  }
   ];
+
+  const toggleForm = () => {
+
+  }
 
   // Fetch products from the server
   useEffect(() => {
@@ -52,13 +77,20 @@ const Home = () => {
 
   return (
     <>
+      {
+        formVisibility ? (
+          <TypeForm className=''/>
+        ) : (
+          <></>
+        )
+      }
       <NavBar className="z-50" />
       <div className="relative hero h-screen w-full flex flex-col">
         <img
           src={imageConfig.homeScreenBackground} 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 flex flex-row items-center justify-center z-10">
+        <div className="absolute inset-0 flex flex-col gap-10 items-center justify-start sm:justify-center z-10">
           <div className="md:text-[65px] text-[55px] text-black text-center px-2 py-2 md:bg-white md:bg-opacity-10 md:backdrop-blur">
             <Typing
               text="Elevate your wardrobe, elevate your life."
@@ -66,6 +98,11 @@ const Home = () => {
               eraseDelay={2000}
             />
           </div>
+        <button 
+          className="absolute bottom-[20vh] animate-pulse md:static z-10 flex gap-4 shadow-xl text-[30px] md:text-[50px] bg-white text-black items-center rounded-[50px] px-8 py-4 transition-transform duration-500 ease-in-out hover:scale-[120%]"
+          onClick={() => setFormVisibility(true)}>
+            <FaSearch/> Find Thobe
+          </button>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-transparent backdrop-blur-[0] to-white z-2"></div>
       </div>
@@ -77,7 +114,7 @@ const Home = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 m-auto bg-[#F6F5F8] px-[10px] py-[30px]  mb-[40px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 m-auto bg-[#F6F5F8] px-[10px] py-[30px]  mb-[40px]">
       {brands.map((brand, index) => (
         <Link to={`/products/search?categoryIds=${brand.id}`}>
           <div key={index} className="relative  sm:h-[0px] h-[10px] pb-[100%] flex items-center justify-center bg-gray-200 rounded-[50px] overflow-hidden hover:cursor-pointer group">
@@ -99,32 +136,7 @@ const Home = () => {
 
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 m-auto bg-[#F6F5F8] px-[10px] py-[30px] pr-[20px] mb-[40px]">
-        {products.map((product, index) => (
-          <div key={index} className="flex flex-col">
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full h-auto"
-            />
-            <div className="price-section mt-4">
-              <h4 className="lg:text-[20px] sm:text-[22px] text-[18px] font-primary uppercase font-bold text-black">
-                {product.name}
-              </h4>
-              <p className="font-primary font-medium text-red">
-                ${product.price}
-              </p>
-              <Link to={`/products/${product.product_id}`} state={{ product: product }}>
-                <button className="uppercase font-primary w-full block py-2 font-medium mt-3 text-white bg-black transition duration-300 hover:bg-red hover:scale-105">
-                  <span className="flex items-center justify-center">
-                    add to cart
-                  </span>
-                </button>
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
+     
       <Footer/>
     </>
   );

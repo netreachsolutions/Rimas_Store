@@ -7,6 +7,6 @@ const router = express.Router();
 router.post('/add', authMiddleware('customer'), cartController.addToCart);
 router.get('/', authMiddleware('customer'), cartController.viewCart);
 router.put('/update', authMiddleware('customer'), cartController.updateCartItem);
-router.delete('/remove', authMiddleware('customer'), cartController.removeCartItem);
+router.post('/remove', authMiddleware('customer'), cartController.removeCartItem);
 
 module.exports = router;

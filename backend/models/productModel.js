@@ -36,6 +36,20 @@ const createProduct = (db, productData, callback) => {
     });
   };
 
+  const findProductImages = (productId, callback) => {
+    const query = `
+    SELECT product_image.image_url, product_image.priority
+    FROM product_image
+    WHERE product_image.product_id = ?
+    ORDER BY product_image.priority ASC;
+    `;
+
+    queryDatabase(query, [productId], (err, results) => {
+      if (err) return callback(err, null);
+      callback(null, results);
+    });
+  };
+
   const getAllProducts = (db, callback) => {
     const query = 'SELECT * FROM products WHERE is_active = TRUE';
     db.query(query, callback);
@@ -63,6 +77,26 @@ const createProduct = (db, productData, callback) => {
       callback(null, results);              // Pass results to callback
     });
  }
+
+ const createProductImages = (productId, imageUrls, callback) => {
+  // Prepare an array to store the SQL values
+  const values = [];
+
+  // Construct the values array for each productId
+  imageUrls.forEach((imageUrl, index) => {
+    values.push(productId, imageUrl, index+1);
+  });
+  console.log("values:");
+  console.log(values);
+
+  const placeholders = imageUrls.map(() => "(?, ?, ?)").join(", ");
+  const query = `INSERT INTO product_image (product_id, image_url, priority) VALUES ${placeholders}`;
+  // db.query(query, [productId, imageUrl], callback)
+  queryDatabase(query, values, (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
+}
   
  const getProductsByCategoryId = (db, categoryId, callback) => {
   console.log(categoryId)
@@ -102,13 +136,13 @@ ORDER BY
 const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
   let query = `
     SELECT 
-        DISTINCT p.product_id, 
+        p.product_id, 
         p.name, 
         p.description, 
         p.price, 
         p.stock, 
         p.created_at, 
-        pi.image_url
+        MAX(pi.image_url) AS image_url  -- Select only the highest priority image URL
     FROM 
         products p
     LEFT JOIN 
@@ -116,8 +150,8 @@ const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPri
     LEFT JOIN 
         categories c ON pc.category_id = c.category_id
     LEFT JOIN 
-        product_image pi ON p.product_id = pi.product_id
-    WHERE 1 = 1`; // Always true, makes adding conditions easier
+        product_image pi ON pi.product_id = p.product_id
+    WHERE 1 = 1`;  // Always true, makes adding conditions easier
 
   const queryParams = [];
 
@@ -139,14 +173,21 @@ const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPri
   }
 
   query += `
+    GROUP BY 
+        p.product_id,  -- Group by the product details to avoid duplicates
+        p.name, 
+        p.description, 
+        p.price, 
+        p.stock, 
+        p.created_at
     ORDER BY 
-        pi.priority IS NULL,  -- Orders rows with NULL priority last
-        pi.priority DESC, 
-        pi.image_url ASC;
+        MAX(pi.priority) IS NULL,  -- Orders rows with NULL priority last
+        MAX(pi.priority) DESC,     -- Highest priority images first
+        MAX(pi.image_url) ASC;
   `;
 
   console.log(queryParams);  // Log parameters for debugging
-  console.log(query);         // Log query for debugging
+  console.log(query);        // Log query for debugging
 
   // db.query(query, queryParams, callback);
   queryDatabase(query, queryParams, (err, results) => {
@@ -157,14 +198,18 @@ const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPri
 
 
 
+
+
   module.exports = {
     createProduct,
     findProductById,
     getAllProducts,
     createProductImage,
+    createProductImages,
     getAllProductsWithImage,
     findProductByIdWithImages,
     getProductsByCategoryId,
-    getProductsByCategoryIdsAndPriceRange
+    getProductsByCategoryIdsAndPriceRange,
+    findProductImages
   };
   

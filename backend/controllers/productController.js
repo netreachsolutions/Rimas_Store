@@ -1,4 +1,8 @@
 const db = require("../config/db");
+const s3 = require('../config/awsConfig');
+const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 const ProductService = require("../services/productService");
 
 exports.getAllProducts = async (req, res) => {
@@ -16,19 +20,81 @@ exports.getAllProducts = async (req, res) => {
 
 
 
-  exports.saveProduct = (req, res) => {
-    console.log('Attemting to save product')
-    const { name, description, price, weight, stock, imageUrl, categories, product_type_id } = req.body;
+  // exports.saveProduct = (req, res) => {
+  //   console.log('Attemting to save product')
+  //   const { name, description, price, weight, stock, imageUrl, categories, product_type_id } = req.body;
+  //   console.log(req.body)
+  //   ProductService.newProduct(db, { name, description, price, weight, stock, imageUrl, categories, product_type_id }, (err, result) => {
+  //     if (err) {
+  //       console.error('Error saving product:', err);
+  //       return res.status(500).json({ message: 'Failed to save product' });
+  //     }
+  //     // res.json({ message: 'Product saved successfully', productId: result.insertId });
+  //     console.log(res)
+  //   });
+  //   res.status(201).json({ message: 'Product saved successfully'})
+  // };
+
+  exports.saveProduct = async (req, res) => {
+    console.log('Attempting to save product');
+    
+    // Destructure product details and the list of images from the request body
+    const { name, description, price, weight, stock, categories, product_type_id } = req.body;
+    const files = req.files; // Assuming files are being sent through `req.files` (multer setup for multiple file uploads)
     console.log(req.body)
-    ProductService.newProduct(db, { name, description, price, weight, stock, imageUrl, categories, product_type_id }, (err, result) => {
-      if (err) {
-        console.error('Error saving product:', err);
-        return res.status(500).json({ message: 'Failed to save product' });
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: 'No images uploaded' });
+    }
+  
+    const uploadedImageUrls = [];
+  
+    try {
+      // Iterate through the files and upload them to S3
+      for (const file of files) {
+        const fileExtension = path.extname(file.originalname);
+        const fileName = `${uuidv4()}${fileExtension}`;
+        
+        const params = {
+          Bucket: process.env.S3_BUCKET_NAME,
+          Key: `uploads/${fileName}`, // Save with a unique name in S3
+          Body: fs.createReadStream(file.path),
+          ContentType: file.mimetype,
+        };
+        
+        // Use the promise-based upload to S3
+        const uploadResult = await s3.upload(params).promise();
+        
+        // Push the uploaded image URL to the array
+        uploadedImageUrls.push(uploadResult.Location);
+        
+        // Remove the image from local storage after uploading
+        fs.unlinkSync(file.path);
       }
-      // res.json({ message: 'Product saved successfully', productId: result.insertId });
-      console.log(res)
-    });
-    res.status(201).json({ message: 'Product saved successfully'})
+  
+      // At this point, all images have been uploaded successfully
+      // const imageUrl = uploadedImageUrls.join(','); // Store as a comma-separated string or adjust as needed
+  
+      // Save the product details, including the image URLs, to the database
+      const productData = {
+        name,
+        description,
+        price,
+        weight,
+        stock,
+        uploadedImageUrls,   // Include the image URLs here
+        categories,
+        product_type_id
+      };
+  
+      const result = await ProductService.newProduct(db, productData);
+
+      // Step 3: Send response after the product is saved successfully
+      res.status(201).json({ message: 'Product saved successfully', result });
+  
+    } catch (err) {
+      console.error('Error uploading images:', err);
+      res.status(500).json({ message: 'Failed to upload images' });
+    }
   };
 
   exports.getProductById = async (req, res) => {

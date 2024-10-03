@@ -78,44 +78,13 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/about"
+                    to="/products/search"
                     className="text-black uppercase mb-2 inline-block font-primary font-normal transition duration-300 hover:text-red focus:text-red"
                   >
-                    about
+                    search
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    to="/hospitality"
-                    className="text-black uppercase mb-2 inline-block font-primary font-normal transition duration-300 hover:text-red focus:text-red"
-                  >
-                    hospitality
-                  </Link>
-                </li>
-                {/* <li>
-                  <Link
-                    to="/"
-                    className="text-black uppercase mb-2 inline-block font-primary font-normal transition duration-300 hover:text-red focus:text-red"
-                  >
-                    staff
-                  </Link>
-                </li> */}
-                <li>
-                  <Link
-                    to="/store"
-                    className="text-black uppercase mb-2 inline-block font-primary font-normal transition duration-300 hover:text-red focus:text-red"
-                  >
-                    our store
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/contact"
-                    className="text-black uppercase mb-2 inline-block font-primary font-normal transition duration-300 hover:text-red focus:text-red"
-                  >
-                    contact us
-                  </Link>
-                </li>
+               
               </ul>
             </div>
             {/* <div className="footer_link">
@@ -218,7 +187,10 @@ const Footer = () => {
       {/* SUBFOOTER SECTION */}
       <section className="py-4 bg-[#F6F5F8] md:px-[40px] px-[20px]">
         <div className="w-full h-[1px] bg-[#F6F5F8]"></div>
-        <div className="flex items-center justify-center pt-4">
+        <div className="flex flex-col items-center justify-center pt-4">
+          <p>
+            powered by <a className="underline text-blue-500" target="_blank" href="https://netreach.uk">netreach.uk</a>
+          </p>
           <p className="text-center text-black font-normal font-primary text-[14px]">
             Copyright © All Right Reserved. Rimas Store Ltd 2024
           </p>

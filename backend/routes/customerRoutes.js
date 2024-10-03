@@ -16,6 +16,7 @@ router.get("/products/:id", productController.getProductById);
 router.post("/address/new", authMiddleware('customer'), customerController.addAddress);
 router.get("/profile", authMiddleware('customer'), customerController.customerProfile);
 router.get("/verify", authMiddleware('customer'), customerController.validateCustomerToken);
+router.post("/reset", authMiddleware('customer_auth'), customerController.updatePassword);
 
 
 module.exports = router;

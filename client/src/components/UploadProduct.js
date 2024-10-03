@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import AdminSideBar from './AdminSideBar';
 import { MdOutlineFileUpload } from "react-icons/md";
 import AdminSideBarMobile from './AdminSideBarMobile';
+import UploadImages from './UploadImages';
+import { useAlert } from '../context/AlertContext'; // import the useAlert hook
+
 
 const UploadProduct = () => {
   const [productData, setProductData] = useState({
@@ -16,6 +19,7 @@ const UploadProduct = () => {
     stock: '',
   });
 
+  const {showAlert} = useAlert();
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [categoriesByType, setCategoriesByType] = useState({});
@@ -153,8 +157,9 @@ const UploadProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    if (!croppedImage) {
-      alert('Please crop and upload an image first');
+    if (!productData.images) {
+      showAlert('Please upload an image first', 'danger')
+      // alert('Please upload an image first');
       return;
     }
   
@@ -180,15 +185,40 @@ const UploadProduct = () => {
     const productDetails = {
       ...productData,
       name: generatedName,
-      imageUrl: croppedImage,
+      // imageUrl: croppedImage,
       categories: selectedCategories, // Add selected categories to the product details
       product_type_id: prod_type,
     };
-  
+
+    // create formdata object to be passed to server
+    const formData = new FormData();
+    formData.append('name', productData.name);
+    formData.append('description', productData.description);
+    formData.append('price', productData.price);
+    formData.append('weight', productData.weight);
+    formData.append('stock', productData.stock);
+    console.log('Categories:')
+    console.log(selectedCategories)
+    formData.append('categories', selectedCategories);
+    formData.append('product_type_id', productData.product_type_id);
+
+
+    // Append multiple files
+    productData.images.forEach((cropObject, index) => {
+      console.log(cropObject);
+      const file = new File(
+        [cropObject.file],
+        cropObject.fileName,
+        { type: `image/${cropObject.fileExtension}` }
+      );
+      formData.append('files', file);
+    });
+      
+
     try {
-      const response = await axios.post('/api/admin/saveProduct', productDetails, {
+      const response = await axios.post('/api/admin/saveProduct', formData, {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
@@ -199,6 +229,13 @@ const UploadProduct = () => {
       console.error('Error saving product:', error);
       alert('Failed to save product.');
     }
+  };
+
+  const handleImagesChange = (images) => {
+    
+    setProductData({ ...productData, images });
+    console.log('below is output from handleImagesChange()')
+    console.log(productData.images)
   };
   
   
@@ -368,7 +405,7 @@ const UploadProduct = () => {
               />
             </div>
 
-            <div className='border-2'>
+            {/* <div className='border-2'>
               <input
                 type="file"
                 style={{ display: 'none' }} 
@@ -381,10 +418,10 @@ const UploadProduct = () => {
                   <MdOutlineFileUpload className='m-auto text-[40px] text-gray-600'/>
                    <label className="block mb-2 text-sm font-medium hover:cursor-pointer">Upload Image</label>
                 </div>
-            </div>
+            </div> */}
 
             {/* Popup cropper in the center of the screen */}
-            {imageSrc && (
+            {/* {imageSrc && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="relative bg-white p-6 pt-[55px] x-6 max-w-[500px] rounded-lg shadow-lg w-3/4 h-4/5">
                   <button
@@ -413,14 +450,17 @@ const UploadProduct = () => {
                   </button>
                 </div>
               </div>
-            )}
+            )} */}
 
-            {croppedImage && (
+            {/* {croppedImage && (
               <div className="mt-4">
                 <p className="mb-2 text-sm font-medium">Uploaded Image Preview:</p>
                 <img src={croppedImage} alt="Uploaded Image" className="w-full h-auto rounded-md shadow-md" />
               </div>
-            )}
+            )} */}
+
+            <UploadImages onImagesChange={handleImagesChange} />
+
 
             <button
               type="submit"

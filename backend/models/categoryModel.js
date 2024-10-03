@@ -188,8 +188,15 @@ const deleteSelectedProductsInCategory = (db, categoryID, productIDs, callback)=
 
 const setProductCategories = (db, productId, categoryIds, callback) => {
 
+      if (typeof categoryIds === 'string') {
+        categoryIds = categoryIds.split(',').map(Number); // Convert to an array of numbers
+      }
+
       // Prepare an array to store the SQL values for inserting new categories
       const values = [];
+
+      console.log('Category Ids Below:')
+      console.log(categoryIds);
 
       // Construct the values array for each categoryId
       categoryIds.forEach((categoryId) => {
@@ -198,7 +205,7 @@ const setProductCategories = (db, productId, categoryIds, callback) => {
 
       // Create the SQL query with placeholders for each category
       const placeholders = categoryIds.map(() => "(?, ?)").join(", ");
-      const insertProductCategoriesQuery = `
+      const query = `
         INSERT INTO product_category (category_id, product_id) 
         VALUES ${placeholders};
       `;

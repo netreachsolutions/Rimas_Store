@@ -1,9 +1,10 @@
 // services/authService.js
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { findCustomerByEmail, createCustomer, generateOTP, retrieveOTP } = require("../models/customerModel");
+const { findCustomerByEmail, createCustomer, generateOTP, retrieveOTP, resetPassword } = require("../models/customerModel");
 const { resolve } = require("path");
 const { reject } = require("bcrypt/promises");
+const { type } = require("os");
 
 class AuthService {
   static async registerCustomer(db, userData) {
@@ -29,6 +30,17 @@ class AuthService {
     })
   }
 
+  static async resetCustomerPassword(customerId, password) {
+    const passwordHash = await bcrypt.hash(password, 10);
+    return new Promise((resolve, reject) => {
+      resetPassword(customerId, passwordHash, async (err, result) => {
+        if (err) return reject(err);
+        resolve('success')
+      })
+    }); 
+
+  }
+
   static async verifyOTP(db, customerId, otp) {
     return new Promise((resolve, reject) => {
       retrieveOTP(db, customerId, async (err, result) => {
@@ -36,18 +48,18 @@ class AuthService {
         if (!result || result.length === 0) return reject(new Error('OTP not found'));
 
         const otp_object = result[0];
-        const currentTime = new Date(new Date().toISOString());  // Ensure current time is in UTC
+        const currentTime = new Date();  // Ensure current time is in UTC
         const otpTimestamp = new Date(otp_object.updated_at);
 
         // Calculate the time difference in minutes
-        const timeDifference = (currentTime - otpTimestamp) / (1000 * 60); // Difference in minutes
+        const timeDifference = (currentTime - otpTimestamp)/60000; // Difference in minutes
         
         console.log(otp_object)
         console.log(currentTime)
         console.log(otpTimestamp)
-        console.log(timeDifference-60)
+        console.log(timeDifference)
         // Check if the OTP is within the 2-minute window
-        if ((timeDifference-60) > 2) {
+        if (timeDifference > 2) {
           console.log('expired')
           return reject('expired');
         }
@@ -58,7 +70,7 @@ class AuthService {
           return reject('invalid');
         }
 
-        const accessToken = jwt.sign({ customerId, role: 'customer_auth' }, process.env.JWT_SECRET, { expiresIn: '10min' });
+        const accessToken = jwt.sign({ customerId, role: 'customer_auth', type: 'password' }, process.env.JWT_SECRET, { expiresIn: '10min' });
 
         resolve({accessToken});
       }); 

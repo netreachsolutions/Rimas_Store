@@ -117,7 +117,7 @@ const Products = () => {
           </tbody>
         </table>
       </div>
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-5 m-auto bg-[#F6F5F8] px-[10px] py-[30px] pr-[20px] mb-[40px] ml-64">
+      {/* <div className="grid grid-cols-3 md:grid-cols-4 gap-5 m-auto bg-[#F6F5F8] px-[10px] py-[30px] pr-[20px] mb-[40px] ml-64">
         {filteredProducts.map((product, index) => (
           <div key={index} className="flex flex-col">
             <img
@@ -131,7 +131,7 @@ const Products = () => {
                 {product.name}
               </h4>
               <p className="font-primary font-medium text-red ">
-                ${product.price}
+                £{product.price}
               </p>
               <Link to={`/checkout`} state={{ product: product }}>
                 <button className="uppercase font-primary w-full block py-2 font-medium mt-3  text-white bg-black transition duration-300 hover:bg-red hover:scale-105">
@@ -144,7 +144,7 @@ const Products = () => {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </>
   );
 };

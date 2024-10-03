@@ -292,7 +292,7 @@ const ProductSearch = (props) => {
         <div className="md:ml-64">
         {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 m-auto  px-[10px] py-[0px]  mb-[0px]"> */}
 
-        <div
+        {/* <div
           className={`grid m-auto px-[0px] py-[0px] mb-[0px] gap-0`}
           style={{
             gridTemplateColumns: `repeat(${Math.min(featured[selectedFeature]?.items.length, 4)}, 1fr)`,
@@ -317,7 +317,7 @@ const ProductSearch = (props) => {
               </h1>
             </button>
           ))}
-        </div>
+        </div> */}
         {/* <div className='categories flex gap-1'>
           {selectedCategories.map((category, index) => (
             <div className='bg-gray-100 px-3 py-2 flex gap-1 items-center'>
@@ -330,16 +330,21 @@ const ProductSearch = (props) => {
           ))}
         </div> */}
         <div className="font-light w-full flex px-1 pt-3 justify-between items-end">
-        <div className='categories flex gap-1'>
+        <div className='categories grid grid-cols-4 gap-1'>
           {selectedCategories.map((category, index) => (
-            <div className='bg-gray-100 px-3 py-2 flex gap-1 font-normal items-center'>
-              {category.category_name}
+            <div className='bg-gray-100 px-3 py-2 flex gap-1 font-normal items-center sm:text-[18px] text-[15px]'>
+              <span>{category.category_name}</span>
               <RxCross2  
                 className='hover:cursor-pointer mt-[3px]'
                 onClick={() => handleRemoveCategory(category)} // Add onClick handler to remove the category
                 />
             </div>
           ))}
+
+        </div>
+      </div>
+      <div className='flex justify-between items-end sm:justify-end'>
+          <div className='px-2 sm:hidden'>{products.length} items</div>
           <div>
             <span className="hidden sm:block font-light">{`${products.length} products`}</span>
             <div className='sm:hidden flex items-end bg-gray-50 rounded px-2 py-1 border justify-between gap-7 font-'
@@ -348,7 +353,6 @@ const ProductSearch = (props) => {
             </div>
           </div>
 
-        </div>
       </div>
       <div className='h-[1px] bg-gray-300 w-full mt-3 mb-0'/>
 
@@ -359,18 +363,18 @@ const ProductSearch = (props) => {
           ) : error ? (
             <div className="mt-4 text-red-500">{error}</div>
           ) : (
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link to={`/products/${product.product_id}`} key={product.product_id}>
                   <div className="border p-4 rounded-md shadow hover:shadow-lg transition-shadow">
                     <img
                       src={product.image_url || 'placeholder-image-url'}
                       alt={product.name}
-                      className="w-full h-40 object-cover mb-4"
+                      className="w-full h-[300px] object-cover mb-4"
                     />
                     <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
                     <p className="text-gray-600 mb-2">{product.description}</p>
-                    <p className="text-gray-800 font-bold">${product.price}</p>
+                    <p className="text-gray-800 font-bold">£{product.price}</p>
                   </div>
                 </Link>
               ))}

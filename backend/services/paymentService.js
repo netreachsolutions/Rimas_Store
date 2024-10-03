@@ -12,6 +12,34 @@ class PaymentService {
    * @param {string} currency - The currency in which the payment is made (e.g., 'gbp').
    * @returns {Promise<Object>} - Returns the Stripe client secret and any next actions.
    */
+
+  static async calculateCartTotal(customerId) { 
+    try {
+      const cartItems = await CartService.viewCart(db, customerId);
+      // Calculate the total amount
+      let itemsAmount = 0;
+      let netWeight = 0;
+      cartItems.forEach(item => {
+        itemsAmount += item.price*100 * item.quantity; // Assuming each item has price and quantity fields
+        netWeight += item.product_weight;
+      });
+
+      let shippingCost =0;
+      if (netWeight < 2000) {
+        shippingCost = 299;
+      } else {
+        shippingCost = 499;
+      }
+
+      const totalAmount = itemsAmount + shippingCost;
+
+      return totalAmount;
+    } catch (error) {
+      console.error('Error creating payment intent:', error);
+      throw new Error(error.message);
+    }
+  }
+
   static async createPaymentIntentFromCart(db, customerId, paymentMethodType, currency) {
     try {
       const cartItems = await CartService.viewCart(db, customerId);

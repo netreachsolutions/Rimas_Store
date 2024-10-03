@@ -26,5 +26,9 @@ module.exports = (requiredRole) => (req, res, next) => {
     req.tokenAssets = tokenAssets; // Attach customer to the request
   } 
 
+  if (tokenAssets.role == 'customer_auth' ) {
+    req.tokenAssets = tokenAssets; // Attach type to the request
+  }
+
   next();
 };

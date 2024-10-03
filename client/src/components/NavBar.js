@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { IoIosCart } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import imageConfig from "../config/imageConfig";
 import SideMenu from "./SideMenu"; // Import the SideMenu component
 
 const NavBar = (props) => {
+  const navigate = useNavigate();
   const [currency, setCurrency] = useState("USD");
   const [bgColor, setBgColor] = useState("transparent");
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false); // State to control the side menu
@@ -50,7 +51,9 @@ const NavBar = (props) => {
           <Link to={`/products/search`}>Search</Link>
         </section>
 
-        <section className="section_middle absolute left-1/2 transform -translate-x-1/2 flex items-center text-[20px] sm:text-[40px]">
+        <section className="section_middle absolute left-1/2 hover:cursor-pointer transform -translate-x-1/2 flex items-center text-[20px] sm:text-[40px]"
+          onClick={() => navigate('/')}
+        >
           <h1 className="m-0">RIMAS</h1>
           <img
             className="sm:h-[60px] h-[30px] md:mx-2 mx-[2px]"
@@ -61,8 +64,9 @@ const NavBar = (props) => {
         </section>
 
         <section className="section_right flex items-center text-gray-700 md:gap-5 gap-3">
-          <Link to={`/cart`}>
+          <Link to={`/cart`} className="flex">
             <IoIosCart className="sm:text-[33px] text-[25px]  transition duration-300 hover:text-red hover:scale-105" />
+            <div className="h-5 flex font-medium items-center justify-center w-5 rounded-[50px] bg-red-400 text-white">0</div>
           </Link>
           <Link to={`/profile`}>
             <FaUser className="sm:text-[30px] text-[23px] transition duration-300 hover:text-red hover:scale-105" />
@@ -76,7 +80,7 @@ const NavBar = (props) => {
             <select
               value={currency}
               onChange={handleCurrencyChange}
-              className="appearance-none text-black bg-white pr-auto px-1"
+              className=" text-black bg-white pr-auto px-1"
             >
               {currencies.map((cur) => (
                 <option key={cur.code} value={cur.code}>
@@ -84,7 +88,7 @@ const NavBar = (props) => {
                 </option>
               ))}
             </select>
-            <IoMdArrowDropdown className="text-black text-xl ml-1" />
+            {/* <IoMdArrowDropdown className="text-black text-xl ml-1" /> */}
           </div>
         </section>
       </nav>

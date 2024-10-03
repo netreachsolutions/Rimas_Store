@@ -7,6 +7,10 @@ const ResetPassword = () => {
   const [step, setStep] = useState(1); // Step 1: Enter email, Step 2: Enter OTP
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [password, setPassword] = useState('');
+  const [verifyPass, setVerifyPass] = useState('');
+  const [isDisabled, setIsDisabled] = useState(false);
+
 
   // Handle sending OTP
   const sendOTP = async () => {
@@ -20,12 +24,46 @@ const ResetPassword = () => {
     }
   };
 
+  const handlePassChange = (e) => {
+    setPassword(e.target.value)
+  };
+
+  const handleVerifyPassChange = (e) => {
+    setVerifyPass(e.target.value)
+  };
+
+  const handleReset = async (e) => {
+    if (password != verifyPass) {
+      setMessage('')
+      setError("passwords don't match")
+    } else {
+      const token = localStorage.getItem('otp-token');
+      try {
+        const response = await axios.post('/api/users/reset', 
+          {email: email, pass: password},
+           {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log(response)
+        setError(null);
+        setMessage('password reset sucessfully');
+        setIsDisabled(true);
+        
+      } catch (error) {
+        
+        setError('error updating password')
+      }
+    }
+  };
+
   // Handle OTP verification
   const verifyOTP = async () => {
     try {
       const response = await axios.post('/api/users/otp/verify', { email, otp });
+      localStorage.setItem('otp-token', response.data.accessToken);
       setMessage('OTP verified, you can now reset your password');
       // You can redirect to the password reset page here.
+      setStep(3);
     } catch (err) {
       setError('Invalid OTP');
       console.error(err);
@@ -68,9 +106,47 @@ const ResetPassword = () => {
             type="text"
             placeholder="Enter OTP"
             value={otp}
+            className="w-full px-3 py-2 border rounded"
+
             onChange={(e) => setOtp(e.target.value)}
           />
-          <button onClick={verifyOTP}>Verify OTP</button>
+          <button 
+            onClick={verifyOTP}
+            className="w-full py-2 px-4 font-semibold text-white bg-black rounded-md hover:bg-gray-700 disabled:hover:bg-gray-300 disabled:bg-gray-300"
+            >Verify OTP</button>
+          {message && <p>{message}</p>}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+        </div>
+      )}
+            {step === 3 && (
+        <div>
+          <h2>Reset Password</h2>
+          <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={password}
+          onChange={handlePassChange}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          name="verify-password"
+          placeholder="Re-type Password"
+          value={verifyPass}
+          onChange={handleVerifyPassChange}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
+        <button
+          className="w-full py-2 px-4 font-semibold text-white bg-black rounded-md hover:bg-gray-700 disabled:hover:bg-gray-300 disabled:bg-gray-300"
+          onClick={handleReset}
+          disabled={isDisabled}
+        >
+          Reset
+        </button>
+          {/* <button onClick={verifyOTP}>Verify OTP</button> */}
           {message && <p>{message}</p>}
           {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>

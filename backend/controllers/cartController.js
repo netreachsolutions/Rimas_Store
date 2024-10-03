@@ -18,7 +18,7 @@ exports.viewCart = async (req, res) => {
   try {
     const customerId = req.tokenAssets.customerId;
     const cartItems = await cartService.viewCart(db, customerId);
-    const price = cartService.calcultatePrice(cartItems);
+    const price = cartService.calculatePrice(cartItems);
     res.json({ cartItems, price });
   } catch (error) {
     console.error('Error viewing cart:', error);
@@ -39,6 +39,7 @@ exports.updateCartItem = async (req, res) => {
 };
 
 exports.removeCartItem = async (req, res) => {
+  console.log('attemting cart removal')
   try {
     const { cartItemId } = req.body;
     await cartService.removeCartItem(db, cartItemId);

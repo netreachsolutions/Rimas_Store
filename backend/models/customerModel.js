@@ -14,6 +14,19 @@ const createCustomer = (db, customerData, callback) => {
       callback(null, results);              // Pass results to callback
     });
   };
+
+  const resetPassword = (customerId, password_hash, callback) => {
+    const query = `
+      UPDATE customers 
+      SET password_hash = ? 
+      WHERE customer_id = ?
+    `;
+    queryDatabase(query, [password_hash, customerId], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
+  };
+  
   
 const findCustomerByEmail = (db, email, callback) => {
     const query = 'SELECT * FROM customers WHERE email = ?';
@@ -40,7 +53,7 @@ const generateOTP = (db, id, code_hash, callback) => {
   const query = `
     INSERT INTO otp (customer_id, code_hash, updated_at)
     VALUES (?, ?, ?)
-    ON DUPLICATE KEY UPDATE code_hash = VALUES(code_hash)
+    ON DUPLICATE KEY UPDATE code_hash = VALUES(code_hash), updated_at = VALUES(updated_at)
   `;
   // db.query(query, [id, code_hash, currentTime], callback);
   queryDatabase(query, [id, code_hash, currentTime], (err, results) => {
@@ -67,6 +80,7 @@ const retrieveOTP = (db, id, callback) => {
     findCustomerByEmail,
     findCustomerById,
     generateOTP,
-    retrieveOTP
+    retrieveOTP,
+    resetPassword
   };
   

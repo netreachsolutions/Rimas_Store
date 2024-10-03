@@ -3,9 +3,11 @@ import NavBar from "./NavBar"
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import Spinner from './Spinner';
+import NewAddress from './NewAddress';
 
 const Profile = () => {
   const [profileData, setProfileData] = useState(null);
+  const [backdropPosition, setBackdropPosition] = useState('hidden');
   const [newAddress, setNewAddress] = useState({
     first_line: '',
     second_line: '',
@@ -82,8 +84,42 @@ const Profile = () => {
     return <div className="text-center text-lg font-semibold mt-8"><Spinner/></div>;
   }
 
+  const showAddressForm = () => {
+    setBackdropPosition('fixed')
+  }
+
+  const handleAddressAdded = async () => {
+    setBackdropPosition('hidden');
+    const token = localStorage.getItem('token');
+    try {
+      // Refresh profile data after adding address
+      const updatedProfile = await axios.get('api/users/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProfileData(updatedProfile.data);
+    } catch (error) {
+      console.error('Error refreshing profile data:', error);
+    }
+  };
+
   return (
-    <><NavBar />
+    <>
+      <div 
+        className={`${backdropPosition} z-10 inset-0 bg-black opacity-50 w-full`}
+        onClick={() => setBackdropPosition('hidden')}
+      />
+      {( backdropPosition == 'fixed' ? (
+        <NewAddress 
+          className={`z-[100]`}
+          onAddressAdded={handleAddressAdded} // Pass the callback to hide form on successful submission
+        />
+
+      ) : null
+        
+
+      )}
+
+    <NavBar />
     <div className="container mx-auto my-10 p-6 bg-white shadow-md rounded-lg">
       
       <h2 className="text-3xl font-bold mb-6 text-center">Profile</h2>
@@ -110,7 +146,7 @@ const Profile = () => {
       </div>
 
       <div className="mt-8">
-        <h3 className="text-2xl font-semibold mb-4">Add New Address</h3>
+        {/* <h3 className="text-2xl font-semibold mb-4">Add New Address</h3>
         {error && <p className="text-red-600 mb-4">{error}</p>}
         <form onSubmit={handleAddAddress} className="space-y-4">
           <input
@@ -173,7 +209,13 @@ const Profile = () => {
           >
             Add Address
           </button>
-        </form>
+        </form> */}
+        <button
+          className={`bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition duration-300 `}
+          onClick={showAddressForm}
+        >
+          Add Address
+        </button>
       </div>
     </div></>
     

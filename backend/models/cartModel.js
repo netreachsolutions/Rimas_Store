@@ -32,7 +32,9 @@ const findCartItemsByCartId = (db, cartId, callback) => {
     SELECT 
       cart_items.*, 
       products.name, 
-      product_image.image_url 
+      product_image.image_url, 
+      products.product_id,
+      products.product_weight
     FROM 
       cart_items 
     JOIN 

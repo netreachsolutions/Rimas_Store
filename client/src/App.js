@@ -20,11 +20,15 @@ import AdminHome from "./components/AdminHome";
 import Categories from "./components/Categories";
 import ProductSearch from "./components/ProductSearch";
 import ResetPassword from "./components/ResetPassword";
+import Brands from "./components/Brands";
+import { AlertProvider } from './context/AlertContext';
 
 function App() {
   return (
+    
     <div className="App">
       <BrowserRouter>
+      <AlertProvider>
         {/* public routes */}
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -34,6 +38,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/products/search" element={<ProductSearch/>} />
           <Route path="/reset" element={<ResetPassword />} />
+          <Route path="/brands" element={<Brands/>} />
           {/* <Route path="/profile" element={<Profile/>} /> */}
 
           {/* protected routes */}
@@ -54,6 +59,7 @@ function App() {
             <Route path="/admin" element={<Orders />} />
           </Route>
         </Routes>
+    </AlertProvider>
       </BrowserRouter>
     </div>
   );

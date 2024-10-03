@@ -3,11 +3,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from '../api/axios';
 import NavBar from './NavBar';
 import Spinner from './Spinner';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/autoplay";
 
 const ProductDetails = () => {
   const { id } = useParams();  // Get the product ID from the URL
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [images, setImages] = useState([]);
+  const [imageIndex, setImageIndex] = useState(0);
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);  // State for quantity
   const navigate = useNavigate();
@@ -17,6 +24,9 @@ const ProductDetails = () => {
       try {
         const response = await axios.get(`/api/users/products/${id}`);
         setProduct(response.data.product);
+        setImages(response.data.product.images);
+        console.log(response.data.product);
+        console.log(response.data.product.images);
         setLoading(false);
       } catch (error) {
         setError('Error fetching product details');
@@ -84,22 +94,63 @@ const ProductDetails = () => {
   return (
     <>
     <NavBar/>
-    <div className="product-details container mx-auto my-8 p-4">
+    <div className="product-details container mx-auto my-8 p-4 max-w-[1200px]">
       <div className="flex flex-wrap">
-        <div className="w-full md:w-1/2">
+        <div className="w-full md:w-1/2 flex flex-col md:flex-row gap-2">
           <img
-            src={product.image_url}
-            alt={product.name}
-            className="w-full h-auto"
-          />
+              src={images[imageIndex].image_url}
+              alt={product.name}
+              className="flex-grow h-auto shadow-xl md:hidden block"
+            />
+          <div className='flex flex-row md:flex-col h-[120px] md:h-auto gap-2 md:w-[120px] '>
+            {images.map((img, index) => (
+              <div className='rounded-lg'>
+                <img 
+                  className="m-auto h-full w-full  bg-gray-100 flex flex-col items-center justify-center border-2 border-solid border-gray-300 hover:cursor-pointer"
+                  src={img.image_url}
+                  onClick={() => setImageIndex(index)}
+                />
+              </div>
+            ))}
+            <div className='bg-gray-100 h-full'/>
+
+          </div>
+            {/* <Swiper
+              modules={[Autoplay, Navigation]}
+              spaceBetween={20}
+              slidesPerView={1}
+              navigation
+              autoplay={{ delay: 2000, disableOnInteraction: false }}
+              loop={true}
+              className=" h-full w-full !md:hidden bg-black-500"
+            >
+            {images.map((img, index) => (
+                                  <SwiperSlide key={index}>
+
+              <div className='rounded-lg'>
+                <img 
+                  className="m-auto h-full w-full  bg-gray-100 flex flex-col items-center justify-center border-2 border-solid border-gray-300 hover:cursor-pointer"
+                  src={img.image_url}
+                  onClick={() => setImageIndex(index)}
+                />
+              </div>
+              </SwiperSlide>
+
+            ))}
+          </Swiper> */}
+            <img
+              src={images[imageIndex].image_url}
+              alt={product.name}
+              className="flex-grow h-auto shadow-xl hidden md:block"
+            />
         </div>
-        <div className="w-full md:w-1/2 p-4 flex flex-col">
+        <div className="w-full md:w-1/2 p-4 flex flex-col items-start md:items-center flex-col">
           <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
           <p className="text-lg text-gray-700 mb-4">{product.description}</p>
           <p className="text-2xl font-bold mb-4">${product.price}</p>
           <p className="text-lg font-medium text-gray-600">Stock: {product.stock}</p>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex w-full items-center space-x-4">
             <label htmlFor="quantity" className="text-lg font-medium">Quantity:</label>
             <input 
               type="number" 
@@ -109,11 +160,11 @@ const ProductDetails = () => {
               max={product.stock} 
               value={quantity} 
               onChange={handleQuantityChange} 
-              className="border rounded px-2 py-1 w-20"
+              className="border rounded px-2 py-1 flex-grow bg-gray-100"
             />
           </div>
 
-          <button  onClick={handleAddToCart} className="bg-black text-white py-2 px-4 mt-4 hover:bg-red transition duration-300">
+          <button  onClick={handleAddToCart} className="bg-green-600 w-full py-3   text-white py-2 px-4 mt-4 hover:bg-red transition duration-300">
             Add to Cart
           </button>
         </div>
