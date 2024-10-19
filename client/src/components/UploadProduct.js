@@ -31,7 +31,7 @@ const UploadProduct = () => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const fileInputRef = useRef(null); // Add a ref to the file input field
   const token = localStorage.getItem('token');
-  const [isThobe, setIsThobe] = useState(false);
+  const [isThobe, setIsThobe] = useState(true);
 
   const [gender, setGender] = useState(null);
   const [size, setSize] = useState(null);
@@ -53,6 +53,17 @@ const UploadProduct = () => {
 
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (isThobe && categoriesByType['1']) {
+      const womenCategory = categoriesByType['1'].items.find(
+        (category) => category.category_name === 'Women'
+      );
+      if (womenCategory) {
+        setGender(womenCategory); // Automatically set gender to 'Women'
+      }
+    }
+  }, [isThobe, categoriesByType]);
 
 
   const toggleThobe = () => {
@@ -192,13 +203,13 @@ const UploadProduct = () => {
 
     // create formdata object to be passed to server
     const formData = new FormData();
-    formData.append('name', productData.name);
+    formData.append('name', generatedName);
     formData.append('description', productData.description);
     formData.append('price', productData.price);
     formData.append('weight', productData.weight);
     formData.append('stock', productData.stock);
-    console.log('Categories:')
-    console.log(selectedCategories)
+    console.log('Categories:');
+    console.log(selectedCategories);
     formData.append('categories', selectedCategories);
     formData.append('product_type_id', productData.product_type_id);
 
@@ -393,11 +404,11 @@ const UploadProduct = () => {
 
             <div>
               <label className="block mb-2 text```javascript
-                font-medium">Weight (Kg)</label>
+                font-medium">Weight (grams)</label>
               <input
                 type="number"
                 name="weight"
-                placeholder="Weight in Kgs"
+                placeholder="Weight in grams"
                 value={productData.weight}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

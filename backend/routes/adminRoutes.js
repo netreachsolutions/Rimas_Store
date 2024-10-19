@@ -11,5 +11,6 @@ router.post("/login", adminController.loginAdmin);
 // router.post("/saveProduct", authMiddleware('admin'), productController.saveProduct);
 router.post('/saveProduct', authMiddleware('admin'), upload.array('files', 10), productController.saveProduct); // `files` is the field name for the files
 router.get("/verify", authMiddleware('admin'), adminController.validateAdminToken);
+router.post("/products", authMiddleware('admin'), adminController.getAllProducts);
 
 module.exports = router;

@@ -7,6 +7,7 @@ const paymentService = require('../services/paymentService');
 const customerService = require('../services/customerService');
 const notificationService = require('../services/notificationService');
 const {sendEmail, sendSMS} = require('../config/emailConfig');
+const ProductService = require('../services/productService');
 
 exports.createOrder = async (req, res) => {
     const { payment_intent, address_id, currency } = req.body;
@@ -33,13 +34,14 @@ exports.createOrder = async (req, res) => {
         // Step 4: Create Order in the database (transaction)
         const orderId = await orderService.createOrder(db, customerId, address_id, cartItems, finalTotalAmount, shippingCost);
 
+
         // Step 5: Mark payment as completed and associate with the order
         await paymentService.recordPayment(db, payment_intent, orderId, finalTotalAmount, currency);
 
         // Step 6: Clear the cart after order creation
         await CartService.clearCart(db, customerId);
 
-        
+        await ProductService.updateStock(cartItems);
         // Step 7: Send email confirmation to user 
         await notificationService.sendOrderProcessingNotification(db, orderId)
         // const customerProfile = await customerService.getCustomerProfile(db, customerId);

@@ -34,7 +34,8 @@ const findCartItemsByCartId = (db, cartId, callback) => {
       products.name, 
       product_image.image_url, 
       products.product_id,
-      products.product_weight
+      products.product_weight,
+      products.stock
     FROM 
       cart_items 
     JOIN 
@@ -56,7 +57,7 @@ const findCartItemsByCartId = (db, cartId, callback) => {
 };
 
 
-const updateCartItemById = (db, cartItemId, quantity, callback) => {
+const updateCartItemById = (cartItemId, quantity, callback) => {
   const query = 'UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?';
   // db.query(query, [quantity, cartItemId], callback);
   queryDatabase(query, [quantity, cartItemId], (err, results) => {

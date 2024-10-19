@@ -36,6 +36,19 @@ const createProduct = (db, productData, callback) => {
     });
   };
 
+  const findProductSizes = (productId, callback) => {
+    const query = `
+    SELECT pc.*, c.*
+    FROM product_category pc
+    JOIN categories c ON pc.category_id = c.category_id
+    WHERE c.category_group_id = 2
+    AND pc.product_id = ?;
+    `
+    queryDatabase(query, [productId], (err, results) => {
+      callback(null, results)
+    })
+  }
+
   const findProductImages = (productId, callback) => {
     const query = `
     SELECT product_image.image_url, product_image.priority
@@ -194,10 +207,33 @@ const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPri
     if (err) return callback(err, null);  // Pass error to callback
     callback(null, results);              // Pass results to callback
   });
+
+  
 };
 
 
 
+const updateProductStock = (products, callback) => {
+  const queries = products.map(() => `UPDATE products SET stock = stock - ? WHERE product_id = ? AND stock >= ?;`).join(' ');
+  const queryParams = [];
+
+  // Prepare query parameters for each product (quantity and productId)
+  products.forEach(product => {
+    queryParams.push(product.quantity, product.product_id, product.quantity);
+  });
+
+  queryDatabase(queries, queryParams, (err, results) => {
+    if (err) return callback(err, null);
+
+    // Check if the number of affected rows matches the number of products being updated
+    const totalAffectedRows = results.affectedRows;
+    if (totalAffectedRows < products.length) {
+      return callback(new Error('Insufficient stock for one or more products'), null);
+    }
+
+    callback(null, results);
+  });
+};
 
 
   module.exports = {
@@ -210,6 +246,8 @@ const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPri
     findProductByIdWithImages,
     getProductsByCategoryId,
     getProductsByCategoryIdsAndPriceRange,
-    findProductImages
+    findProductImages,
+    findProductSizes,
+    updateProductStock
   };
   

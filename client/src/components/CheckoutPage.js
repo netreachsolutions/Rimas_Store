@@ -6,23 +6,29 @@ import CheckoutForm from "./CheckoutForm";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import NewAddress from "./NewAddress";
 import { useNavigate } from "react-router-dom";
+import { useAlert } from "../context/AlertContext";
+import AcceptedPaymentMethods from "./AcceptedPaymentMethods";
 
 const stripePromise = loadStripe('pk_test_51PApsjGBaVIQ3lGmE2o5Glfe1tOUor4CJiHmfLb2yxLUqXyzErTGruVfE2g2RsmicoxnETNdohTlN8b94QoAIghE00uMMRRfwB');
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const {showAlert} = useAlert();
   const [backdropPosition, setBackdropPosition] = useState('hidden');
   const [cartItems, setCartItems] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
-  const [deliveryDetails, setDeliveryDetails] = useState({
-    address_id: '',
-  });
+  // const [deliveryDetails, setDeliveryDetails] = useState({
+  //   address_id: '',
+  // });
+    const [deliveryDetails, setDeliveryDetails] = useState(null)
   const [cartId, setCartId] = useState(null);
   const [totalAmount, setTotalAmount] = useState(null);
   const [itemsAmount, setItemsAmount] = useState(null);
   const [deliveryAmount, setDeliveryAmount] = useState(null);
 
-  const [clientSecret, setClientSecret] = useState('');
+  const [paymentLoading, setPaymentLoading] = useState(true); // Add loading state
+  const [clientSecret, setClientSecret] = useState("");
+  const [paypalOrderId, setPaypalOrderId] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(''); // Added to track payment method choice
   
@@ -56,6 +62,14 @@ const CheckoutPage = () => {
     fetchAddressesAndCart();
   }, []);
 
+  const resetDelivery = () => {
+    setDeliveryDetails((prev) => ({
+      ...prev,
+      address_id: null,
+    }))
+    setCurrentStep(1)
+  }
+
   function trimString(str) {
     const maxChars = 12;
     return str.length > maxChars ? str.substring(0, maxChars) + ".." : str;
@@ -67,11 +81,20 @@ const CheckoutPage = () => {
 
   const handleDeliverySubmit = async (e) => {
     e.preventDefault();
-    handleNextStep(); // Move to the payment selection step
+    if (deliveryDetails == null || deliveryDetails.addresses.length == 0 || !deliveryDetails?.address_id) {
+      showAlert("Please Select An Address", 'warning')
+    } else {
+
+      handleNextStep(); // Move to the payment selection step
+
+    }
   };
 
   const handlePaymentSelectionSubmit = async () => {
-    if (paymentMethod === 'card') {
+    if (paymentMethod == '') {
+      showAlert('Please select Payment Method', 'warning')
+    }
+    else if (paymentMethod === 'card') {
       // If card is selected, create Stripe payment intent
       const token = localStorage.getItem('token');
       try {
@@ -118,7 +141,7 @@ const CheckoutPage = () => {
     <div>
     { (currentStep == 1 ? (
           <form onSubmit={handleDeliverySubmit}>
-            {deliveryDetails.addresses &&
+            {deliveryDetails?.addresses &&
               deliveryDetails.addresses.map((address) => (
                 <div key={address.address_id} className="mb-2">
                   <label className="block">
@@ -152,10 +175,10 @@ const CheckoutPage = () => {
       
     ) : (
       <div className="flex gap-5">
-        <div>{deliveryDetails.addresses[0].first_line}, {deliveryDetails.addresses[0].city}, {deliveryDetails.addresses[0].postcode}, {deliveryDetails.addresses[0].country}</div>
+        <div>{deliveryDetails?.addresses[0].first_line}, {deliveryDetails?.addresses[0].city}, {deliveryDetails?.addresses[0].postcode}, {deliveryDetails?.addresses[0].country}</div>
         <button 
           className={`w-max text-blue-500 hover:underline hover:cursor-pointer`}
-          onClick={() => setCurrentStep(1)}
+          onClick={() => resetDelivery()}
         >
           Change
         </button>      
@@ -197,6 +220,80 @@ const CheckoutPage = () => {
       </button>
     </div>
   );
+
+  useEffect(() => {
+    if (paymentMethod === 'card' && clientSecret) {
+      setPaymentLoading(false); // Stop loading when clientSecret is set
+    } else if (paymentMethod === 'paypal' && paypalOrderId) {
+      setPaymentLoading(false); // Stop loading when PayPal order ID is set
+    }
+  }, [clientSecret, paypalOrderId]);
+
+  // const renderPaymentStep = () => {
+
+  //      paymentLoading ? (<div>Loading...</div>) : (
+  //     <div>
+  //       {paymentMethod === 'card' && clientSecret && (
+  //         <Elements stripe={stripePromise} options={{ clientSecret }}>
+  //           <CheckoutForm
+  //             clientSecret={clientSecret}
+  //             deliveryDetails={deliveryDetails}
+  //             cartId={cartId}
+  //             setPaymentSuccess={setPaymentSuccess}
+  //           />
+  //         </Elements>
+  //       )}
+  
+  //       {paymentMethod === 'paypal' && (
+  //         <PayPalScriptProvider
+  //           options={{
+  //             "client-id": "AduDOTDNJSWRqOsSVLRZorTUX0jl071FpQBAtrHu-6Xg8sYnFT2ob1RxSZ54fVSrUlMQPe3WdROjH9Nq", // Replace with your PayPal client ID
+  //             "currency": "USD",
+  //             "intent": "capture"
+  //           }}
+  //         >
+  //           <PayPalButtons
+  //             createOrder={async () => {
+  //               setPaymentLoading(true); // Start loading while creating PayPal order
+  //               const token = localStorage.getItem('token');
+  //               const response = await axios.get(
+  //                 '/api/orders/create-paypal-order',
+  //                 { headers: { Authorization: `Bearer ${token}` } }
+  //               );
+  //               const orderData = response.data;
+  
+  //               if (orderData.id) {
+  //                 setPaypalOrderId(orderData.id); // Set PayPal order ID
+  //                 setPaymentLoading(false); // Stop loading once PayPal order ID is retrieved
+  //                 return orderData.id; // Return the PayPal order ID
+  //               } else {
+  //                 throw new Error('Order ID not found in server response');
+  //               }           
+  //             }}
+  //             onApprove={async (data) => {
+  //               setPaymentLoading(true); // Start loading during approval
+  //               const token = localStorage.getItem('token');
+  //               const response = await axios.post(
+  //                 '/api/orders/confirm-paypal',
+  //                 {                  
+  //                   paypalOrderId: data.orderID, 
+  //                   address_id: deliveryDetails.address_id, 
+  //                   currency: 'USD'
+  //                 },
+  //                 { headers: { Authorization: `Bearer ${token}` } }
+  //               );
+  //               const orderData = response.data; // Access the parsed data directly
+  //               setPaymentSuccess(true);
+  //               setPaymentLoading(false); // Stop loading after payment confirmation
+  //               console.log("PayPal transaction completed", orderData);
+  //             }}
+  //           />
+  //         </PayPalScriptProvider>
+  //       )}
+  //     </div>
+  //   )
+  //   ;
+  // };
 
   const renderPaymentStep = () => (
     <div>
@@ -260,7 +357,7 @@ const CheckoutPage = () => {
       <ul>
         {cartItems.map((item) => (
           <li key={item.cart_item_id}>
-            {item.name} - {item.quantity} x ${item.price.toFixed(2)}
+            {item.name} - {item.quantity} x ${item?.price?.toFixed(2)}
           </li>
         ))}
       </ul>
@@ -410,12 +507,13 @@ const CheckoutPage = () => {
           <div className="justify-between w-full flex my-1">
             <span className="text-[20px]">
               Total
-              <span className="text-[15px]"> (Exluding Delivery)</span>
+              {/* <span className="text-[15px]"> (Exluding Delivery)</span> */}
             </span>
-            <span className="text-[20px]">£{totalAmount}</span>
+            <span className="text-[20px]">£{totalAmount?.toFixed(2)}</span>
 
           </div>
           <div className="h-[1px] w-full bg-gray-300 mb-2"/>
+          <AcceptedPaymentMethods />
 
         </div>
   </div>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom'; // Import Link
+import { FaCheckCircle } from "react-icons/fa";
 import axios from '../api/axios';
 import NavBar from './NavBar';
 import Spinner from './Spinner';
@@ -8,16 +9,25 @@ import { Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/autoplay";
+import { useLogin } from '../context/LoginContext';
+import { useCart } from '../context/CartContext';
+import { useAlert } from '../context/AlertContext';
+import AcceptedPaymentMethods from './AcceptedPaymentMethods';
 
 const ProductDetails = () => {
-  const { id } = useParams();  // Get the product ID from the URL
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [images, setImages] = useState([]);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [error, setError] = useState('');
-  const [quantity, setQuantity] = useState(1);  // State for quantity
+  const { showAlert } = useAlert();
+  const { showLogin } = useLogin();
+  const { id } = useParams(); // Get the product ID from the URL
+  const [ product, setProduct ] = useState(null);
+  const [ loading, setLoading ] = useState(true);
+  const [ images, setImages ] = useState([]);
+  const [ sizes, setSizes ] = useState([]);
+  const [ imageIndex, setImageIndex ] = useState(0);
+  const [ error, setError ] = useState('');
+  const [ quantity, setQuantity ] = useState(1); // State for quantity
+  const [addedToCart, setAddedToCart] = useState(false); // State to track if added to cart
   const navigate = useNavigate();
+  const { fetchCartItems } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -25,6 +35,7 @@ const ProductDetails = () => {
         const response = await axios.get(`/api/users/products/${id}`);
         setProduct(response.data.product);
         setImages(response.data.product.images);
+        setSizes(response.data.product.sizes)
         console.log(response.data.product);
         console.log(response.data.product.images);
         setLoading(false);
@@ -38,12 +49,19 @@ const ProductDetails = () => {
   }, [id]);
 
   const handleQuantityChange = (e) => {
-    const value = parseInt(e.target.value, 10);
+    let value = e
+    // if (e.target.value) {
+    //   value = parseInt(e.target.value, 10);
+
+    // } else {
+    //   value = e
+    // }
 
     // Ensure the value stays within the valid range
     if (value > 0 && value <= product.stock) {
       setQuantity(value);
     } else if (value > product.stock) {
+      showAlert('No More Available Stock', 'warning')
       setQuantity(product.stock);
     } else {
       setQuantity(1);
@@ -53,34 +71,45 @@ const ProductDetails = () => {
   const handleAddToCart = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('/api/carts/add', {
-        productId: product.product_id,
-        quantity,
-        price: product.price,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.post(
+        '/api/carts/add',
+        {
+          productId: product.product_id,
+          quantity,
+          price: product.price,
         },
-      });
-      alert('Product added to cart!');
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      fetchCartItems();
+      showAlert('Product added to cart!', 'success');
+      setAddedToCart(true); // Set state to true after adding to cart
     } catch (error) {
       if (error.response.status == 403) {
-        navigate('/login');
-      } else {
-
-        alert('Failed to add product to cart');
+        showLogin();
+        // navigate('/login');
+      } else if (error.response.status == 400){
+        showAlert('Items Not Added (No More Stock Left)')
+      }
+      else {
+        showAlert('Failed to add product to cart', 'danger');
       }
       console.error('Error adding to cart:', error);
     }
   };
 
-
   if (loading) {
-    return         <>
-    <NavBar />
-    <div className="mt-4">
-      <Spinner/></div>
-    </>;
+    return (
+      <>
+        <NavBar />
+        <div className="mt-4">
+          <Spinner />
+        </div>
+      </>
+    );
   }
 
   if (error) {
@@ -92,85 +121,103 @@ const ProductDetails = () => {
   }
 
   return (
-    <>
-    <NavBar/>
-    <div className="product-details container mx-auto my-8 p-4 max-w-[1200px]">
-      <div className="flex flex-wrap">
-        <div className="w-full md:w-1/2 flex flex-col md:flex-row gap-2">
-          <img
+    <div className='z-10'>
+      <NavBar />
+      <div className="product-details container mx-auto px-[50px] my-8 p-4 max-w-[1200px]">
+        <div className="flex flex-col md:gap-8 md:flex-row">
+          <div className="w-full md:w-1/2 flex flex-col md:flex-row gap-2">
+            <img
               src={images[imageIndex].image_url}
               alt={product.name}
               className="flex-grow h-auto shadow-xl md:hidden block"
             />
-          <div className='flex flex-row md:flex-col h-[120px] md:h-auto gap-2 md:w-[120px] '>
-            {images.map((img, index) => (
-              <div className='rounded-lg'>
-                <img 
-                  className="m-auto h-full w-full  bg-gray-100 flex flex-col items-center justify-center border-2 border-solid border-gray-300 hover:cursor-pointer"
-                  src={img.image_url}
-                  onClick={() => setImageIndex(index)}
-                />
-              </div>
-            ))}
-            <div className='bg-gray-100 h-full'/>
-
-          </div>
-            {/* <Swiper
-              modules={[Autoplay, Navigation]}
-              spaceBetween={20}
-              slidesPerView={1}
-              navigation
-              autoplay={{ delay: 2000, disableOnInteraction: false }}
-              loop={true}
-              className=" h-full w-full !md:hidden bg-black-500"
-            >
-            {images.map((img, index) => (
-                                  <SwiperSlide key={index}>
-
-              <div className='rounded-lg'>
-                <img 
-                  className="m-auto h-full w-full  bg-gray-100 flex flex-col items-center justify-center border-2 border-solid border-gray-300 hover:cursor-pointer"
-                  src={img.image_url}
-                  onClick={() => setImageIndex(index)}
-                />
-              </div>
-              </SwiperSlide>
-
-            ))}
-          </Swiper> */}
+            <div className='flex flex-grow flex-row md:flex-col h-[120px] md:h-auto gap-2 md:w-[120px]'>
+              {images.map((img, index) => (
+                <div className='rounded-lg' key={index}>
+                  <img
+                    className="m-auto h-full w-full bg-gray-100 flex flex-col items-center justify-center border-2 border-solid border-gray-300 hover:cursor-pointer"
+                    src={img.image_url}
+                    onClick={() => setImageIndex(index)}
+                  />
+                </div>
+              ))}
+            </div>
             <img
               src={images[imageIndex].image_url}
               alt={product.name}
-              className="flex-grow h-auto shadow-xl hidden md:block"
-            />
-        </div>
-        <div className="w-full md:w-1/2 p-4 flex flex-col items-start md:items-center flex-col">
-          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-          <p className="text-lg text-gray-700 mb-4">{product.description}</p>
-          <p className="text-2xl font-bold mb-4">${product.price}</p>
-          <p className="text-lg font-medium text-gray-600">Stock: {product.stock}</p>
-
-          <div className="flex w-full items-center space-x-4">
-            <label htmlFor="quantity" className="text-lg font-medium">Quantity:</label>
-            <input 
-              type="number" 
-              id="quantity" 
-              name="quantity" 
-              min="1" 
-              max={product.stock} 
-              value={quantity} 
-              onChange={handleQuantityChange} 
-              className="border rounded px-2 py-1 flex-grow bg-gray-100"
+              className=" w-[80%] shadow-xl hidden md:block"
             />
           </div>
 
-          <button  onClick={handleAddToCart} className="bg-green-600 w-full py-3   text-white py-2 px-4 mt-4 hover:bg-red transition duration-300">
-            Add to Cart
-          </button>
+          <div className="w-full md:w-1/2 p-4 flex flex-col items-start md:items-left flex-col">
+            <h1 className="text-3xl text-gray-600 font-medium mb-2 text-left">{product.name}</h1>
+            <p className="text-2xl font-bold mb-2">£{product.price}</p>
+            <p className="text-lg text-gray-700 mb-4">{product.description}</p>
+            <div className='flex mb-3'>
+              {sizes.map((category, index) => (
+                  <button className=' border-black bg-gray-50 px-2 py-1 border-[1px]' key={index}>
+                    {category.category_name}
+                  </button>
+                ))}
+
+            </div>
+            <p className="text-lg font-medium text-gray-600">Stock: {product.stock}</p>
+
+            {/* <div className=' border-2 border-gray grid grid-cols-3 items-center text-[50px] font-light'>
+              <button>-</button>
+              <h2 className='text-[30px] px-5'>{quantity}</h2>
+              <button>+</button>
+            </div>
+
+            <div className="flex w-full items-center space-x-4">
+              <label htmlFor="quantity" className="text-lg font-medium">
+                Quantity:
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                min="1"
+                max={product.stock}
+                value={quantity}
+                onChange={handleQuantityChange}
+                className="border rounded px-2 py-1 flex-grow bg-gray-100"
+              />
+            </div> */}
+
+            <div className='flex gap-2 w-full mt-5'>
+              <div className=' border-2 border-gray flex items-center text-[35px] md:text-[40px] font-light px-2'>
+                <button className='w-1/3 text-[45px] md:text-[50px]' onClick={() => handleQuantityChange(quantity - 1)}>-</button>
+                <h2 className='md:text-[25px] text-[23px] text-center w-max mx-[15px] flex justify-center translate-x-[1px] translate-y-[2px]'>{quantity}</h2>
+                <button className='w-1/3' onClick={() => handleQuantityChange(quantity + 1)}>+</button>
+              </div>
+              <button
+                onClick={handleAddToCart}
+                className="bg-green-600 w-full py-3 text-white py-2 px-4  hover:bg-green-700 transition duration-300 md:h-full hover:cursor-pointer"
+              >
+                {addedToCart ? 'Add Another to Cart' : 'Add to Cart'}
+              </button>
+            </div>
+
+            
+            {/* View Cart Button */}
+            {addedToCart ? (
+            <Link
+              to="/cart"
+              className="bg-blue-600 w-full py-3 text-white py-2 px-4 mt-4 hover:bg-blue-800 transition duration-300 text-center"
+            >
+              View Cart
+            </Link>
+
+            ):
+            (null)
+            }
+            <div className='h-5'/>
+            <AcceptedPaymentMethods className='w-full h-full  mt-10'/>
+          </div>
         </div>
       </div>
     </div>
-    </>
   );
 };
 

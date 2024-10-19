@@ -2,17 +2,18 @@
 import React, { useState } from 'react';
 import axios from '../api/axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useHistory } from '../context/HistoryContext';
 
-const AdminLogin = () => {
+const AdminLogin = (state) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
   const navigate = useNavigate();
+  const {prevLocation} = useHistory();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
-
+  // const from = location.state?.from?.pathname || '/';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,7 +27,7 @@ const AdminLogin = () => {
       const response = await axios.post(`api/admin/login`, formData);
       // alert(response.data.accessToken);
       localStorage.setItem('token', response.data.accessToken);
-      navigate(from, { replace: true });
+      navigate(prevLocation, { replace: true });
     } catch (error) {
       console.error('Error logging in:', error);
       alert('Login failed. Please try again.');

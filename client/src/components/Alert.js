@@ -10,11 +10,11 @@ const Alert = ({ message, type = 'info', onClose, fadeOut }) => {
 
   return (
     <div 
-      className={`fixed top-5 left-1/2 transform -translate-x-1/2 z-50 transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed top-5 left-1/2 transform -translate-x-1/2 z-50 w-max max-w-full transition-opacity duration-1000 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
       style={{ pointerEvents: 'none' }} // This ensures that the alert doesn't block any interaction with the page
     >
       <div
-        className={`w-full max-w-[400px] border-l-4 p-4 flex items-center rounded shadow-lg relative ${alertStyles[type]}`}
+        className={`w-full border-l-4 p-4 flex items-center rounded shadow-lg relative ${alertStyles[type]}`}
         role="alert"
         style={{ pointerEvents: 'auto' }} // This allows interactions only within the alert box
       >

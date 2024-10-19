@@ -121,38 +121,40 @@ const UploadImages = ({ onImagesChange }) => {
   }, [totalSlots]);
 
   return (
-    <div className='flex w-full h-[200px]'>
+    <div className='flex w-full h-[250px]'>
       {/* Grid for images */}
-      <div className='grid grid-cols-3 gap-0 flex-grow w-1/3 h-[200px] bg-gray-200  '>
+      <div className='grid grid-cols-3 gap-0 flex-grow w-1/3 h-full bg-gray-200  '>
         {images.map((img, index) => (
-          <div key={img.id} className="relative w-full h-[200px] border-2 border-dashed border-gray-400">
-            <img
-              src={img.url}
-              alt="uploaded"
-              className="m-auto h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div key={img.id} className="flex flex-col w-full h-[250px] border-2 border-dashed border-gray-400">
+            <div className='h-1/5'>
               <button
-                className="px-2 py-1 bg-green-600 hover:bg-green-700"
+                className="h-full px-2 py-1 w-1/3 z-20 bg-green-600 hover:bg-green-700"
                 onClick={() => handlePriorityChange(img.id, 'up')}
                 disabled={index === 0}
               >
-                ↑
+                ←
               </button>
               <button
-                className="px-2 py-1 bg-red-600 hover:bg-red-700"
+                className="h-full px-2 py-1 w-1/3 bg-red-600 hover:bg-red-700"
                 onClick={() => handleRemoveImage(img.id)}
               >
                 ✕
               </button>
               <button
-                className="px-2 py-1 bg-green-600 hover:bg-green-700"
+                className="h-full px-2 py-1  w-1/3 bg-green-600 hover:bg-green-700"
                 onClick={() => handlePriorityChange(img.id, 'down')}
                 disabled={index === images.length - 1}
               >
-                ↓
+                →
               </button>
             </div>
+
+            <img
+              src={img.url}
+              alt="uploaded"
+              className="m-auto h-4/5 object-cover"
+            />
+
           </div>
         ))}
 
@@ -183,7 +185,7 @@ const UploadImages = ({ onImagesChange }) => {
             >
               Close
             </button>
-            <div className="crop-container" style={{ position: 'relative', width: '100%', height: '400px' }}>
+            <div className="crop-container" style={{ position: 'relative', width: '100%', height: '85%' }}>
               <Cropper
                 image={imageSrc}
                 crop={crop}

@@ -4,13 +4,20 @@ import { FaUser } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import imageConfig from "../config/imageConfig";
-import SideMenu from "./SideMenu"; // Import the SideMenu component
+import SideMenu from "./SideMenu"; // Import the SideMenu component'
+import { useCart } from "../context/CartContext";
+import ProfileMenu from "./ProfileMenu";
+import { useLogin } from "../context/LoginContext";
 
 const NavBar = (props) => {
+  const {isLoggedIn} = useLogin();
   const navigate = useNavigate();
   const [currency, setCurrency] = useState("USD");
   const [bgColor, setBgColor] = useState("transparent");
+  const [cartQuantity, setCartQuantity] = useState(0);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false); // State to control the side menu
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false); // State to control the side menu
+  const { quantity, fetchCartItems } = useCart();
 
   const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
@@ -19,6 +26,19 @@ const NavBar = (props) => {
   const toggleSideMenu = () => {
     setIsSideMenuOpen(!isSideMenuOpen);
   };
+
+  const toggleProfileMenu = () => {
+    setIsProfileMenuOpen(!isProfileMenuOpen);
+  };
+
+  useEffect(() => {
+    fetchCartItems();
+  }, [])
+
+  useEffect(() => {
+    fetchCartItems();
+
+  }, [isLoggedIn])
 
   useEffect(() => {
     if (props.background) {
@@ -66,12 +86,18 @@ const NavBar = (props) => {
         <section className="section_right flex items-center text-gray-700 md:gap-5 gap-3">
           <Link to={`/cart`} className="flex">
             <IoIosCart className="sm:text-[33px] text-[25px]  transition duration-300 hover:text-red hover:scale-105" />
-            <div className="h-5 flex font-medium items-center justify-center w-5 rounded-[50px] bg-red-400 text-white">0</div>
+            <div className="h-5 flex font-medium items-center justify-center w-5 rounded-[50px] bg-red-400 text-white">{quantity}</div>
           </Link>
-          <Link to={`/profile`}>
+          {/* <Link to={`/profile`}>
             <FaUser className="sm:text-[30px] text-[23px] transition duration-300 hover:text-red hover:scale-105" />
-          </Link>
-          <div className="relative hidden sm:flex items-center border border-gray-300 rounded px-2">
+          </Link> */}
+          <button className="flex flex-col gap-2 hidden md:flex" onClick={toggleProfileMenu}>
+            <div className="w-[25px] h-[1px] bg-black" />
+            <div className="w-[25px] h-[1px] bg-black" />
+            <div className="w-[25px] h-[1px] bg-black" />
+          </button>
+
+          {/* <div className="relative hidden sm:flex items-center border border-gray-300 rounded px-2">
             <img
               src={selectedCurrency.flag}
               alt={selectedCurrency.code}
@@ -88,13 +114,14 @@ const NavBar = (props) => {
                 </option>
               ))}
             </select>
-            {/* <IoMdArrowDropdown className="text-black text-xl ml-1" /> */}
-          </div>
+          </div> */}
         </section>
       </nav>
 
       {/* Include the SideMenu component */}
       <SideMenu isOpen={isSideMenuOpen} onClose={toggleSideMenu} />
+      <ProfileMenu isOpen={isProfileMenuOpen} onClose={toggleProfileMenu} />
+
     </>
   );
 };

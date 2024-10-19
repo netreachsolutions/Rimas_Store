@@ -10,6 +10,10 @@ exports.addToCart = async (req, res) => {
     res.status(201).json({ message: 'Item added to cart successfully' });
   } catch (error) {
     console.error('Error adding to cart:', error);
+    // If error message indicates stock issue, return 400 Bad Request
+    if (error === 'Not Enough In Stock') {
+      return res.status(400).json({ message: 'Requested quantity exceeds available stock' });
+    }    
     res.status(500).json({ message: 'Failed to add item to cart' });
   }
 };
@@ -30,7 +34,7 @@ exports.updateCartItem = async (req, res) => {
     console.log('update cartt???')
   try {
     const { cartItemId, quantity } = req.body;
-    await cartService.updateCartItem(db, cartItemId, quantity);
+    await cartService.updateCartItem(cartItemId, quantity);
     res.json({ message: 'Cart item updated successfully' });
   } catch (error) {
     console.error('Error updating cart item:', error);

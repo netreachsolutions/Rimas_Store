@@ -7,12 +7,15 @@ const {
   findProductImages,
   getProductsByCategoryId,
   getProductsByCategoryIdsAndPriceRange,
-  createProductImages
+  createProductImages,
+  findProductSizes,
+  updateProductStock
  } = require('../models/productModel');
 
  const {
   setProductCategories
  } = require('../models/categoryModel');
+const { reject } = require('bcrypt/promises');
 
 class ProductService {
   static async allProducts(db) {
@@ -37,15 +40,22 @@ class ProductService {
           return resolve(null); // Product not found
         }
         const productData = results[0]
-        findProductImages(productId, (err, imageResults) => {
+        findProductSizes(productId, (err, sizeResults)=> {
           if (err) {
             return reject(err);
           }
-          productData.images = imageResults;
-          console.log(productData.images)
-          console.log(imageResults)
-          resolve(productData);
-        });
+          console.log(sizeResults)
+          productData.sizes = sizeResults;
+          findProductImages(productId, (err, imageResults) => {
+            if (err) {
+              return reject(err);
+            }
+            productData.images = imageResults;
+            console.log(productData.images)
+            console.log(imageResults)
+            resolve(productData);
+          });
+        })
         // resolve(results[0]); // Return the first product (since we are querying by ID, there should only be one)
       });
     });
@@ -125,6 +135,18 @@ static async getProductsWithFilters(db, filters) {
       resolve(products);
     });
   });
+}
+
+static async updateStock(cartItems) {
+  return new Promise((resolve, reject) => {
+    updateProductStock(cartItems, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve('updated succesfully')
+    })
+  })
 }
 
 }
