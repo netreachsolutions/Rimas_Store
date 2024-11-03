@@ -1,8 +1,9 @@
 // services/userService.js
 const { resolve } = require('path');
 const { findAddressByCustomerId, createAddress, setAllCustomerAddressFalse, setDefaultAddress } = require('../models/addressModel');
-const { findCustomerById, findCustomerByEmail } = require('../models/customerModel')
+const { findCustomerById, findCustomerByEmail, updateField } = require('../models/customerModel')
 const AuthService = require("../services/authService");
+const { reject } = require('bcrypt/promises');
 
 
 class CustomerService {
@@ -77,6 +78,18 @@ class CustomerService {
       resolve('address successfully created')
     })
   }
+
+  static async updateCustomerField(customerId, fieldName, value) {
+    console.log(fieldName)
+    return new Promise((resolve, reject) => {
+      updateField(customerId, fieldName, value, async (err, results) => {
+        if (err) return reject(err);
+
+        resolve('customer detials successfully updated')
+    })
+    })
+  }
+
 
   
 

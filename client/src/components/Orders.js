@@ -3,6 +3,7 @@ import axios from '../api/axios'; // Adjust the import based on your project str
 import { Link } from 'react-router-dom';
 import AdminSideBar from './AdminSideBar';
 import AdminSideBarMobile from './AdminSideBarMobile';
+import { useAlert } from '../context/AlertContext';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -10,8 +11,10 @@ const Orders = () => {
   const [error, setError] = useState('');
   const [expandedOrders, setExpandedOrders] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const {showAlert} = useAlert;
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [statusInput, setStatusInput] = useState('');
+  const [courier, setCourier] = useState('DHL');
   const [trackingIdInput, setTrackingIdInput] = useState('');
 
   useEffect(() => {
@@ -41,7 +44,7 @@ const Orders = () => {
 
   const openModal = (order) => {
     setSelectedOrder(order);
-    setStatusInput(order.deliveryStatus);
+    // setStatusInput(order.deliveryStatus);
     setShowModal(true);
   };
 
@@ -55,8 +58,9 @@ const Orders = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(`/api/orders/${selectedOrder.orderID}/status`, {
-        delivery_status: statusInput,
-        tracking_id: trackingIdInput
+        courier: courier,
+        tracking_id: trackingIdInput,
+        delivery_status: 'dispatched'
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -65,10 +69,11 @@ const Orders = () => {
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.orderID === selectedOrder.orderID
-            ? { ...order, deliveryStatus: statusInput }
+            ? { ...order, deliveryStatus: 'dispatched' }
             : order
         )
       );
+      
       closeModal();
     } catch (error) {
       setError('Error updating delivery status');
@@ -93,13 +98,13 @@ const Orders = () => {
     {/* <AdminSideBar/> */}
     <div className="container mx-auto my-8 p-4 flex-grow md:ml-64">
       <h2 className="text-2xl font-bold mb-4">All Orders</h2>
-      <table className="table-auto w-full border-collapse">
+      <table className="sm:text-[20px] text-[12px] table-auto w-full border-collapse">
         <thead>
           <tr className="bg-gray-200">
             <th className="border px-4 py-2">Order ID</th>
             <th className="border px-4 py-2 sm:block hidden">Order Date/Time</th>
             <th className="border px-4 py-2">Customer Name</th>
-            <th className="border px-4 py-2">Total Amount</th>
+            <th className="border px-4 py-2 sm:block hidden">Total Amount</th>
             <th className="border px-4 py-2">Delivery Status</th>
             <th className="border px-4 py-2">Actions</th>
           </tr>
@@ -111,12 +116,13 @@ const Orders = () => {
                 <td className="border px-4 py-2 text-center">{order.orderID}</td>
                 <td className="border px-4 py-2 text-center sm:block hidden">{order.orderDateTime}</td>
                 <td className="border px-4 py-2 text-center">{order.customerName}</td>
-                <td className="border px-4 py-2 text-center">${order.totalAmount}</td>
+                <td className="border px-4 py-2 text-center sm:block hidden">${order.totalAmount}</td>
                 <td className="border px-4 py-2 text-center">{order.deliveryStatus}</td>
                 <td className="border px-4 py-2 text-center">
+                  <div>
                   <Link to={`/order/${order.orderID}`}>
                     <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2">
+                    className="bg-blue-500 w-full text-white px-4 py-2 rounded-t hover:bg-blue-600 mr-2">
                       View Details
                       </button>
                   </Link>
@@ -127,11 +133,13 @@ const Orders = () => {
                     {expandedOrders[order.orderID] ? 'Hide Details' : 'View Details'}
                   </button> */}
                   <button
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    className="bg-green-500 w-full text-white px-4 py-2 rounded-b hover:bg-green-600"
                     onClick={() => openModal(order)}
                   >
-                    Update Status
+                    Dispatch
                   </button>
+
+                  </div>
                 </td>
               </tr>
               {expandedOrders[order.orderID] && (
@@ -156,52 +164,7 @@ const Orders = () => {
         </tbody>
       </table>
 
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full">
-            <h3 className="text-xl font-bold mb-4">Update Order Status</h3>
-            <form onSubmit={handleModalSubmit}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Order Status</label>
-                <select
-                  value={statusInput}
-                  onChange={(e) => setStatusInput(e.target.value)}
-                  className="border rounded px-3 py-2 w-full"
-                >
-                  <option value="processing">Processing</option>
-                  <option value="dispatched">Dispatched</option>
-                  <option value="arrived">Delivered</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Tracking ID</label>
-                <input
-                  type="text"
-                  value={trackingIdInput}
-                  onChange={(e) => setTrackingIdInput(e.target.value)}
-                  className="border rounded px-3 py-2 w-full"
-                  placeholder="Enter tracking ID"
-                />
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
-                  onClick={closeModal}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      
     </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "./CheckoutForm";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import NewAddress from "./NewAddress";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAlert } from "../context/AlertContext";
 import AcceptedPaymentMethods from "./AcceptedPaymentMethods";
 
@@ -48,6 +48,10 @@ const CheckoutPage = () => {
         const cartResponse = await axios.get("/api/carts", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (cartResponse.data.cartItems.length === 0) {
+          navigate('/cart');
+          return;
+        }
         setCartItems(cartResponse.data.cartItems);
         setTotalAmount(cartResponse.data.price.total);
         setDeliveryAmount(cartResponse.data.price.delivery);
@@ -100,7 +104,7 @@ const CheckoutPage = () => {
       try {
         const response = await axios.post(
           '/api/orders/create-intent',
-          { paymentMethodType: 'card', currency: 'USD', cart_id: cartId },
+          { paymentMethodType: 'card', currency: 'GBP', cart_id: cartId },
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setClientSecret(response.data.clientSecret);
@@ -190,6 +194,11 @@ const CheckoutPage = () => {
   </div>
   );
 
+  const handlePaymentSelect = (paymentType) => {
+    setPaymentMethod(paymentType);
+    setCurrentStep(2)
+  }
+
   const renderPaymentSelectionStep = () => (
     <div>
       <div className="mb-4">
@@ -198,7 +207,7 @@ const CheckoutPage = () => {
             type="radio"
             name="paymentMethod"
             value="card"
-            onChange={(e) => setPaymentMethod(e.target.value)}
+            onChange={(e) => handlePaymentSelect(e.target.value)}
           />
           Pay with Card (Stripe)
         </label>
@@ -207,7 +216,7 @@ const CheckoutPage = () => {
             type="radio"
             name="paymentMethod"
             value="paypal"
-            onChange={(e) => setPaymentMethod(e.target.value)}
+            onChange={(e) => handlePaymentSelect(e.target.value)}
           />
           Pay with PayPal
         </label>
@@ -312,7 +321,7 @@ const CheckoutPage = () => {
         <PayPalScriptProvider
           options={{
             "client-id": "AduDOTDNJSWRqOsSVLRZorTUX0jl071FpQBAtrHu-6Xg8sYnFT2ob1RxSZ54fVSrUlMQPe3WdROjH9Nq", // Replace with your PayPal client ID
-            "currency": "USD",
+            "currency": "GBP",
             "intent": "capture"
           }}
         >
@@ -338,7 +347,7 @@ const CheckoutPage = () => {
                 {                  
                   paypalOrderId: data.orderID, 
                   address_id: deliveryDetails.address_id, 
-                  currency: 'USD'
+                  currency: 'GBP'
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
               );
@@ -420,6 +429,12 @@ const CheckoutPage = () => {
       <div className="text-left">
         <h2 className="text-3xl font-bold mb-4 w-[60%]">Order Confirmed</h2>
         <p>Thank you for your purchase! A confirmation email will be sent shortly.</p>
+        <Link to={'/products/search'}>
+        <button
+                className="block px-4 py-2 bg-blue-500 text-white font-medium mt-4 hover:bg-blue-600 w-full"              >
+                Continue Shopping
+              </button>
+        </Link>
       </div>
     ) : (
       <div>

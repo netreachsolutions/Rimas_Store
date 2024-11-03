@@ -73,6 +73,18 @@ const retrieveOTP = (db, id, callback) => {
   });
 };
 
+const updateField = (customerId, fieldName, value, callback) => {
+  const query = `
+    UPDATE customers 
+    SET ${fieldName} = ?
+    WHERE customer_id = ?
+  `;
+  queryDatabase(query, [value, customerId], (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
+};
+
 
   
   module.exports = {
@@ -81,6 +93,7 @@ const retrieveOTP = (db, id, callback) => {
     findCustomerById,
     generateOTP,
     retrieveOTP,
-    resetPassword
+    resetPassword,
+    updateField
   };
   

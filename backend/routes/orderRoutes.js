@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post('/create-intent', authMiddleware('customer'), paymentController.createPaymentIntent);
 router.post("/confirm", authMiddleware("customer"), orderController.createOrder);
+router.post("/myorders", authMiddleware('customer'), orderController.getCustomerOrders)
 router.get('/', authMiddleware('admin'), orderController.getAllOrders)
 router.put('/:order_id/status', authMiddleware('admin'), orderController.updateDeliveryStatus);
 router.get('/:orderId/details', authMiddleware('admin'), orderController.getOrderDetails);

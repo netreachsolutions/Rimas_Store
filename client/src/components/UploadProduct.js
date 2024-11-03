@@ -234,7 +234,7 @@ const UploadProduct = () => {
         },
       });
   
-      alert('Product saved successfully');
+      showAlert('Product saved successfully', 'success')
       navigate('/admin');
     } catch (error) {
       console.error('Error saving product:', error);

@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import NavBar from "./NavBar"
+import NavBar from "./NavBar";
 import axios from '../api/axios';
 import { useNavigate } from 'react-router-dom';
 import Spinner from './Spinner';
 import NewAddress from './NewAddress';
+import EditProfileField from './EditProfileField';
+import { MdPassword } from 'react-icons/md';
+import { useLogin } from '../context/LoginContext';
 
 const Profile = () => {
+  const {showReset} = useLogin()
   const [profileData, setProfileData] = useState(null);
+  const [editField, setEditField] = useState(null); // Track which field is being edited
   const [backdropPosition, setBackdropPosition] = useState('hidden');
-  const [newAddress, setNewAddress] = useState({
-    first_line: '',
-    second_line: '',
-    city: '',
-    postcode: '',
-    country: '',
-    is_default: false,
-  });
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +22,6 @@ const Profile = () => {
         const response = await axios.get(`api/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(response.data)
         setProfileData(response.data);
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -35,58 +30,17 @@ const Profile = () => {
         }
       }
     };
-
     fetchProfile();
   }, [navigate]);
 
-  const handleAddressChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setNewAddress((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
+  const handleEditClick = (field) => {
+    if (field == 'password') {
+      showReset();
+    } else {
 
-  const handleAddAddress = async (e) => {
-    e.preventDefault();
-    alert(newAddress.country)
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        'api/users/address/new',
-        { address: newAddress },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      console.log(newAddress)
-      // Refresh profile data after adding address
-      const updatedProfile = await axios.get('api/users/profile', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log(updatedProfile)
-      setProfileData(updatedProfile.data.customer);
-      setNewAddress({
-        first_line: '',
-        second_line: '',
-        city: '',
-        postcode: '',
-        country: '',
-        is_default: false,
-      });
-    } catch (error) {
-      setError('Error adding address');
-      console.error('Error adding address:', error);
+      setEditField(field);
     }
   };
-
-  if (!profileData) {
-    return <div className="text-center text-lg font-semibold mt-8"><Spinner/></div>;
-  }
-
-  const showAddressForm = () => {
-    setBackdropPosition('fixed')
-  }
 
   const handleAddressAdded = async () => {
     setBackdropPosition('hidden');
@@ -102,9 +56,33 @@ const Profile = () => {
     }
   };
 
+
+  
+  const showAddressForm = () => {
+    setBackdropPosition('fixed')
+  }
+
+  if (!profileData) {
+    return <div className="text-center text-lg font-semibold mt-8"><Spinner/></div>;
+  }
+
+  const handleSave = (newValue) => {
+    setProfileData((prevData) => {
+      if (editField === "name") {
+        return { ...prevData, first_name: newValue.first_name, last_name: newValue.last_name };
+      }
+      return { ...prevData, [editField]: newValue };
+    });
+    setEditField(null); // Close the editor after saving
+  };
+
+  if (!profileData) {
+    return <div className="text-center text-lg font-semibold mt-8"><Spinner /></div>;
+  }
+
   return (
     <>
-      <div 
+    <div 
         className={`${backdropPosition} z-10 inset-0 bg-black opacity-50 w-full`}
         onClick={() => setBackdropPosition('hidden')}
       />
@@ -118,107 +96,69 @@ const Profile = () => {
         
 
       )}
-
-    <NavBar />
-    <div className="container mx-auto my-10 p-6 bg-white shadow-md rounded-lg">
-      
-      <h2 className="text-3xl font-bold mb-6 text-center">Profile</h2>
-      <div className="border-b border-gray-300 pb-4">
-        <p className="text-lg mb-2"><strong>Email:</strong> {profileData.email}</p>
-        <p className="text-lg mb-2"><strong>Name:</strong> {profileData.first_name} {profileData.last_name}</p>
-        <p className="text-lg mb-2"><strong>Phone:</strong> {profileData.phone_number}</p>
-      </div>
-
-      <div className="mt-8">
-        <h3 className="text-2xl font-semibold mb-4">Addresses</h3>
-        {profileData.addresses && profileData.addresses.length > 0 ? (
-          <ul className="space-y-4">
-            {profileData.addresses.map((address) => (
-              <li key={address.address_id} className="bg-gray-100 p-4 rounded-lg">
-                <p className="text-lg">{address.first_line}, {address.city}, {address.postcode}, {address.country}</p>
-                {address.is_default && <p className="text-sm text-green-600">(Default Address)</p>}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-600">No addresses found.</p>
-        )}
-      </div>
-
-      <div className="mt-8">
-        {/* <h3 className="text-2xl font-semibold mb-4">Add New Address</h3>
-        {error && <p className="text-red-600 mb-4">{error}</p>}
-        <form onSubmit={handleAddAddress} className="space-y-4">
-          <input
-            type="text"
-            name="first_line"
-            placeholder="Address Line 1"
-            value={newAddress.first_line}
-            onChange={handleAddressChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="text"
-            name="second_line"
-            placeholder="Address Line 2"
-            value={newAddress.second_line}
-            onChange={handleAddressChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <input
-            type="text"
-            name="city"
-            placeholder="City"
-            value={newAddress.city}
-            onChange={handleAddressChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="text"
-            name="postcode"
-            placeholder="Postcode"
-            value={newAddress.postcode}
-            onChange={handleAddressChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="text"
-            name="country"
-            placeholder="Country"
-            value={newAddress.country}
-            onChange={handleAddressChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="is_default"
-              checked={newAddress.is_default}
-              onChange={handleAddressChange}
-              className="mr-2"
-            />
-            <label className="text-lg">Set as default address</label>
+      <NavBar />
+      <h2 className="text-2xl font-semibold mb-3 text-gray-600 text-left pl-4 md:hidden">Profile</h2>
+      <div className="w-max flex md:flex-row flex-col md:gap-5 mx-auto bg-white shadow-md rounded-lg md:mt-7">
+        <div className=" border-gray-300 text-left md:border-[1.5px] border-t-[1.5px] md:w-auto w-screen rounded-[5px] h-max">
+          {[
+            { label: "Email", field: "email" },
+            { label: "Name", field: "name", value: `${profileData.first_name} ${profileData.last_name}` },
+            { label: "Phone", field: "phone_number" },
+            { label: "Password", field: "password", value: "************" },
+          ].map(({ label, field, value }) => (
+            <span key={field} className="text-lg mb-2 border-b-[1.5px] px-4 py-3 flex justify-between items-center gap-10">
+              <div className='flex flex-col'>
+                <strong>{label}</strong>
+                {value || profileData[field]}
+              </div>
+              <button
+                className='font-normal border-[1px] rounded-[8px] w-[100px] h-[80%] border-gray-400 hover:bg-gray-100'
+                onClick={() => handleEditClick(field)}
+              >
+                Edit
+              </button>
+            </span>
+          ))}
+        </div>
+        {/* Addresses Section */}
+        <div className="md:border-2 md:w-auto w-screen">
+          <div className='flex justify-between px-4 pt-5 items-end border-b-2 pb-2'>
+            <h3 className="text-2xl font-semibold text-gray-700">Addresses</h3>
+            <button
+              className={`bg-green-500 text-white px-6 py-1 rounded hover:bg-green-600 transition duration-300`}
+              onClick={showAddressForm}
+            >
+              Add Address
+            </button>
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
-          >
-            Add Address
-          </button>
-        </form> */}
-        <button
-          className={`bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition duration-300 `}
-          onClick={showAddressForm}
-        >
-          Add Address
-        </button>
+          {profileData.addresses && profileData.addresses.length > 0 ? (
+            <ul className="h-[320px] overflow-y-scroll">
+              {profileData.addresses.map((address) => (
+                <li key={address.address_id} className="border-b-2 px-3 flex py-4 rounded-lg">
+                  <div className='w-[75%] text-left'>
+                    <p className="text-sm">{address.first_line}, {address.city}, {address.postcode}, {address.country}</p>
+                  </div>
+                  <button className='text-gray-500 underline hover:text-gray-600'>Remove</button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-600">No addresses found.</p>
+          )}
+        </div>
       </div>
-    </div></>
-    
+
+      {/* Render Edit Profile Field */}
+      {editField && (
+        <EditProfileField
+          field={editField}
+          fieldLabel={editField === 'name' ? 'Name' : editField.charAt(0).toUpperCase() + editField.slice(1)}
+          initialValue={editField === 'name' ? { first_name: profileData.first_name, last_name: profileData.last_name } : profileData[editField]}
+          onClose={() => setEditField(null)}
+          onSave={handleSave}
+        />
+      )}
+    </>
   );
 };
 

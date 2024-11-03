@@ -138,12 +138,12 @@ const Cart = () => {
     return (
     <>
       <NavBar/>
-      <div>
+      <div className="w-full">
         <h1 className="text-[30px] font-normal">
           Your cart is empty
           </h1>
         <button 
-          className="absolute m-auto bottom-[20vh] animate-pulse md:static z-10 flex gap-4 shadow-xl text-[30px] md:text-[50px] bg-white text-black items-center rounded-[50px] px-8 py-4 transition-transform duration-500 ease-in-out hover:scale-[120%]"
+          className=" mx-auto md:bottom-[20vh] animate-pulse md:static z-10 flex gap-4 shadow-xl text-[30px] md:text-[50px] bg-white text-black items-center rounded-[50px] px-8 py-4 transition-transform duration-500 ease-in-out hover:scale-[120%]"
           onClick={() => navigate('/products/search')}
         >
           <FaSearch/> Shop

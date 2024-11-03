@@ -112,3 +112,17 @@ exports.validateCustomerToken = (req, res) => {
   res.json('success')
 } 
 
+exports.updateCustomerField = async (req, res) => {
+  try {
+    const {customerId} = req.tokenAssets;
+    console.log(req.body)
+    const {fieldName, value} = req.body;
+    console.log(fieldName)
+    await customerService.updateCustomerField(customerId, fieldName, value);
+    res.json('successfully updated customer details')
+  } catch (error) {
+    console.error("Error during updating customer field", error);
+    res.status(400).json({message: error.message})
+  }
+}
+

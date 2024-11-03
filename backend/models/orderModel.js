@@ -69,10 +69,12 @@ ORDER BY
 
 };
 
-const updateDeliveryStatus = (db, order_id, delivery_status, callback) => {
-  const query = 'UPDATE deliveries SET delivery_status = ? WHERE order_id = ?';
+const updateDeliveryStatus = (db, order_id, delivery_status, tracking_id, courier, callback) => {
+  // const {delivery_status, tracking_id, courier} = delivery;
+  console.log(`${delivery_status} : ${tracking_id} : ${courier}`)
+  const query = 'UPDATE deliveries SET delivery_status = ?, tracking_id = ?, courier = ? WHERE order_id = ?';
   // db.query(query, [delivery_status, order_id], callback);
-  queryDatabase(query, [delivery_status, order_id], (err, results) => {
+  queryDatabase(query, [delivery_status, tracking_id, courier, order_id], (err, results) => {
     if (err) return callback(err, null);  // Pass error to callback
     callback(null, results);              // Pass results to callback
   });
@@ -87,11 +89,66 @@ const getOrderCustomer = (db, orderId, callback) => {
   });
 }
 
+const getCustomerOrders = (customerId, callback) => {
+  const query = `
+    SELECT 
+      o.order_id, 
+      o.customer_id, 
+      o.delivery_amount, 
+      o.created_at,
+      oi.order_item_id, 
+      oi.product_id, 
+      oi.quantity, 
+      oi.price AS item_price,
+      p.name AS product_name,
+      pi.image_url
+    FROM orders o
+    LEFT JOIN order_items oi ON o.order_id = oi.order_id
+    LEFT JOIN products p ON oi.product_id = p.product_id
+    LEFT JOIN 
+    product_image pi ON oi.product_id = pi.product_id 
+    WHERE o.customer_id = ?
+  `;
+  
+  queryDatabase(query, [customerId], (err, results) => {
+    if (err) return callback(err, null);
+
+    // Process the result to group order items by orders
+    const ordersMap = {};
+
+    results.forEach(row => {
+      if (!ordersMap[row.order_id]) {
+        ordersMap[row.order_id] = {
+          order_id: row.order_id,
+          customer_id: row.customer_id,
+          delivery_amount: row.delivery_amount,
+          created_at: row.created_at,
+          items: []
+        };
+      }
+
+      ordersMap[row.order_id].items.push({
+        order_item_id: row.order_item_id,
+        product_id: row.product_id,
+        product_name: row.product_name,
+        quantity: row.quantity,
+        price: row.item_price,
+        image_url: row.image_url
+      });
+    });
+
+    // Convert the orders map to an array
+    const orders = Object.values(ordersMap);
+    callback(null, orders);
+  });
+};
+
+
 const selectOrderDetails = (db, orderId, callback) => {
   const query = `
-  SELECT o.order_id, o.created_at, o.delivery_amount AS total, o.customer_id,
+  SELECT o.order_id, o.created_at, o.delivery_amount AS total, o.customer_id, o.total_weight,
         c.first_name, c.last_name, c.email, c.phone_number,
-        d.address_id, a.first_line, a.city, a.postcode, a.country, d.delivery_status,
+        d.address_id, a.first_line, a.city, a.postcode, a.country, d.delivery_status, d.courier, d.tracking_id,
         p.payment_id, p.processor_id, p.amount AS payment_amount, p.currency
   FROM orders o
   LEFT JOIN customers c ON o.customer_id = c.customer_id
@@ -112,6 +169,7 @@ const selectOrderItems = (db, orderId, callback) => {
     SELECT 
       order_items.*, 
       products.name, 
+      products.product_weight,
       product_image.image_url 
     FROM 
       order_items
@@ -144,5 +202,6 @@ module.exports = {
   updateDeliveryStatus,
   selectOrderDetails,
   getOrderCustomer,
-  selectOrderItems
+  selectOrderItems,
+  getCustomerOrders
 };

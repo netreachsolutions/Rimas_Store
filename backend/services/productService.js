@@ -9,13 +9,15 @@ const {
   getProductsByCategoryIdsAndPriceRange,
   createProductImages,
   findProductSizes,
-  updateProductStock
+  updateProductStock,
+  updateProductsActiveStatus
  } = require('../models/productModel');
 
  const {
   setProductCategories
  } = require('../models/categoryModel');
 const { reject } = require('bcrypt/promises');
+const { resolve } = require('path');
 
 class ProductService {
   static async allProducts(db) {
@@ -146,6 +148,19 @@ static async updateStock(cartItems) {
 
       resolve('updated succesfully')
     })
+  })
+}
+static async updateProductStatuses(productIds, isActive) {
+  return new Promise((resolve, reject) => {
+    
+    updateProductsActiveStatus(productIds, isActive, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      
+      resolve('updates statuses!')
+    })
+
   })
 }
 

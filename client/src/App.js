@@ -25,6 +25,7 @@ import { AlertProvider } from './context/AlertContext';
 import { LoginProvider } from "./context/LoginContext";
 import { CartProvider } from "./context/CartContext";
 import { HistoryProvider } from './context/HistoryContext'; // Import your new context
+import MyOrders from "./components/MyOrders";
 
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/orders" element={<MyOrders/>} />
             </Route>
 
             <Route element={<AdminProtectedRoute />}>
@@ -62,7 +64,7 @@ function App() {
               <Route path="/admin/products" element={<Products/>}/>
               <Route path="/category/create" element={<CreateCategory />} />
               <Route path="/category/:categoryID" element={<AddProductToCategory />} />
-              <Route path="/orders" element={<Orders />} />
+              <Route path="/admin/orders" element={<Orders />} />
               <Route path="/order/:id" element={<OrderDetails />} />
               <Route path="/admin" element={<Orders />} />
             </Route>

@@ -18,6 +18,17 @@ exports.getAllProducts = async (req, res) => {
     }
   };
 
+  exports.updateProductStatus = async (req, res) => {
+    try {
+      const {productIds, is_active} = req.body;
+      await ProductService.updateProductStatuses(productIds, is_active);
+      res.json('updated succesfully');
+    } catch (error) {
+      console.error('Error during update:', error);
+      res.status(400).json({ message: error.message });
+    }
+  };
+
 
 
   // exports.saveProduct = (req, res) => {

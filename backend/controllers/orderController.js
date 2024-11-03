@@ -166,10 +166,11 @@ exports.getAllOrders = async (req, res) => {
 
   exports.updateDeliveryStatus = async (req, res) => {
     const { order_id } = req.params;
-    const { delivery_status } = req.body;
+    const { delivery_status, tracking_id, courier} = req.body;
+    console.log(req.body)
 
     try {
-        await orderService.updateDeliveryStatus(db, order_id, delivery_status);
+        await orderService.updateDeliveryStatus(db, order_id, delivery_status, tracking_id, courier);
 
         await notificationService.sendOrderDispatchedNotification(db, order_id);
 
@@ -211,6 +212,18 @@ exports.getOrderDetails = async (req, res) => {
     } catch (error) {
       console.error('Error fetching order details:', error);
       res.status(500).json({ message: 'Failed to fetch order details' });
+    }
+  };
+
+  exports.getCustomerOrders = async (req, res) => {
+    const { customerId } = req.tokenAssets; // Ensure customer ID is attached to the token
+    try {
+      const orders = await orderService.getCustomerOrders(customerId);
+      console.log(orders);
+      res.status(200).json(orders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      res.status(500).json({ message: 'Failed to fetch orders' });
     }
   };
 

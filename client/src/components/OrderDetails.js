@@ -68,7 +68,7 @@ const OrderDetails = () => {
       <AdminSideBarMobile />
       <div className="container mx-auto my-8 p-6 flex-grow bg-white shadow-md rounded-lg text-left md:ml-64">
         <div className='inner-container max-w-[900px] m-auto'>
-        <Link to={'/orders'}>
+        <Link to={'/admin/orders'}>
         <span className='flex gap-1 items-center rounded-xl py-1 px-1.5 bg-gray-50 w-max  text-gray-500'>
         <IoArrowBackOutline />
 
@@ -89,6 +89,9 @@ const OrderDetails = () => {
                         <h3 className="text-xl font-semibold mb-2 text-gray-700">Delivery Details</h3>
             <p className="mb-2"><strong className="text-gray-600">Address:</strong> {orderDetails.first_line}, {orderDetails.city}, {orderDetails.postcode}, {orderDetails.country}</p>
             <p className="mb-2"><strong className="text-gray-600">Delivery Status:</strong> {orderDetails.delivery_status}</p>
+            <p className="mb-2"><strong className="text-gray-600">Courier:</strong> {orderDetails.courier}</p>
+            <p className="mb-2"><strong className="text-gray-600">Tracking Number:</strong> {orderDetails.tracking_id}</p>
+
           </div>
         </div>
 
@@ -104,10 +107,11 @@ const OrderDetails = () => {
           <div className='bg-gray-100 rounded px-4 py-2'>
             <h3 className="text-xl font-semibold mb-2 text-gray-700">Order Summary</h3>
             <p className="mb-2"><strong className="text-gray-600">Order Date:</strong> {new Date(orderDetails.created_at).toLocaleDateString()}</p>
+            <p className="mb-2"><strong className="text-gray-600">Weight:</strong> {orderDetails.total_weight}grams</p>
             <p className="mb-2"><strong className="text-gray-600">Total:</strong> ${orderDetails.total}</p>
           </div>
         </div>
-    <div className="grid grid-cols-1 md:grid-cols-1 gap-5 w-full max-w-[500px]">
+    <div className="grid grid-cols-1 md:grid-cols-1 gap-5 w-full max-w-[400px]">
       <h1 className='font-bold'>Items</h1>
           {orderItems.map((item) => (
                 <div key={item.order_item_id} className="flex flex-row gap-2 border px-4 py-1 h-[90px] items-center justify-between">
@@ -121,12 +125,13 @@ const OrderDetails = () => {
                   </div>
                   <div className="flex flex-col flex-grow text-left">
                     <h2 className="text-sm font-normal "><b>{item.name}</b> #{item.product_id}</h2>
+                    <h2 className='text-[12px]'>Unit Weight: {item.product_weight}grams</h2>
                   </div>
                 </div>
                 <div className="flex items-center text-right my-2 text-sm">
                   <label
                     htmlFor={`quantity-${item.cart_item_id}`}
-                    className="mr-2"
+                    className="mr-2 font-medium text-[19px]"
                   >
                     x{item.quantity}
                   </label>

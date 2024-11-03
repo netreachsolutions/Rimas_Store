@@ -363,10 +363,10 @@ const ProductSearch = (props) => {
           ) : error ? (
             <div className="mt-4 text-red-500">{error}</div>
           ) : (
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link to={`/products/${product.product_id}`} key={product.product_id}>
-                  <div className="border p-4 rounded-md shadow hover:shadow-lg transition-shadow">
+                  <div className="border p-4 rounded-md shadow hover:shadow-lg transition-shadow h-full">
                     <img
                       src={product.image_url || 'placeholder-image-url'}
                       alt={product.name}

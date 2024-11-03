@@ -81,6 +81,8 @@ const createProduct = (db, productData, callback) => {
     });
   };
 
+
+
  const createProductImage = (db, imageData, callback) => {
     const {productId, imageUrl} = imageData;
     const query = 'INSERT INTO product_image (product_id, image_url) VALUES (?, ?)';
@@ -110,6 +112,28 @@ const createProduct = (db, productData, callback) => {
     callback(null, results);              // Pass results to callback
   });
 }
+
+const updateProductsActiveStatus = (productIds, isActive, callback) => {
+  // Convert `isActive` to a binary value (0 or 1)
+  const activeStatus = isActive ? 1 : 0;
+
+  // Construct the SQL query with placeholders
+  const query = `
+    UPDATE products 
+    SET is_active = ? 
+    WHERE product_id IN (${productIds.map(() => '?').join(', ')});
+  `;
+
+  // Prepare the query parameters
+  const queryParams = [activeStatus, ...productIds];
+
+  // Execute the query
+  queryDatabase(query, queryParams, (err, results) => {
+    if (err) return callback(err, null);  // Pass error to callback
+    callback(null, results);              // Pass results to callback
+  });
+};
+
   
  const getProductsByCategoryId = (db, categoryId, callback) => {
   console.log(categoryId)
@@ -164,7 +188,7 @@ const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPri
         categories c ON pc.category_id = c.category_id
     LEFT JOIN 
         product_image pi ON pi.product_id = p.product_id
-    WHERE 1 = 1`;  // Always true, makes adding conditions easier
+    WHERE is_active = 1`;  // Always true, makes adding conditions easier
 
   const queryParams = [];
 
@@ -248,6 +272,7 @@ const updateProductStock = (products, callback) => {
     getProductsByCategoryIdsAndPriceRange,
     findProductImages,
     findProductSizes,
-    updateProductStock
+    updateProductStock,
+    updateProductsActiveStatus
   };
   

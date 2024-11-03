@@ -124,7 +124,7 @@ static async validatePaypalOrder(paypalOrderId, accessToken, totalAmount) {
     if (paypalAmount === totalAmount) {
       return { valid: true, message: "PayPal order amount matches the cart total." };
     } else {
-      return { valid: false, message: `PayPal order amount (${paypalAmount / 100} USD) does not match the cart total (${totalAmount / 100} USD).` };
+      return { valid: false, message: `PayPal order amount (${paypalAmount / 100} GBP) does not match the cart total (${totalAmount / 100} GBP).` };
     }
   } catch (error) {
     console.error('Error validating PayPal order:', error);
@@ -187,7 +187,7 @@ static async validatePaymentIntent(paymentIntentId) {
       purchase_units: [
           {
               amount: {
-                  currency_code: "USD",
+                  currency_code: "GBP",
                   value: (totalAmount/100).toString(),
               },
           },

@@ -40,6 +40,7 @@ CREATE TABLE orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
 	delivery_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    total_weight INT DEFAULT 0 NOT NULL;
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
 );

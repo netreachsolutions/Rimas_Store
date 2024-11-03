@@ -98,11 +98,12 @@ const {
         let netWeight = 0;
         cartItems.forEach(item => {
           itemsAmount += item.price * item.quantity; // Assuming each item has price and quantity fields
-          netWeight += item.product_weight;
+          netWeight += item.product_weight * item.quantity;
           console.log(item.product_weight)
         });
   
         let shippingCost =0;
+        console.log(cartItems.length)
         console.log(netWeight)
         if (netWeight < 2000) {
           shippingCost = 1.99;

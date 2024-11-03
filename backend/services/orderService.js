@@ -1,3 +1,4 @@
+const { reject } = require('bcrypt/promises');
 const {
     createOrder,
     createOrderItem,
@@ -6,7 +7,8 @@ const {
     updateDeliveryStatus,
     selectOrderDetails,
     getOrderCustomer,
-    selectOrderItems
+    selectOrderItems,
+    getCustomerOrders
 } = require('../models/orderModel');
 
 class OrderService {
@@ -124,7 +126,7 @@ class OrderService {
         });
     }
 
-    static async updateDeliveryStatus(db, order_id, delivery_status) {
+    static async updateDeliveryStatus(db, order_id, delivery_status, tracking_id, courier) {
         return new Promise((resolve, reject) => {
             console.log('Attempting to update delivery status');
             console.log("Delivery Status: "+delivery_status);
@@ -136,11 +138,11 @@ class OrderService {
             }
 
             // Call the model function to update the delivery status
-            updateDeliveryStatus(db, order_id, delivery_status, (err, result) => {
+            updateDeliveryStatus(db, order_id, delivery_status, tracking_id, courier, (err, result) => {
                 if (err) {
                     console.error('Error updating delivery status:', err);
                     return reject(err); // Reject the promise on error
-                }
+                }                                                               
                 
                 console.log('Delivery status updated successfully');
                 resolve(result); // Resolve the promise with the result
@@ -182,6 +184,19 @@ class OrderService {
         resolve(result[0]);
         });
     });
+    }
+
+    static async getCustomerOrders(customerId) {
+        return new Promise((resolve, reject) => {
+            getCustomerOrders(customerId, (err, orders) => {
+            if (err) {
+                console.error('Error fetching orders:', err);
+                return reject(err);
+            };
+            resolve(orders);
+
+            })
+        })
     }
 
 
