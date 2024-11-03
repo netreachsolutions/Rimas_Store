@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
 import { useAlert } from './AlertContext';
 import LoginForm from '../components/LoginForm';
@@ -17,6 +17,7 @@ export const LoginProvider = ({ children }) => {
   const { showAlert } = useAlert();
   const [loginState, setLoginState] = useState({ visible: false, mode: 'login', onSuccess: null }); // Add `mode` to toggle between forms
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
 
   // Function to show login form
   const showLogin = (onSuccess) => {
@@ -75,6 +76,20 @@ export const LoginProvider = ({ children }) => {
   useEffect(() => {
     auth(); // Check if user is authenticated whenever the component mounts
   }, []);
+
+  // Listen for the back button and close the modal if it’s open
+  useEffect(() => {
+    const handlePopState = () => {
+      if (loginState.visible) {
+        hideLogin();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [loginState.visible]);
 
   return (
     <LoginContext.Provider value={{ showLogin, showRegister, showReset, hideLogin, logout, auth, isLoggedIn }}>

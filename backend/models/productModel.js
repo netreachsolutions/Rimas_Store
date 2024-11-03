@@ -72,14 +72,25 @@ const createProduct = (db, productData, callback) => {
     });
   };
 
+
   const getAllProductsWithImage = async (db, callback) => {
-    const query = 'SELECT products.product_id, products.name, products.description, products.is_active, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MAX(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL)));';
+    const query = 'SELECT products.product_id, products.name, products.description, products.is_active, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MIN(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL)));';
     // Use queryDatabase and pass in a callback
     queryDatabase(query, [], (err, results) => {
       if (err) return callback(err, null);  // Pass error to callback
       callback(null, results);              // Pass results to callback
     });
   };
+
+  const getAllActiveProductsWithImage = async (db, callback) => {
+    const query = 'SELECT products.product_id, products.name, products.description, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MIN(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL))) WHERE products.is_active = TRUE;';
+    // Use queryDatabase and pass in a callback
+    queryDatabase(query, [], (err, results) => {
+      if (err) return callback(err, null);  // Pass error to callback
+      callback(null, results);              // Pass results to callback
+    });
+  };
+
 
 
 
@@ -170,70 +181,212 @@ ORDER BY
   });
 };
 
+// const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
+//   // let query = `
+//   //   SELECT 
+//   //       p.product_id, 
+//   //       p.name, 
+//   //       p.description, 
+//   //       p.price, 
+//   //       p.stock, 
+//   //       p.created_at, 
+//   //       pi.image_url
+//   //   FROM 
+//   //       products p
+//   //   LEFT JOIN 
+//   //       product_category pc ON p.product_id = pc.product_id
+//   //   LEFT JOIN 
+//   //       categories c ON pc.category_id = c.category_id
+//   //   LEFT JOIN 
+//   //       product_image pi ON pi.product_id = p.product_id
+//   //   WHERE is_active = 1`;  // Always true, makes adding conditions easier
+//   let query = `
+//   SELECT
+//     p.product_id,
+//     p.name,
+//     p.description,
+//     p.price,
+//     p.stock,
+//     p.created_at,
+//     pi.image_url,
+//     pi.priority,
+//     pi.product_image_id
+// FROM
+//     products p
+// LEFT JOIN
+//     product_category pc ON p.product_id = pc.product_id
+// LEFT JOIN
+//     categories c ON pc.category_id = c.category_id
+// LEFT JOIN
+//     product_image pi ON pi.product_id = p.product_id
+// WHERE
+//     is_active = 1
+//   `
+
+//   const queryParams = [];
+
+//   if (categoryIds && categoryIds.length > 0) {
+//     // query += ` AND p.product_id IN (
+//     //   SELECT product_id FROM product_category WHERE category_id IN (?) GROUP BY product_id HAVING COUNT(DISTINCT category_id) = ?
+//     // )`;
+//     query += ` AND p.product_id IN (
+//         SELECT product_id
+//         FROM product_category
+//         WHERE category_id IN (?))`
+//     queryParams.push(categoryIds, categoryIds.length);
+//   }
+
+//   if (minPrice !== null) {
+//     query += ` AND p.price >= ?`;
+//     queryParams.push(minPrice);
+//   }
+
+//   if (maxPrice !== null) {
+//     query += ` AND p.price <= ?`;
+//     queryParams.push(maxPrice);
+//   }
+
+//   query += `
+//     GROUP BY 
+//         p.product_id,  -- Group by the product details to avoid duplicates
+//         p.name, 
+//         p.description, 
+//         p.price, 
+//         p.stock, 
+//         p.created_at
+//     ORDER BY 
+//         MIN(pi.priority) IS NULL,  -- Orders rows with NULL priority last
+//         MIN(pi.priority) ASC,     -- Highest priority images first
+//         MIN(pi.image_url) ASC;
+//   `;
+
+//   console.log(queryParams);  // Log parameters for debugging
+//   console.log(query);        // Log query for debugging
+
+//   // db.query(query, queryParams, callback);
+//   queryDatabase(query, queryParams, (err, results) => {
+//     if (err) return callback(err, null);  // Pass error to callback
+//     callback(null, results);              // Pass results to callback
+//   });
+
+  
+// };
+
 const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
-  let query = `
-    SELECT 
+  // First, get the category_group_id for each selected category_id
+  const getCategoryGroupsQuery = `SELECT category_id, category_group_id FROM categories WHERE category_id IN (?)`;
+
+  db.query(getCategoryGroupsQuery, [categoryIds], (err, categoryGroupRows) => {
+    if (err) return callback(err);
+
+    // Group the categoryIds by their category_group_id
+    const categoriesByGroup = {};
+
+    categoryGroupRows.forEach(row => {
+      const groupId = row.category_group_id;
+      if (!categoriesByGroup[groupId]) {
+        categoriesByGroup[groupId] = [];
+      }
+      categoriesByGroup[groupId].push(row.category_id);
+    });
+
+    // Construct the main query
+    let query = `
+      SELECT
+        p.product_id,
+        p.name,
+        p.description,
+        p.price,
+        p.stock,
+        p.created_at,
+        pi.image_url,
+        pi.priority
+      FROM
+        products p
+      LEFT JOIN
+        product_category pc ON p.product_id = pc.product_id
+      LEFT JOIN
+        categories c ON pc.category_id = c.category_id
+      LEFT JOIN
+        product_image pi ON pi.product_id = p.product_id
+      WHERE
+        p.is_active = 1
+    `;
+
+    const queryParams = [];
+
+    // Build WHERE conditions to ensure products have at least one category from each selected group
+    const whereConditions = [];
+
+    Object.keys(categoriesByGroup).forEach(groupId => {
+      const categoryIdsInGroup = categoriesByGroup[groupId];
+
+      // Create placeholders for the category IDs
+      const placeholders = categoryIdsInGroup.map(() => '?').join(',');
+
+      // Add EXISTS condition for this group
+      const condition = `
+        EXISTS (
+          SELECT 1 FROM product_category pc2
+          JOIN categories c2 ON pc2.category_id = c2.category_id
+          WHERE pc2.product_id = p.product_id
+            AND c2.category_group_id = ?
+            AND c2.category_id IN (${placeholders})
+        )
+      `;
+      whereConditions.push(condition);
+
+      // Add groupId and categoryIdsInGroup to queryParams
+      queryParams.push(groupId);
+      queryParams.push(...categoryIdsInGroup);
+    });
+
+    if (whereConditions.length > 0) {
+      query += ' AND ' + whereConditions.join(' AND ');
+    }
+
+    // Add price filtering if applicable
+    if (minPrice !== null && minPrice !== '') {
+      query += ` AND p.price >= ?`;
+      queryParams.push(minPrice);
+    }
+
+    if (maxPrice !== null && maxPrice !== '') {
+      query += ` AND p.price <= ?`;
+      queryParams.push(maxPrice);
+    }
+
+    // Group and order the results
+    query += `
+      GROUP BY 
         p.product_id, 
         p.name, 
         p.description, 
         p.price, 
         p.stock, 
-        p.created_at, 
-        MAX(pi.image_url) AS image_url  -- Select only the highest priority image URL
-    FROM 
-        products p
-    LEFT JOIN 
-        product_category pc ON p.product_id = pc.product_id
-    LEFT JOIN 
-        categories c ON pc.category_id = c.category_id
-    LEFT JOIN 
-        product_image pi ON pi.product_id = p.product_id
-    WHERE is_active = 1`;  // Always true, makes adding conditions easier
-
-  const queryParams = [];
-
-  if (categoryIds && categoryIds.length > 0) {
-    query += ` AND p.product_id IN (
-      SELECT product_id FROM product_category WHERE category_id IN (?) GROUP BY product_id HAVING COUNT(DISTINCT category_id) = ?
-    )`;
-    queryParams.push(categoryIds, categoryIds.length);
-  }
-
-  if (minPrice !== null) {
-    query += ` AND p.price >= ?`;
-    queryParams.push(minPrice);
-  }
-
-  if (maxPrice !== null) {
-    query += ` AND p.price <= ?`;
-    queryParams.push(maxPrice);
-  }
-
-  query += `
-    GROUP BY 
-        p.product_id,  -- Group by the product details to avoid duplicates
-        p.name, 
-        p.description, 
-        p.price, 
-        p.stock, 
         p.created_at
-    ORDER BY 
-        MAX(pi.priority) IS NULL,  -- Orders rows with NULL priority last
-        MAX(pi.priority) DESC,     -- Highest priority images first
-        MAX(pi.image_url) ASC;
-  `;
+      ORDER BY 
+        priority IS NULL,  
+        priority ASC;
+    `;
 
-  console.log(queryParams);  // Log parameters for debugging
-  console.log(query);        // Log query for debugging
+    console.log('Query Parameters:', queryParams);  // For debugging
+    console.log('Query:', query);                   // For debugging
 
-  // db.query(query, queryParams, callback);
-  queryDatabase(query, queryParams, (err, results) => {
-    if (err) return callback(err, null);  // Pass error to callback
-    callback(null, results);              // Pass results to callback
+    // Execute the query with parameters
+    db.query(query, queryParams, (err, results) => {
+      if (err) return callback(err);
+      callback(null, results);
+    });
   });
-
-  
 };
+
+// Dummy helper function to get category type ID - replace this with actual logic
+const getCategoryTypeId = (categoryId) => {
+  // This should retrieve the type for each category (e.g., Gender, Size) based on categoryId
+};
+
+
 
 
 
@@ -273,6 +426,7 @@ const updateProductStock = (products, callback) => {
     findProductImages,
     findProductSizes,
     updateProductStock,
-    updateProductsActiveStatus
+    updateProductsActiveStatus,
+    getAllActiveProductsWithImage
   };
   

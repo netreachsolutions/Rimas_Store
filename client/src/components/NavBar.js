@@ -56,7 +56,7 @@ const NavBar = (props) => {
   return (
     <>
       <nav
-        className={`navbar md:px-[40px] px-[20px] z-50 w-full h-[80px] flex items-center justify-between top-0 left-0 relative ${bgColor === 'white' ? 'bg-white' : 'bg-' + bgColor + '-500'}`}
+        className={`navbar md:px-[40px] px-[20px] z-50 w-full h-[80px] flex items-center justify-between top-0 left-0 relative shadow-md ${bgColor === 'white' ? 'bg-white' : 'bg-' + bgColor + '-500'}`}
       >
         <section className="md:hidden block">
           <button className="flex flex-col gap-2" onClick={toggleSideMenu}>
@@ -83,7 +83,11 @@ const NavBar = (props) => {
           <h1 className="m-0">STORE</h1>
         </section>
 
-        <section className="section_right flex items-center text-gray-700 md:gap-5 gap-3">
+        <section className="section_right flex items-center text-gray-700 md:gap-5 gap-0">
+          {isLoggedIn ? (null) : <button className="text-gray-600 md:text-[15px] text-[11px] md:block hidden">
+            Sign in
+          </button>}
+
           <Link to={`/cart`} className="flex">
             <IoIosCart className="sm:text-[33px] text-[25px]  transition duration-300 hover:text-red hover:scale-105" />
             <div className="h-5 flex font-medium items-center justify-center w-5 rounded-[50px] bg-red-400 text-white">{quantity}</div>

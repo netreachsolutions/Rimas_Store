@@ -176,30 +176,31 @@ const ProductSearch = (props) => {
     fetchRelevantProducts();
   }, [minPrice, maxPrice, selectedCategories]);
 
-  const handleCategoryClick = (category, setCategory) => {
-    setCategory((prev) => {
-      if (prev === category.category_id) {
-        // Deselect the category
-        setSelectedCategories((prevSelected) => {
-          const updatedCategories = prevSelected.filter((c) => c.category_id !== category.category_id);
-          updateUrlParams(updatedCategories.map((c) => c.category_id)); // Update URL
-          return updatedCategories;
-        });
-        return null;
+  const handleCategoryClick = (category) => {
+    setSelectedCategories((prevSelected) => {
+      // Check if the category is already selected
+      const isAlreadySelected = prevSelected.some(
+        (selected) => selected.category_id === category.category_id
+      );
+  
+      // Toggle category in selectedCategories: add if not selected, remove if selected
+      let updatedCategories;
+      if (isAlreadySelected) {
+        updatedCategories = prevSelected.filter(
+          (selected) => selected.category_id !== category.category_id
+        );
       } else {
-        // Add the category to the selectedCategories list
-        setSelectedCategories((prevSelected) => {
-          if (!prevSelected.some((selected) => selected.category_id === category.category_id)) {
-            const updatedCategories = [...prevSelected, category];
-            updateUrlParams(updatedCategories.map((c) => c.category_id)); // Update URL
-            return updatedCategories;
-          }
-          return prevSelected;
-        });
-        return category.category_id;
+        updatedCategories = [...prevSelected, category];
       }
+  
+      // Update URL params with selected category IDs
+      updateUrlParams(updatedCategories.map((c) => c.category_id));
+      return updatedCategories;
     });
   };
+  
+  
+  
 
   const handleRemoveCategory = (categoryToRemove) => {
     setSelectedCategories((prevSelected) => {
@@ -209,20 +210,18 @@ const ProductSearch = (props) => {
     });
   };
 
-  const renderCategoryList = (categories, selectedCategory, setCategory) => (
+  const renderCategoryList = (categories) => (
     <ul className="space-y-2 font-medium">
       {categories.items.map((category) => (
         <li key={category.category_id}>
           <div
-            onClick={() => handleCategoryClick(category, setCategory)}
-            className={`flex items-center p-2 text-[13px] text-gray-900 rounded-lg hover:bg-gray-200 group cursor-pointer ${
-              selectedCategory === category.category_id ? 'bg-gray-200' : ''
-            }`}
+            onClick={() => handleCategoryClick(category)}
+            className="flex items-center p-2 text-[13px] text-gray-900 rounded-lg hover:bg-gray-200 group cursor-pointer"
           >
             <input
-              type="radio"
-              checked={selectedCategory === category.category_id}
-              readOnly
+              type="checkbox"
+              checked={selectedCategories.some((c) => c.category_id === category.category_id)}
+              onChange={() => handleCategoryClick(category)}
               className="mr-2"
             />
             <span className="ml-5">{category.category_name}</span>
@@ -232,62 +231,93 @@ const ProductSearch = (props) => {
     </ul>
   );
 
+  const onClose = () => {
+    setIsSidebarVisible(false);
+  }
+  
+  
+
   return (
     <>
       <NavBar background="white" className="z-50 ml-64" />
       <div className="container mx-auto my-1 p-4">
-        <aside
-          id="logo-sidebar"
-          className={`fixed top-[80px] left-0 z-20 w-64 h-screen bg-gray-50 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ${
-            isSidebarVisible ? 'translate-x-0' : 'sm:-translate-x-0 -translate-x-full'  // Toggle sidebar visibility
-          }`}
-          aria-label="Sidebar"
+
+      {isSidebarVisible ? <div className="fixed top-0 z-10 inset-0 bg-black opacity-50 w-full h-screen" onClick={onClose} /> : (null)}
+
+      <aside
+        id="logo-sidebar"
+        className={`fixed top-[0px] pt-[70px] left-0 z-20 w-64 h-screen bg-gray-50 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300  ${
+          isSidebarVisible ? 'translate-x-0' : 'sm:-translate-x-0 -translate-x-full'  // Toggle sidebar visibility
+        }`}
+        aria-label="Sidebar"
+      >
+        <button
+          className="absolute top-[82px] right-3 text-3xl text-gray-700 sm:hidden"
+          onClick={() => setIsSidebarVisible(false)} 
         >
-                <button
-        className="absolute top-2 right-3 text-3xl text-gray-700 sm:hidden"
-        onClick={() => setIsSidebarVisible(false)} // Corrected: Use arrow function to update state
-        >
-        <IoIosClose />
-      </button>
-          <div className="flex-1 px-3 py-4 overflow-y-auto sm:mt-0 mt-3">
-            {categoriesByType['1'] && (
-              <div className="w-full mb-6">
-                <div className="line h-[1px] bg-gray-400 my-3" />
-                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
-                  Gender
-                </h1>
-                {renderCategoryList(categoriesByType['1'], gender, setGender)}
-              </div>
-            )}
-            {categoriesByType['2'] && (
-              <div className="w-full mb-6">
-                <div className="line h-[1px] bg-gray-400 my-3" />
-                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
-                  Size
-                </h1>
-                {renderCategoryList(categoriesByType['2'], size, setSize)}
-              </div>
-            )}
-            {categoriesByType['3'] && (
-              <div className="w-full mb-6">
-                <div className="line h-[1px] bg-gray-400 my-3" />
-                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
-                  Brand
-                </h1>
-                {renderCategoryList(categoriesByType['3'], color, setColor)}
-              </div>
-            )}
-            {categoriesByType.apparel && (
-              <div className="w-full mb-6">
-                <div className="line h-[1px] bg-gray-400 my-3" />
-                <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
-                  Apparel
-                </h1>
-                {renderCategoryList(categoriesByType.apparel, apparel, setApparel)}
-              </div>
-            )}
-          </div>
-        </aside>
+          <IoIosClose />
+        </button>
+        <div className="flex-1 px-3 py-4 sm:mt-0 mt-3 overflow-y-auto max-h-[calc(100vh-120px)] shadow shadow-gray-500/100 shaddow-sm">
+        <div className="shaddow-inner shadow-[0px_-10px_10px_-10px_rgba(0,0,0,0.05)]"></div> {/* Bottom shadow */}
+
+         {/* Max height for scroll */}
+          {categoriesByType['2'] && (
+            <div className="w-full mb-6">
+              <div className="line h-[1px] bg-gray-400 my-3" />
+              <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                Size
+              </h1>
+              {renderCategoryList(categoriesByType['2'])}
+            </div>
+          )}
+          {categoriesByType['3'] && (
+            <div className="w-full mb-6">
+              <div className="line h-[1px] bg-gray-400 my-3" />
+              <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                Brand
+              </h1>
+              {renderCategoryList(categoriesByType['3'])}
+            </div>
+          )}
+          {categoriesByType['4'] && (
+            <div className="w-full mb-6">
+              <div className="line h-[1px] bg-gray-400 my-3" />
+              <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                Width
+              </h1>
+              {renderCategoryList(categoriesByType['4'])}
+            </div>
+          )}
+            {categoriesByType['5'] && (
+            <div className="w-full mb-6">
+              <div className="line h-[1px] bg-gray-400 my-3" />
+              <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                Finish
+              </h1>
+              {renderCategoryList(categoriesByType['5'])}
+            </div>
+          )}
+                    {categoriesByType['1'] && (
+            <div className="w-full mb-6">
+              <div className="line h-[1px] bg-gray-400 my-3" />
+              <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                Gender
+              </h1>
+              {renderCategoryList(categoriesByType['1'])}
+            </div>
+          )}
+          {/* {categoriesByType.apparel && (
+            <div className="w-full mb-6">
+              <div className="line h-[1px] bg-gray-400 my-3" />
+              <h1 className="text-black-300 text-[15px] text-left font-semibold capitalize">
+                Apparel
+              </h1>
+              {renderCategoryList(categoriesByType.apparel, apparel, setApparel)}
+            </div>
+          )} */}
+        </div>
+     </aside>
+
 
         <div className="md:ml-64">
         {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 m-auto  px-[10px] py-[0px]  mb-[0px]"> */}
@@ -330,18 +360,23 @@ const ProductSearch = (props) => {
           ))}
         </div> */}
         <div className="font-light w-full flex px-1 pt-3 justify-between items-end">
-        <div className='categories grid grid-cols-4 gap-1'>
-          {selectedCategories.map((category, index) => (
-            <div className='bg-gray-100 px-3 py-2 flex gap-1 font-normal items-center sm:text-[18px] text-[15px]'>
-              <span>{category.category_name}</span>
-              <RxCross2  
-                className='hover:cursor-pointer mt-[3px]'
-                onClick={() => handleRemoveCategory(category)} // Add onClick handler to remove the category
-                />
-            </div>
-          ))}
+        <div className='categories grid grid-cols-3 gap-1 mb-4'>
+  {selectedCategories.map((category, index) => (
+    <div
+      key={index}
+      className='bg-gray-100 px-3 py-2 flex justify-between items-center font-normal sm:text-[18px] text-[12px] h-max'
+    >
+      <span className='flex-grow overflow-hidden text-ellipsis whitespace-nowrap'>
+        {category.category_name}
+      </span>
+      <RxCross2  
+        className='hover:cursor-pointer text-[15px] ml-2'
+        onClick={() => handleRemoveCategory(category)}
+      />
+    </div>
+  ))}
+</div>
 
-        </div>
       </div>
       <div className='flex justify-between items-end sm:justify-end'>
           <div className='px-2 sm:hidden'>{products.length} items</div>

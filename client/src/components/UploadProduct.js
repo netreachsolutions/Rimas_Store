@@ -45,6 +45,7 @@ const UploadProduct = () => {
       try {
         const response = await axios.get('/api/category/type'); // Assuming this endpoint returns categories by type
         setCategoriesByType(response.data);
+        console.log(response.data)
         console.log(response.data['1'].items)
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -54,16 +55,32 @@ const UploadProduct = () => {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    if (isThobe && categoriesByType['1']) {
-      const womenCategory = categoriesByType['1'].items.find(
-        (category) => category.category_name === 'Women'
-      );
-      if (womenCategory) {
-        setGender(womenCategory); // Automatically set gender to 'Women'
-      }
+// Add to your useEffect for setting the default category when isThobe is true
+useEffect(() => {
+  if (isThobe && categoriesByType['1']) {
+    const womenCategory = categoriesByType['1'].items.find(
+      (category) => category.category_name === 'Women'
+    );
+    if (womenCategory) {
+      setGender(womenCategory); // Automatically set gender to 'Women'
+      
+      // Add "Women" to selectedCategories if it's not already there
+      setSelectedCategories((prevSelected) => {
+        // Filter out any existing gender category from the selected categories
+        const updatedCategories = prevSelected.filter(
+          (selected) => selected.category_group_id !== womenCategory.category_group_id
+        );
+
+        // Add "Women" to selectedCategories if it's not already there
+        if (!updatedCategories.some((selected) => selected.category_id === womenCategory.category_id)) {
+          return [...updatedCategories, womenCategory];
+        }
+        return updatedCategories;
+      });
     }
-  }, [isThobe, categoriesByType]);
+  }
+}, [isThobe, categoriesByType]);
+
 
 
   const toggleThobe = () => {
@@ -130,15 +147,24 @@ const UploadProduct = () => {
     setCategory((prev) => (prev && prev.category_id === category.category_id ? null : category));
   
     setSelectedCategories((prevSelected) => {
-      // If the category ID is already selected, remove it, otherwise add it
-      if (prevSelected.some((selected) => selected.category_id === category.category_id)) {
-        return prevSelected.filter((selected) => selected.category_id !== category.category_id);
-      } else {
-        return [...prevSelected, category.category_id];
+      // Check if there is an existing category with the same category_group_id
+      const updatedCategories = prevSelected.filter(
+        (selected) => selected.category_group_id !== category.category_group_id
+      );
+  
+      // If the new category is not already selected, add it to the filtered list
+      if (!updatedCategories.some((selected) => selected.category_id === category.category_id)) {
+        return [...updatedCategories, category];
       }
+      
+      return updatedCategories;
     });
-    console.log(selectedCategories)
+    // Convert selectedCategories to a list of category IDs
+    const categoryIds = selectedCategories.map((category) => category.category_id);
+    console.log(selectedCategories);
+    console.log(categoryIds);
   };
+  
 
   const renderCategoryList = (categories, selectedCategory, setCategory) => (
     <ul className="space-y-2 font-medium">
@@ -201,6 +227,13 @@ const UploadProduct = () => {
       product_type_id: prod_type,
     };
 
+    
+
+    // Convert selectedCategories to a list of category IDs
+    const categoryIds = selectedCategories.map((category) => category.category_id);
+    console.log('categoryids')
+    console.log(categoryIds)
+
     // create formdata object to be passed to server
     const formData = new FormData();
     formData.append('name', generatedName);
@@ -210,7 +243,7 @@ const UploadProduct = () => {
     formData.append('stock', productData.stock);
     console.log('Categories:');
     console.log(selectedCategories);
-    formData.append('categories', selectedCategories);
+    formData.append('categories', categoryIds);
     formData.append('product_type_id', productData.product_type_id);
 
 

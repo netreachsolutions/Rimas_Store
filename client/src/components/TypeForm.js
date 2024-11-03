@@ -23,7 +23,7 @@ const TypeForm = () => {
                     next: 'finish'
                 },
                 {
-                    id: 20,
+                    id: 18,
                     english: 'Ratti',
                     arabic: 'راتي',
                     image_url: imageConfig.brands.ratti,
@@ -37,21 +37,21 @@ const TypeForm = () => {
                     next: 'finish'
                 },
                 {
-                    id: 18,
+                    id: 27,
                     english: 'Switzerland',
                     arabic: 'ايطالي',
                     image_url: imageConfig.brands.italian,
                     next: 'finish'
                 },
                 {
-                    id: 18,
+                    id: 26,
                     english: 'Sahra',
                     arabic: 'ايطالي',
                     image_url: imageConfig.brands.italian,
                     next: 'width'
                 },
                 {
-                    id: 18,
+                    id: 25,
                     english: 'Other',
                     arabic: 'ايطالي',
                     image_url: imageConfig.brands.italian,

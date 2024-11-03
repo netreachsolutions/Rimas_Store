@@ -1,6 +1,7 @@
 // services/userService.js
 const { 
   getAllProductsWithImage, 
+  getAllActiveProductsWithImage,
   createProduct,
   createProductImage,
   findProductByIdWithImages,
@@ -127,15 +128,26 @@ class ProductService {
 static async getProductsWithFilters(db, filters) {
   console.log(filters);
   const { categoryIds, minPrice, maxPrice } = filters;
+  console.log(filters)
   return new Promise((resolve, reject) => {
-    getProductsByCategoryIdsAndPriceRange(db, categoryIds, minPrice, maxPrice, (err, products) => {
-      if (err) {
-        return reject(err);
-      }
-      console.log('products:')
-      console.log(products)
-      resolve(products);
-    });
+    if (categoryIds.length == 0) {
+      getAllActiveProductsWithImage(db, (err, allActiveProducts) => {
+        if (err) {
+          return reject(err);
+        }
+        resolve(allActiveProducts);
+      })
+    } else {
+
+      getProductsByCategoryIdsAndPriceRange(db, categoryIds, minPrice, maxPrice, (err, products) => {
+        if (err) {
+          return reject(err);
+        }
+        console.log('products:')
+        console.log(products)
+        resolve(products);
+      });
+    }
   });
 }
 

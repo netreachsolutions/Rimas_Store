@@ -67,7 +67,7 @@ class CategoryService {
           }
           console.log(category_group_id)
           // Add the category to the array for its type
-          acc[category_group_id].items.push({ category_id, category_name });
+          acc[category_group_id].items.push({ category_id, category_name, category_group_id });
   
           return acc;
         }, {});

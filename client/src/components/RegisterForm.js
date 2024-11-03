@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import { useAlert } from '../context/AlertContext'; // Importing the useAlert hook
+import { useLogin } from '../context/LoginContext'; // Import the context
 import { PiCircleNotch } from "react-icons/pi";
 
 const RegisterForm = ({ onClose, onSuccess }) => {
+  const { showLogin } = useLogin(); // Add showReset function from context
   const { showAlert } = useAlert(); // Using the alert context
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("register"); // Default to "signin"
   const [formData, setFormData] = useState({
     email: '',
     first_name: '',
@@ -35,6 +38,12 @@ const RegisterForm = ({ onClose, onSuccess }) => {
     setIsProcessing(false); // End the processing state
   };
 
+  useEffect(() => {
+    if (selectedOption == "signin") {
+      showLogin()
+    }
+  }, [selectedOption])
+
   return (
     <>
       {/* Backdrop Overlay */}
@@ -49,6 +58,30 @@ const RegisterForm = ({ onClose, onSuccess }) => {
           <h1 className="m-0">Register</h1>
         </section>
         
+        <div className="mb-4 flex flex-col justify-left items-start w-full border-[1px] rounded-[5px]">
+          <label className="block px-2 py-1 w-full text-left">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="register"
+              checked={selectedOption === "register"}
+              onChange={() => setSelectedOption("register")}
+            />
+            <span className="ml-1 text-[15px]">Register</span> <span className="text-[12px] text-gray-700">Create an account.</span>
+          </label>
+          <div className="w-full h-[0.5px] bg-gray-200" />
+          <label className="block px-2 bg-gray-50 py-1">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value="signin"
+              checked={selectedOption === "signin"}
+              onChange={() => setSelectedOption("signin")}
+            />
+            <span className="ml-1 text-[15px]">Sign in</span> <span className="text-[12px] text-gray-700">Already a Customer?</span>
+          </label>
+        </div>
+
         {/* Registration Form */}
         <form onSubmit={handleSubmit} className="space-y-3 w-full">
           <input
