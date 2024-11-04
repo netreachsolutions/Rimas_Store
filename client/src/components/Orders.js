@@ -164,6 +164,53 @@ const Orders = () => {
         </tbody>
       </table>
 
+
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full">
+            <h3 className="text-xl font-bold mb-4">Update Order Status</h3>
+            <form onSubmit={handleModalSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Courier</label>
+                <select
+                  value={courier}
+                  onChange={(e) => setCourier(e.target.value)}
+                  className="border rounded px-3 py-2 w-full"
+                >
+                  <option value="royal_mail">Royal Mail</option>
+                  <option value="dhl">DHL</option>
+                  <option value="ups">UPS</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Tracking ID</label>
+                <input
+                  type="text"
+                  value={trackingIdInput}
+                  onChange={(e) => setTrackingIdInput(e.target.value)}
+                  className="border rounded px-3 py-2 w-full"
+                  placeholder="Enter tracking ID"
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
+                  onClick={closeModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       
     </div>
     </div>
