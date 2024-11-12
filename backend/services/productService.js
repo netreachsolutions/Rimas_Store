@@ -23,7 +23,7 @@ const { resolve } = require('path');
 class ProductService {
   static async allProducts(db) {
     return new Promise((resolve, reject) => {
-      getAllProductsWithImage(db, async (err, results) => {
+      getAllProductsWithImage(async (err, results) => {
             if (err) return reject(err);
     
             const products = results;
@@ -33,9 +33,9 @@ class ProductService {
     });
   };
 
-  static async findProductById(db, productId) {
+  static async findProductById(productId) {
     return new Promise((resolve, reject) => {
-      findProductByIdWithImages(db, productId, (err, results) => {
+      findProductByIdWithImages(productId, (err, results) => {
         if (err) {
           return reject(err);
         }
@@ -64,14 +64,14 @@ class ProductService {
     });
   }
 
-  static async newProduct(db, productData) {
+  static async newProduct(productData) {
     const { name, description, price, weight, stock, uploadedImageUrls, categories, product_type_id } = productData;
 
     console.log(uploadedImageUrls);
 
     return new Promise((resolve, reject) => {
         // First, create the product
-        createProduct(db, { name, description, price, weight, stock, product_type_id }, (err, result) => {
+        createProduct({ name, description, price, weight, stock, product_type_id }, (err, result) => {
             if (err) {
                 console.error('Error creating product:', err);
                 return reject(err); // Reject if there's an error creating the product
@@ -89,7 +89,7 @@ class ProductService {
                 console.log('Product images created');
 
                 // Now, set the product categories
-                setProductCategories(db, productId, categories, (err, result) => {
+                setProductCategories(productId, categories, (err, result) => {
                     if (err) {
                         console.error('Error creating product categories:', err);
                         return reject(err); // Reject if there's an error creating the product categories
@@ -112,9 +112,9 @@ class ProductService {
 
   
 
-  static async getProductsByCategory(db, categoryId) {
+  static async getProductsByCategory(categoryId) {
     return new Promise((resolve, reject) => {
-        getProductsByCategoryId(db, categoryId, (err, products) => {
+        getProductsByCategoryId(categoryId, (err, products) => {
             if (err) {
                 return reject(err);
             }
@@ -125,13 +125,13 @@ class ProductService {
 
   }
 // The calling function in your service/controller
-static async getProductsWithFilters(db, filters) {
+static async getProductsWithFilters(filters) {
   console.log(filters);
   const { categoryIds, minPrice, maxPrice } = filters;
   console.log(filters)
   return new Promise((resolve, reject) => {
     if (categoryIds.length == 0) {
-      getAllActiveProductsWithImage(db, (err, allActiveProducts) => {
+      getAllActiveProductsWithImage((err, allActiveProducts) => {
         if (err) {
           return reject(err);
         }
@@ -139,7 +139,7 @@ static async getProductsWithFilters(db, filters) {
       })
     } else {
 
-      getProductsByCategoryIdsAndPriceRange(db, categoryIds, minPrice, maxPrice, (err, products) => {
+      getProductsByCategoryIdsAndPriceRange(categoryIds, minPrice, maxPrice, (err, products) => {
         if (err) {
           return reject(err);
         }

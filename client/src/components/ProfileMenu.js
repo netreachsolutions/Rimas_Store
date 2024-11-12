@@ -6,7 +6,7 @@ import { useLogin } from '../context/LoginContext';
 
 const ProfileMenu = ({ isOpen, onClose }) => {
   const { logout, auth, isLoggedIn, showLogin } = useLogin(); // Correct the variable name here
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("GBP");
 
   const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
@@ -17,7 +17,7 @@ const ProfileMenu = ({ isOpen, onClose }) => {
   }
 
   const currencies = [
-    { code: "USD", label: "USD", flag: imageConfig.flags.usa },
+    // { code: "USD", label: "USD", flag: imageConfig.flags.usa },
     { code: "GBP", label: "GBP", flag: imageConfig.flags.gb },
   ];
 

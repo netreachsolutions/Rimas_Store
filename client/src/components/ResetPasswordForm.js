@@ -7,6 +7,7 @@ import { useAlert } from '../context/AlertContext';
 const ResetPasswordForm = ({ onClose, onSuccess }) => {
   const { showLogin, hideLogin } = useLogin(); // Manage login/reset modal visibility
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState(1); // Step 1: Enter email, Step 2: Enter OTP, Step 3: Reset Password
   const [message, setMessage] = useState('');
@@ -21,7 +22,7 @@ const ResetPasswordForm = ({ onClose, onSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post('/api/users/otp', { email });
+      const response = await axios.post('/api/users/otp', { phone });
       setMessage(response.data.message);
       showAlert(response.data.message, 'success')
       setStep(2); // Move to OTP input step
@@ -39,7 +40,7 @@ const ResetPasswordForm = ({ onClose, onSuccess }) => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post('/api/users/otp/verify', { email, otp });
+      const response = await axios.post('/api/users/otp/verify', { phone, otp });
       localStorage.setItem('otp-token', response.data.accessToken);
       setMessage('OTP verified. You can now reset your password.');
       setStep(3); // Move to reset password step
@@ -67,7 +68,7 @@ const ResetPasswordForm = ({ onClose, onSuccess }) => {
     setError('');
     try {
       const token = localStorage.getItem('otp-token');
-      const response = await axios.post('/api/users/reset', { email, pass: password }, {
+      const response = await axios.post('/api/users/reset', { phone, pass: password }, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessage('Password reset successfully');
@@ -103,17 +104,24 @@ const ResetPasswordForm = ({ onClose, onSuccess }) => {
         <div className="reset-password-container space-y-4">
           {step === 1 && (
             <div className='space-y-3'>
-              <input
+              {/* <input
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border rounded"
+              /> */}
+              <input
+                type="text"
+                placeholder="Enter your phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-3 py-2 border rounded"
               />
               <button
                 className="w-full py-2 px-4 font-semibold text-white bg-black rounded-md hover:bg-gray-700"
                 onClick={sendOTP}
-                disabled={!email}
+                disabled={!phone}
               >
                 Send Reset Link
               </button>

@@ -7,7 +7,9 @@ const authMiddleware = require("../middlewares/authMiddleware");
 
 const router = express.Router({mergeParams: true});
 
-router.post("/register", customerController.registerCustomer);
+// router.post("/register", customerController.registerCustomer);
+router.post("/custom-order-request", authMiddleware('customer'), customerController.customOrderRequest);
+router.post("/register", authMiddleware('register_auth'), customerController.registerCustomer2);
 router.post("/login", customerController.loginCustomer);
 router.post("/otp", customerController.initiateOTP);
 router.post("/otp/verify", customerController.verifyOTP);

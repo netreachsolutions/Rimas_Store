@@ -8,7 +8,7 @@ import { useLogin } from '../context/LoginContext';
 
 const SideMenu = ({ isOpen, onClose }) => {
   const { logout, auth, isLoggedIn, showLogin } = useLogin(); // Correct the variable name here
-    const [currency, setCurrency] = useState("USD");
+    const [currency, setCurrency] = useState("GBP");
     const handleCurrencyChange = (event) => {
         setCurrency(event.target.value);
       };
@@ -19,14 +19,14 @@ const SideMenu = ({ isOpen, onClose }) => {
 
 
       const currencies = [
-        { code: "USD", label: "USD", flag: imageConfig.flags.usa },
+        // { code: "USD", label: "USD", flag: imageConfig.flags.usa },
         { code: "GBP", label: "GBP", flag: imageConfig.flags.gb },
       ];
     
       const selectedCurrency = currencies.find((cur) => cur.code === currency);
   return (
     <>
-        {isOpen ? <div className="fixed top-0 z-10 inset-0 bg-black opacity-50 w-full h-screen" onClick={onClose} /> : (null)}
+        {isOpen ? <div className="fixed top-0 z-20 inset-0 bg-black opacity-50 w-full h-screen" onClick={onClose} /> : (null)}
     <div
       className={`fixed top-0 left-0 z-50 w-[250px] h-full bg-white shadow-lg transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'

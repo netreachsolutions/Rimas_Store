@@ -8,6 +8,7 @@ import { useAlert } from '../context/AlertContext'; // import the useAlert hook
 import { FaSearch } from "react-icons/fa";
 import { useCart } from "../context/CartContext";
 import AcceptedPaymentMethods from "./AcceptedPaymentMethods";
+import Footer from "./Footer";
 
 
 
@@ -138,8 +139,8 @@ const Cart = () => {
     return (
     <>
       <NavBar/>
-      <div className="w-full">
-        <h1 className="text-[30px] font-normal">
+      <div className="w-full h-[70vh]">
+        <h1 className="text-[30px] font-normal mt-5">
           Your cart is empty
           </h1>
         <button 
@@ -149,7 +150,7 @@ const Cart = () => {
           <FaSearch/> Shop
         </button>
       </div>;
-    
+      <Footer/>
     </>
     )
   }
@@ -245,6 +246,7 @@ const Cart = () => {
           </button>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

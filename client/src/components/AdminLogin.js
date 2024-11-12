@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from '../api/axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useHistory } from '../context/HistoryContext';
+import { useAlert } from '../context/AlertContext';
 
 const AdminLogin = (state) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const AdminLogin = (state) => {
   const navigate = useNavigate();
   const {prevLocation} = useHistory();
   const location = useLocation();
+  const {showAlert} = useAlert();
   // const from = location.state?.from?.pathname || '/';
 
   const handleChange = (e) => {
@@ -30,13 +32,14 @@ const AdminLogin = (state) => {
       navigate(prevLocation, { replace: true });
     } catch (error) {
       console.error('Error logging in:', error);
-      alert('Login failed. Please try again.');
+      showAlert('Login failed. Please try again.', 'danger')
+      // alert('Login failed. Please try again.');
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6 flex items-center flex-col justify-center h-screen">
-                    <section className="section_middle mx-auto mb-6 flex justify-center items-center text-[40px]">
+          <section className="section_middle mx-auto mb-6 flex justify-center items-center text-[40px]">
           <h1 className="m-0">RIMAS</h1>
           <img
             className="h-[60px]   mx-[2px]"

@@ -6,7 +6,7 @@ exports.addToCart = async (req, res) => {
   try {
     const customerId = req.tokenAssets.customerId;
     const { productId, quantity, price } = req.body;
-    await cartService.addToCart(db, customerId, productId, quantity, price);
+    await cartService.addToCart(customerId, productId, quantity, price);
     res.status(201).json({ message: 'Item added to cart successfully' });
   } catch (error) {
     console.error('Error adding to cart:', error);
@@ -21,7 +21,7 @@ exports.addToCart = async (req, res) => {
 exports.viewCart = async (req, res) => {
   try {
     const customerId = req.tokenAssets.customerId;
-    const cartItems = await cartService.viewCart(db, customerId);
+    const cartItems = await cartService.viewCart(customerId);
     const price = cartService.calculatePrice(cartItems);
     res.json({ cartItems, price });
   } catch (error) {
@@ -46,7 +46,7 @@ exports.removeCartItem = async (req, res) => {
   console.log('attemting cart removal')
   try {
     const { cartItemId } = req.body;
-    await cartService.removeCartItem(db, cartItemId);
+    await cartService.removeCartItem(cartItemId);
     res.json({ message: 'Item removed from cart successfully' });
   } catch (error) {
     console.error('Error removing cart item:', error);

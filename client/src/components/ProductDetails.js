@@ -13,6 +13,7 @@ import { useLogin } from '../context/LoginContext';
 import { useCart } from '../context/CartContext';
 import { useAlert } from '../context/AlertContext';
 import AcceptedPaymentMethods from './AcceptedPaymentMethods';
+import Footer from './Footer';
 
 const ProductDetails = () => {
   const { showAlert } = useAlert();
@@ -141,7 +142,7 @@ const ProductDetails = () => {
             <div className='flex mb-3'>
               {sizes.map((category, index) => (
                 <button className='border-black bg-gray-50 px-2 py-1 border-[1px]' key={index}>
-                  {category.category_name}
+                  {category.category_name == 'All' ? 'Suitible for All Sizes': category.category_name}
                 </button>
               ))}
             </div>
@@ -188,6 +189,7 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+      <Footer/>
     </div>
   );
 };

@@ -12,14 +12,20 @@ const AdminSideBarMobile = () => {
 
      <>
       {/* Hamburger Icon */}
-      <div className="fixed top-4 left-4 z-50">
-        <section className="md:hidden block">
-        <button onClick={toggleSidebar} className="text-gray-500 focus:outline-none flex flex-col gap-2">
+      {/* <div className="fixed top-0 z-20 inset-0 bg-black opacity-50 w-full h-screen"/> */}
+      {isOpen ? <div className="fixed top-0 z-20 inset-0 bg-black opacity-50 w-full h-screen" onClick={() => setIsOpen(false)} /> : (null)}
+
+      <div className="md:hidden fixed top-0 left-0 z-50 w-full bg-white shadow-md flex justify-between px-4 py-3">
+        <section onClick={toggleSidebar} className="md:hidden flex gap-2 items-center w-full bg-white">
+
+        <button className="text-gray-500 focus:outline-none flex flex-col gap-2">
             <div className="w-[25px] h-[1px] bg-black" />
             <div className="w-[25px] h-[1px] bg-black" />
             <div className="w-[25px] h-[1px] bg-black" />
           </button>
+        <span className="text-[20px] font-normal">menu</span>
         </section>
+        <h1 className="text-[20px] font-normal whitespace-nowrap">Admin</h1>
       </div>
     <aside
       id="logo-sidebar"
@@ -57,15 +63,43 @@ const AdminSideBarMobile = () => {
         </svg>
         <span class="sr-only">Close menu</span>
       </button>
-      <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+      <div className="h-full px-3 py-4 overflow-y-auto bg-gray-100 dark:bg-gray-800">
         <ul className="space-y-2 font-medium">
           <li>
+            <Link to={"/admin/orders"}>
+              <a className="flex items-center text-left px-2 py-3 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                <svg
+                  className="flex-shrink-0 w-[30px] h-[30px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 18 20"
+                >
+                  <path d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z" />
+                </svg>
+                <span className="flex-1 ml-5 whitespace-nowrap text-[20px]">Orders</span>
+              </a>
+            </Link>
+          </li>
+          <li>
+          <Link to={"/admin/products"}>
             <a
               href="#"
-              className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-gray-500 group"
+              className="flex items-center text-left px-2 py-3 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+            >
+              <IoShirt className="w-[30px] h-[30px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
+              <span className="flex-1 ml-5 whitespace-nowrap text-[20px]">Products</span>
+              {/* <span className="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">Pro</span> */}
+            </a>
+            </Link>
+          </li>
+          <li>
+            <div
+              href="#"
+              className="flex items-center text-left p-2 text-gray-500 rounded-lg dark:text-gray-500 group"
             >
               <svg
-                className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-500 "
+                className="flex-shrink-0 w-5 h-5 text-gray-400 transition duration-75  "
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -75,44 +109,16 @@ const AdminSideBarMobile = () => {
                 <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
               </svg>
               <span className="ml-5">Dashboard</span>
-            </a>
-          </li>
-          <li>
-            <Link to={"/admin/orders"}>
-              <a className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                <svg
-                  className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 18 20"
-                >
-                  <path d="M17 5.923A1 1 0 0 0 16 5h-3V4a4 4 0 1 0-8 0v1H2a1 1 0 0 0-1 .923L.086 17.846A2 2 0 0 0 2.08 20h13.84a2 2 0 0 0 1.994-2.153L17 5.923ZM7 9a1 1 0 0 1-2 0V7h2v2Zm0-5a2 2 0 1 1 4 0v1H7V4Zm6 5a1 1 0 1 1-2 0V7h2v2Z" />
-                </svg>
-                <span className="flex-1 ml-5 whitespace-nowrap">Orders</span>
-              </a>
-            </Link>
-          </li>
-          <li>
-          <Link to={"/admin/products"}>
-            <a
-              href="#"
-              className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-            >
-              <IoShirt className="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" />
-              <span className="flex-1 ml-5 whitespace-nowrap">Products</span>
-              {/* <span className="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">Pro</span> */}
-            </a>
-            </Link>
+            </div>
           </li>
           <li>
             {/* <Link to={"/category"}> */}
-              <a
+              <div
                 href="#"
-                className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-gray-500 group"
+                className="flex items-center text-left p-2 rounded-lg text-gray-500 group"
                 >
                 <svg
-                className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-500 "
+                className="flex-shrink-0 w-5 h-5 text-gray-400 transition duration-75  "
                 aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="currentColor"
@@ -124,7 +130,7 @@ const AdminSideBarMobile = () => {
                   Categories
                 </span>
                 {/* <span className="inline-flex items-center justify-center px-2 ms-3 text-sm font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-700 dark:text-gray-300">Pro</span> */}
-              </a>
+              </div>
             {/* </Link> */}
           </li>
 
@@ -138,12 +144,12 @@ const AdminSideBarMobile = () => {
         </a>
      </li> */}
           <li>
-            <a
+            <div
               href="#"
-              className="flex items-center text-left p-2 text-gray-900 rounded-lg dark:text-gray-500 group"
+              className="flex items-center text-left p-2 rounded-lg text-gray-500 group"
             >
               <svg
-                className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-500 "
+                className="flex-shrink-0 w-5 h-5 transition duration-75 text-gray-400 "
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="currentColor"
@@ -152,7 +158,7 @@ const AdminSideBarMobile = () => {
                 <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
               </svg>
               <span className="flex-1 ml-5 whitespace-nowrap">Customers</span>
-            </a>
+            </div>
           </li>
 
           <li className="hidden">

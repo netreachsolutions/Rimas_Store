@@ -8,7 +8,7 @@ exports.createPaymentIntent = async (req, res) => {
 
 
       try {
-        const {clientSecret, nextAction} = await paymentService.createPaymentIntentFromCart( db, customerId, paymentMethodType, currency );
+        const {clientSecret, nextAction} = await paymentService.createPaymentIntentFromCart( customerId, paymentMethodType, currency );
         res.send({
             clientSecret: clientSecret,
             nextAction: nextAction,
@@ -24,7 +24,7 @@ exports.createPaypalOrder = async (req, res) => {
   const customerId = req.tokenAssets.customerId; 
   
   try {
-    const response = await paymentService.createPaypalOrderFromCart(db, customerId);
+    const response = await paymentService.createPaypalOrderFromCart(customerId);
     console.log(response)
     res.send(response);
   } catch (error) {

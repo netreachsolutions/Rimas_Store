@@ -96,7 +96,7 @@ const Orders = () => {
     <div className='flex'>
       <AdminSideBarMobile/>
     {/* <AdminSideBar/> */}
-    <div className="container mx-auto my-8 p-4 flex-grow md:ml-64">
+    <div className="container mx-auto my-[50px] p-4 flex-grow md:ml-64">
       <h2 className="text-2xl font-bold mb-4">All Orders</h2>
       <table className="sm:text-[20px] text-[12px] table-auto w-full border-collapse">
         <thead>
@@ -104,43 +104,47 @@ const Orders = () => {
             <th className="border px-4 py-2">Order ID</th>
             <th className="border px-4 py-2 sm:block hidden">Order Date/Time</th>
             <th className="border px-4 py-2">Customer Name</th>
-            <th className="border px-4 py-2 sm:block hidden">Total Amount</th>
+            <th className="border px-4 py-2">Total Amount</th>
             <th className="border px-4 py-2">Delivery Status</th>
-            <th className="border px-4 py-2">Actions</th>
+            {/* <th className="border px-4 py-2">Actions</th> */}
           </tr>
         </thead>
         <tbody>
           {orders.map(order => (
             <React.Fragment key={order.orderID}>
               <tr>
-                <td className="border px-4 py-2 text-center">{order.orderID}</td>
+                <td className="border px-4 py-2 text-center">
+                  <Link to={`/order/${order.orderID}`}>
+                    <span className='bg-gray-200 p-3 rounded-[50px] font-bold'>{order.orderID}</span>
+                  </Link>
+                </td>
                 <td className="border px-4 py-2 text-center sm:block hidden">{order.orderDateTime}</td>
                 <td className="border px-4 py-2 text-center">{order.customerName}</td>
-                <td className="border px-4 py-2 text-center sm:block hidden">${order.totalAmount}</td>
-                <td className="border px-4 py-2 text-center">{order.deliveryStatus}</td>
-                <td className="border px-4 py-2 text-center">
-                  <div>
+                <td className="border px-4 py-10 text-center">£{order.totalAmount}</td>
+                {order.deliveryStatus == 'dispatched' ? 
+                  <td className="border px-4 py-2 text-center"><span className={`rounded-[10px] px-2 py-3 bg-green-300 text-gray-600`}>{order.deliveryStatus}</span></td>
+                  :
+                  <td className="border px-4 py-2 text-center hover:cursor-pointer"><span onClick={() => openModal(order)} className={`rounded-[10px] px-2 py-5  bg-orange-100`}>{order.deliveryStatus}</span></td>
+                }
+                {/* <td className="border px-4 py-2 text-center"><span className={`rounded-[10px] p-2 ${order.deliveryStatus == 'dispatched' ? 'bg-green-300 text-gray-600' : 'bg-orange-100'}`}>{order.deliveryStatus}</span></td> */}
+                {/* <td className="border px-4 py-2 text-center">
+                  <div className='h-min'>
                   <Link to={`/order/${order.orderID}`}>
                     <button
-                    className="bg-blue-500 w-full text-white px-4 py-2 rounded-t hover:bg-blue-600 mr-2">
+                    className={`bg-blue-500 w-full text-[11px]  text-white px-2 py-2 rounded-t hover:bg-blue-600 mr-2 ${order.deliveryStatus == 'dispatched' ? 'rounded-b' : ''}`}>
                       View Details
                       </button>
                   </Link>
-                  {/* <button
-                    className="bg-blue text-white px-4 py-2 rounded hover:bg-blue mr-2"
-                    onClick={() => toggleExpandOrder(order.orderID)}
-                  >
-                    {expandedOrders[order.orderID] ? 'Hide Details' : 'View Details'}
-                  </button> */}
+
                   <button
-                    className="bg-green-500 w-full text-white px-4 py-2 rounded-b hover:bg-green-600"
+                    className={`bg-green-500 w-full  text-white px-4 py-2 rounded-b hover:bg-green-600 ${order.deliveryStatus == 'dispatched' ? 'hidden' : ''}`}
                     onClick={() => openModal(order)}
                   >
                     Dispatch
                   </button>
 
                   </div>
-                </td>
+                </td> */}
               </tr>
               {expandedOrders[order.orderID] && (
                 <tr>
@@ -168,43 +172,43 @@ const Orders = () => {
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full">
-            <h3 className="text-xl font-bold mb-4">Update Order Status</h3>
+            <h3 className="text-xl font-bold mb-4">Dispatch Order #{selectedOrder.orderID}</h3>
             <form onSubmit={handleModalSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">Courier</label>
                 <select
                   value={courier}
                   onChange={(e) => setCourier(e.target.value)}
-                  className="border rounded px-3 py-2 w-full"
+                  className="border rounded px-3 py-4 w-full"
                 >
                   <option value="royal_mail">Royal Mail</option>
                   <option value="dhl">DHL</option>
                   <option value="ups">UPS</option>
                 </select>
               </div>
-              <div className="mb-4">
+              <div className="mb-20">
                 <label className="block text-sm font-medium mb-2">Tracking ID</label>
                 <input
                   type="text"
                   value={trackingIdInput}
                   onChange={(e) => setTrackingIdInput(e.target.value)}
-                  className="border rounded px-3 py-2 w-full"
+                  className="border rounded px-3 py-5 w-full"
                   placeholder="Enter tracking ID"
                 />
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-between">
                 <button
                   type="button"
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
+                  className="bg-gray-500 text-white px-5 py-3 rounded hover:bg-gray-600 mr-2"
                   onClick={closeModal}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                  className="bg-green-500 text-white px-5 py-3 rounded hover:bg-green-600"
                 >
-                  Save Changes
+                  Mark as Dispatched
                 </button>
               </div>
             </form>

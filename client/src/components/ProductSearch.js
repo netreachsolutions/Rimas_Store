@@ -7,6 +7,7 @@ import imageConfig from '../config/imageConfig';
 import { RxCross2 } from "react-icons/rx";
 import { FaFilter } from "react-icons/fa6";
 import { IoIosClose } from 'react-icons/io';
+import Footer from './Footer';
 
 
 
@@ -240,7 +241,7 @@ const ProductSearch = (props) => {
   return (
     <>
       <NavBar background="white" className="z-50 ml-64" />
-      <div className="container mx-auto my-1 p-4">
+      <div className="container mx-auto my-1 p-4 min-h-[75vh]">
 
       {isSidebarVisible ? <div className="fixed top-0 z-10 inset-0 bg-black opacity-50 w-full h-screen" onClick={onClose} /> : (null)}
 
@@ -398,10 +399,10 @@ const ProductSearch = (props) => {
           ) : error ? (
             <div className="mt-4 text-red-500">{error}</div>
           ) : (
-            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
               {products.map((product) => (
                 <Link to={`/products/${product.product_id}`} key={product.product_id}>
-                  <div className="border p-4 rounded-md shadow hover:shadow-lg transition-shadow h-full">
+                  <div className="border pb-3 md:pb-4 rounded-md shadow hover:shadow-lg transition-shadow h-full">
                     <img
                       src={product.image_url || 'placeholder-image-url'}
                       alt={product.name}
@@ -417,6 +418,7 @@ const ProductSearch = (props) => {
           )}
         </div>
       </div>
+      <Footer/>
     </>
   );
 };

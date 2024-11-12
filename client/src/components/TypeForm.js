@@ -39,21 +39,21 @@ const TypeForm = () => {
                 {
                     id: 27,
                     english: 'Switzerland',
-                    arabic: 'ايطالي',
+                    arabic: 'سواسري',
                     image_url: imageConfig.brands.italian,
                     next: 'finish'
                 },
                 {
                     id: 26,
                     english: 'Sahra',
-                    arabic: 'ايطالي',
+                    arabic: 'صحراء',
                     image_url: imageConfig.brands.italian,
                     next: 'width'
                 },
                 {
                     id: 25,
                     english: 'Other',
-                    arabic: 'ايطالي',
+                    arabic: 'آخر',
                     image_url: imageConfig.brands.italian,
                     next: 'width'
                 }

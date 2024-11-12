@@ -35,7 +35,7 @@ exports.getAllProducts = async (req, res) => {
   //   console.log('Attemting to save product')
   //   const { name, description, price, weight, stock, imageUrl, categories, product_type_id } = req.body;
   //   console.log(req.body)
-  //   ProductService.newProduct(db, { name, description, price, weight, stock, imageUrl, categories, product_type_id }, (err, result) => {
+  //   ProductService.newProduct({ name, description, price, weight, stock, imageUrl, categories, product_type_id }, (err, result) => {
   //     if (err) {
   //       console.error('Error saving product:', err);
   //       return res.status(500).json({ message: 'Failed to save product' });
@@ -97,7 +97,7 @@ exports.getAllProducts = async (req, res) => {
         product_type_id
       };
   
-      const result = await ProductService.newProduct(db, productData);
+      const result = await ProductService.newProduct(productData);
 
       // Step 3: Send response after the product is saved successfully
       res.status(201).json({ message: 'Product saved successfully', result });
@@ -111,7 +111,7 @@ exports.getAllProducts = async (req, res) => {
   exports.getProductById = async (req, res) => {
     try {
       const productId = req.params.id; // Get product ID from URL params
-      const product = await ProductService.findProductById(db, productId); // Fetch product by ID using ProductService
+      const product = await ProductService.findProductById(productId); // Fetch product by ID using ProductService
   
       if (!product) {
         return res.status(404).json({ message: 'Product not found' });
@@ -127,7 +127,7 @@ exports.getAllProducts = async (req, res) => {
   exports.getProductsByCategory = async (req, res) => {
     const { categoryId } = req.params;
     try {
-        const products = await ProductService.getProductsByCategory(db, categoryId);
+        const products = await ProductService.getProductsByCategory(categoryId);
         res.json(products);
     } catch (error) {
         console.error('Error fetching products by category:', error);
@@ -140,7 +140,7 @@ exports.getAllProducts = async (req, res) => {
     const { filters } = req.body;
     console.log('attemting to retrieve products by filters')
     try {
-        const products = await ProductService.getProductsWithFilters(db, filters);
+        const products = await ProductService.getProductsWithFilters(filters);
         console.log(products)
         res.json(products);
     } catch (error) {

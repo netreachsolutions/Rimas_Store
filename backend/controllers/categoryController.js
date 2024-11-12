@@ -5,7 +5,7 @@ exports.createCategory = async (req, res) => {
     try {
         const {name, type} = req.body;
         console.log('Type: '+type);
-        const category = await CategoryService.createCategory(db, {name, type});
+        const category = await CategoryService.createCategory({name, type});
         res.status(201).json(category);
       } catch (error) {
         console.error('Error during category creation:', error);
@@ -18,7 +18,7 @@ exports.addProductsToCategory = async (req, res) => {
     try {
         const {productIds, categoryId} = req.body;
         console.log(productIds)
-        await CategoryService.addToCategory(db, categoryId, productIds);
+        await CategoryService.addToCategory(categoryId, productIds);
         res.json({message: 'Product added to category sucessfully'});
     } catch (error) {
         console.error('Error during adding product to category:', error);
@@ -40,7 +40,7 @@ exports.retrieveAllCategories = async (req, res) => {
 exports.retrieveCategoriesByIds = async (req, res) => {
     try {
         const {categoryIds} = req.body;
-        const categories = await CategoryService.getCategoriesByIds(db, categoryIds)
+        const categories = await CategoryService.getCategoriesByIds(categoryIds)
         res.json(categories);
         
     } catch (error) {
@@ -74,7 +74,7 @@ exports.deleteCategoriesByIDs = async (req, res) =>{
     try{
         const categoryIDs = req.body.selectedCategories
         console.log("\nREQ BODY:", req.body)
-        await CategoryService.deleteCategoriesByIDs(db, categoryIDs);
+        await CategoryService.deleteCategoriesByIDs(categoryIDs);
         res.json({ message: "Deleted Categories with successfully" })
     }catch (error){
         console.error('Error during deleting categories:', error);
@@ -100,7 +100,7 @@ exports.deleteProducts = async (req, res) => {
     try{
         const productIds = req.body.productIds;
         const categoryID = req.body.categoryId;
-        await CategoryService.deleteProductsInCategory(db, categoryID, productIds);
+        await CategoryService.deleteProductsInCategory(categoryID, productIds);
         res.json({"message":"Deleted products from category sucessfully"});
     } 
     catch (error){
@@ -113,7 +113,7 @@ exports.getAllProductsNotInCategory = async (req, res) => {
     const {categoryId} = req.params;
 
     try{
-        const products = await CategoryService.getAllProductsNotInCategoryService(db, categoryId);
+        const products = await CategoryService.getAllProductsNotInCategoryService(categoryId);
         res.json(products);
     } 
     catch (error){

@@ -21,30 +21,31 @@ exports.createOrder = async (req, res) => {
         }
 
         // Step 2: Fetch cart items from the database using cart_id
-        const cartItems = await CartService.viewCart(db, customerId);
+        const cartItems = await CartService.viewCart(customerId);
         if (!cartItems || cartItems.length === 0) {
             return res.status(400).json({ message: 'Cart is empty or invalid' });
         }
 
         // Step 3: Calculate total price of the order (including shipping)
         const totalAmount = cartItems.reduce((total, item) => total + (item.quantity * item.price * 100), 0);
-        const shippingCost = 299; // Example shipping cost in cents
+        const totalWeight = cartItems.reduce((total, item) => total + (item.quantity * item.product_weight), 0);
+        const shippingCost = await paymentService.calculateCartTotal(customerId)
         const finalTotalAmount = totalAmount + shippingCost;
 
         // Step 4: Create Order in the database (transaction)
-        const orderId = await orderService.createOrder(db, customerId, address_id, cartItems, finalTotalAmount, shippingCost);
+        const orderId = await orderService.createOrder(customerId, address_id, cartItems, finalTotalAmount, shippingCost, totalWeight);
 
 
         // Step 5: Mark payment as completed and associate with the order
-        await paymentService.recordPayment(db, payment_intent, orderId, finalTotalAmount, currency);
+        await paymentService.recordPayment(payment_intent, orderId, finalTotalAmount, currency);
 
         // Step 6: Clear the cart after order creation
-        await CartService.clearCart(db, customerId);
+        await CartService.clearCart(customerId);
 
         await ProductService.updateStock(cartItems);
         // Step 7: Send email confirmation to user 
-        await notificationService.sendOrderProcessingNotification(db, orderId)
-        // const customerProfile = await customerService.getCustomerProfile(db, customerId);
+        await notificationService.sendOrderProcessingNotification(orderId)
+        // const customerProfile = await customerService.getCustomerProfile(customerId);
         // const emailMsg = {
         //   to: customerProfile.email,
         //   subject: 'RIMAS Order Confirmation',
@@ -87,7 +88,7 @@ exports.confirmPayapalOrder = async (req, res) => {
       const accessToken = await PaymentService.generateAccessToken();
 
           // Retrieve the cart items for the customer
-    const cartItems = await CartService.viewCart(db, customerId);
+    const cartItems = await CartService.viewCart(customerId);
 
       // Calculate the total amount in the cart
       let totalAmount = 0;
@@ -111,14 +112,14 @@ exports.confirmPayapalOrder = async (req, res) => {
       const orderId = await orderService.createOrder(db.promise(), customerId, address_id, cartItems, totalAmount, shippingCost);
 
       // Step 5: Mark payment as completed and associate with the order
-      await paymentService.recordPayment(db, paypalOrderId, orderId, totalAmount, currency);
+      await paymentService.recordPayment(paypalOrderId, orderId, totalAmount, currency);
 
       // Step 6: Clear the cart after order creation
-      await CartService.clearCart(db, customerId);
+      await CartService.clearCart(customerId);
 
       // Step 7: Send email confirmation to user 
-      await notificationService.sendOrderProcessingNotification(db, orderId)
-      // const customerProfile = await customerService.getCustomerProfile(db, customerId);
+      await notificationService.sendOrderProcessingNotification(orderId)
+      // const customerProfile = await customerService.getCustomerProfile(customerId);
       // const emailMsg = {
       //   to: customerProfile.email,
       //   subject: 'RIMAS Order Confirmation',
@@ -170,9 +171,9 @@ exports.getAllOrders = async (req, res) => {
     console.log(req.body)
 
     try {
-        await orderService.updateDeliveryStatus(db, order_id, delivery_status, tracking_id, courier);
+        await orderService.updateDeliveryStatus(order_id, delivery_status, tracking_id, courier);
 
-        await notificationService.sendOrderDispatchedNotification(db, order_id);
+        await notificationService.sendOrderDispatchedNotification(order_id);
 
         
         res.status(200).json({ message: 'Delivery status updated successfully' });
@@ -187,7 +188,7 @@ exports.getOrderDetails = async (req, res) => {
     const { orderId } = req.params;
     console.log('Order ID: '+orderId)
     try {
-      const orderDetails = await orderService.getOrderDetails(db, orderId);
+      const orderDetails = await orderService.getOrderDetails(orderId);
       if (!orderDetails) {
         return res.status(404).json({ message: 'Order not found' });
       }
@@ -203,7 +204,7 @@ exports.getOrderDetails = async (req, res) => {
     const { orderId } = req.params;
     console.log('Order ID: '+orderId)
     try {
-      const orderItems = await orderService.getOrderItems(db, orderId);
+      const orderItems = await orderService.getOrderItems(orderId);
       if (!orderItems) {
         return res.status(404).json({ message: 'Order not found' });
       }

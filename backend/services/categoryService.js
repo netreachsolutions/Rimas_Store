@@ -15,18 +15,18 @@ const { reject } = require("bcrypt/promises");
 const { getCategory } = require("../controllers/categoryController");
 
 class CategoryService {
-  static async createCategory(db, categoryData) {
+  static async createCategory(categoryData) {
     return new Promise((resolve, reject) => {
-      createCategory(db, categoryData, (err, result) => {
+      createCategory(categoryData, (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
     });
   }
 
-  static async addToCategory(db, categoryId, productIds) {
+  static async addToCategory(categoryId, productIds) {
     return new Promise((resolve, reject) => {
-      addProductsToCategory(db, categoryId, productIds, (err, result) => {
+      addProductsToCategory(categoryId, productIds, (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
@@ -35,16 +35,16 @@ class CategoryService {
 
   static async getAllCategories(db) {
     return new Promise((resolve, reject) => {
-      findAllCategories(db, (err, result) => {
+      findAllCategories((err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
     });
   }
 
-  static async getCategoriesByIds(db, categoryIds) {
+  static async getCategoriesByIds(categoryIds) {
     return new Promise((resolve, reject) => {
-      getCategoriesByIDs(db, categoryIds, (err, result) => {
+      getCategoriesByIDs(categoryIds, (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
@@ -53,7 +53,7 @@ class CategoryService {
 
   static async getCategoriesByType(db) {
     return new Promise((resolve, reject) => {
-      findAllCategoriesWithGroupName(db, (err, result) => {
+      findAllCategoriesWithGroupName((err, result) => {
         console.log(result);
         if (err) return reject(err);
   
@@ -79,23 +79,23 @@ class CategoryService {
   
   static async getAllCategoriesWithCount(db){
     return new Promise((resolve, reject) =>{
-      getAllCategoriesWithCount(db, (err, result) => {
+      getAllCategoriesWithCount((err, result) => {
         if (err) return reject(err);
         resolve(result);
       })
     })
   }
   
-  static async deleteCategoriesWithProducts(db, categoryId){
+  static async deleteCategoriesWithProducts(categoryId){
     return new Promise((resolve, reject) =>{
-      deleteCategoriesWithProducts(db, categoryId, (err, result) => {
+      deleteCategoriesWithProducts(categoryId, (err, result) => {
         if (err) return reject(err);
         resolve(result);
       })
     })
   }
 
-  static async getCategoryByID(db, categoryId){
+  static async getCategoryByID(categoryId){
     return new Promise((resolve,reject)=>{
       getCategoryByID(db,categoryId, (err,result)=>{
         if(err) return reject(err);
@@ -106,16 +106,16 @@ class CategoryService {
 
   static async deleteProductsInCategory(db,categoryId,productIds){
     return new Promise((resolve,reject)=>{
-      deleteSelectedProductsInCategory(db, categoryId, productIds, (err,result)=>{
+      deleteSelectedProductsInCategory(categoryId, productIds, (err,result)=>{
         if(err) return reject(err);
         resolve(result);
       })
     })
   }
 
-  static async getAllProductsNotInCategoryService(db, categoryId){
+  static async getAllProductsNotInCategoryService(categoryId){
     return new Promise((resolve,reject)=>{
-      getAllProductsNotInCategory(db, categoryId, (err,result)=>{
+      getAllProductsNotInCategory(categoryId, (err,result)=>{
         if(err) return reject(err);
         resolve(result);
       })

@@ -1,16 +1,16 @@
 // services/userService.js
 const { resolve } = require('path');
 const { findAddressByCustomerId, createAddress, setAllCustomerAddressFalse, setDefaultAddress } = require('../models/addressModel');
-const { findCustomerById, findCustomerByEmail, updateField } = require('../models/customerModel')
+const { findCustomerById, findCustomerByEmail, updateField, findCustomerByPhone } = require('../models/customerModel')
 const AuthService = require("../services/authService");
 const { reject } = require('bcrypt/promises');
 
 
 class CustomerService {
-  static async getCustomerProfile(db, customerId) {
+  static async getCustomerProfile(customerId) {
     return new Promise((resolve, reject) => {
       // Fetch customer details
-      findCustomerById(db, customerId, (err, customerResults) => {
+      findCustomerById(customerId, (err, customerResults) => {
         if (err) return reject(err);
   
         if (customerResults.length === 0) {
@@ -20,7 +20,7 @@ class CustomerService {
         const customer = customerResults[0];
   
         // Fetch addresses related to the customer
-        findAddressByCustomerId(db, customerId, (err, addressResults) => {
+        findAddressByCustomerId(customerId, (err, addressResults) => {
           if (err) return reject(err);
   
           // Attach addresses to the customer object
@@ -33,27 +33,44 @@ class CustomerService {
     });
   }
 
-  static async getCustomerByEmail(db, email) {
+  static async getCustomerByEmail(email) {
     return new Promise((resolve, reject) => {
       // Fetch customer details
-      findCustomerByEmail(db, email, (err, customerResults) => {
+      findCustomerByEmail(email, (err, customerResults) => {
         if (err) return reject(err);
   
-        if (customerResults.length === 0) {
-          return reject(new Error("Customer not found"));
-        }
+        // if (customerResults.length === 0) {
+        //   return reject(new Error("Customer not found"));
+        // }
   
-        const customer = customerResults[0];
+        const customer = customerResults;
   
-        resolve(customer);
+        resolve(customer[0]);
+      });
+    });
+  }
+
+  static async getCustomerByPhone(phone) {
+    return new Promise((resolve, reject) => {
+      // Fetch customer details
+      findCustomerByPhone(phone, (err, customerResults) => {
+        if (err) return reject(err);
+  
+        // if (customerResults.length === 0) {
+        //   return reject(new Error("Customer not found"));
+        // }
+  
+        const customer = customerResults;
+  
+        resolve(customer[0]);
       });
     });
   }
   
 
-  static async createCustomerAddress(db, addressData) {
+  static async createCustomerAddress(addressData) {
     return new Promise((resolve, reject) => {
-      createAddress(db, addressData, async (err, results) => {
+      createAddress(addressData, async (err, results) => {
         if (err) return reject(err);
 
         const address = results[0];
@@ -65,13 +82,13 @@ class CustomerService {
   }
 
 
-  static async setDefaultCustomerAddress(db, customerId, addressId) {
+  static async setDefaultCustomerAddress(customerId, addressId) {
     return new Promise((resolve, reject) => {
-      setAllCustomerAddressFalse(db, customerId, async (err, results) => {
+      setAllCustomerAddressFalse(customerId, async (err, results) => {
         if (err) return reject(err);
       });
 
-      setDefaultAddress(db, customerId, addressId, async (err, results) => {
+      setDefaultAddress(customerId, addressId, async (err, results) => {
         if (err) return reject(err);
       })
 

@@ -69,7 +69,7 @@ const OrderDetails = () => {
       <div className="container mx-auto my-8 p-6 flex-grow bg-white shadow-md rounded-lg text-left md:ml-64">
         <div className='inner-container max-w-[900px] m-auto'>
         <Link to={'/admin/orders'}>
-        <span className='flex gap-1 items-center rounded-xl py-1 px-1.5 bg-gray-50 w-max  text-gray-500'>
+        <span className=' text-[22px] flex gap-1 items-center rounded-xl py-5 px-5 bg-gray-100 w-max  text-gray-700 my-5'>
         <IoArrowBackOutline />
 
         Back to Orders
@@ -77,42 +77,7 @@ const OrderDetails = () => {
         </Link>
         <h2 className="text-3xl font-bold mb-6 text-gray-800">Order Details for Order #{orderDetails.order_id}</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className='bg-gray-100 rounded px-4 py-2'>
-        <h3 className="text-xl font-semibold mb-2 text-gray-700 ">Customer Details</h3>
-            <p className="mb-2"><strong className="text-gray-600">Name:</strong> {orderDetails.first_name} {orderDetails.last_name}</p>
-            <p className="mb-2"><strong className="text-gray-600">Email:</strong> {orderDetails.email}</p>
-            <p className="mb-2"><strong className="text-gray-600">Phone:</strong> {orderDetails.phone_number}</p>
-          </div>
-
-          <div className='bg-gray-100 rounded px-4 py-2'>
-                        <h3 className="text-xl font-semibold mb-2 text-gray-700">Delivery Details</h3>
-            <p className="mb-2"><strong className="text-gray-600">Address:</strong> {orderDetails.first_line}, {orderDetails.city}, {orderDetails.postcode}, {orderDetails.country}</p>
-            <p className="mb-2"><strong className="text-gray-600">Delivery Status:</strong> {orderDetails.delivery_status}</p>
-            <p className="mb-2"><strong className="text-gray-600">Courier:</strong> {orderDetails.courier}</p>
-            <p className="mb-2"><strong className="text-gray-600">Tracking Number:</strong> {orderDetails.tracking_id}</p>
-
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className='bg-gray-100 rounded px-4 py-2'>
-        <h3 className="text-xl font-semibold mb-2 text-gray-700">Payment Details</h3>
-            <p className="mb-2"><strong className="text-gray-600">Payment ID:</strong> {orderDetails.payment_id}</p>
-            <p className="mb-2"><strong className="text-gray-600">Processor ID:</strong> {orderDetails.processor_id}</p>
-            <p className="mb-2"><strong className="text-gray-600">Amount:</strong> ${orderDetails.payment_amount}</p>
-            <p className="mb-2"><strong className="text-gray-600">Currency:</strong> {orderDetails.currency}</p>
-          </div>
-
-          <div className='bg-gray-100 rounded px-4 py-2'>
-            <h3 className="text-xl font-semibold mb-2 text-gray-700">Order Summary</h3>
-            <p className="mb-2"><strong className="text-gray-600">Order Date:</strong> {new Date(orderDetails.created_at).toLocaleDateString()}</p>
-            <p className="mb-2"><strong className="text-gray-600">Weight:</strong> {orderDetails.total_weight}grams</p>
-            <p className="mb-2"><strong className="text-gray-600">Total:</strong> ${orderDetails.total}</p>
-          </div>
-        </div>
-    <div className="grid grid-cols-1 md:grid-cols-1 gap-5 w-full max-w-[400px]">
-      <h1 className='font-bold'>Items</h1>
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-5 w-full max-w-[400px] mb-5">
           {orderItems.map((item) => (
                 <div key={item.order_item_id} className="flex flex-row gap-2 border px-4 py-1 h-[90px] items-center justify-between">
                 <div className="flex gap-5 items-center">
@@ -139,6 +104,44 @@ const OrderDetails = () => {
               </div>
           ))}
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className='bg-gray-100 rounded px-4 py-2'>
+        <h3 className="text-xl font-semibold mb-2 text-gray-700 ">Customer Details</h3>
+            <p className="mb-2"><strong className="text-gray-600">Name:</strong> {orderDetails.first_name} {orderDetails.last_name}</p>
+            <p className="mb-2"><strong className="text-gray-600">Email:</strong> {orderDetails.email}</p>
+            <p className="mb-2"><strong className="text-gray-600">Phone:</strong> {orderDetails.phone_number}</p>
+          </div>
+
+          <div className='bg-gray-100 rounded px-4 py-2'>
+                        <h3 className="text-xl font-semibold mb-2 text-gray-700">Delivery Details</h3>
+            <p className="mb-2"><strong className="text-gray-600">Address:</strong> {orderDetails.first_line}, {orderDetails.city}, {orderDetails.postcode}, {orderDetails.country}</p>
+            <p className="mb-2"><strong className="text-gray-600">Delivery Status:</strong> {orderDetails.delivery_status}</p>
+            <p className="mb-2"><strong className="text-gray-600">Courier:</strong> {orderDetails.courier}</p>
+            <p className="mb-2"><strong className="text-gray-600">Tracking Number:</strong> {orderDetails.tracking_id}</p>
+            <p className="mb-2"><strong className="text-gray-600">Delivery Amount:</strong> £{(orderDetails.total/100).toFixed(2)}</p>
+
+
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className='bg-gray-100 rounded px-4 py-2'>
+        <h3 className="text-xl font-semibold mb-2 text-gray-700">Payment Details</h3>
+            <p className="mb-2"><strong className="text-gray-600">Payment ID:</strong> {orderDetails.payment_id}</p>
+            <p className="mb-2"><strong className="text-gray-600">Processor ID:</strong> {orderDetails.processor_id}</p>
+            <p className="mb-2"><strong className="text-gray-600">Amount:</strong> £{(orderDetails.payment_amount/100).toFixed(2)}</p>
+            <p className="mb-2"><strong className="text-gray-600">Currency:</strong> {orderDetails.currency}</p>
+          </div>
+
+          <div className='bg-gray-100 rounded px-4 py-2'>
+            <h3 className="text-xl font-semibold mb-2 text-gray-700">Order Summary</h3>
+            <p className="mb-2"><strong className="text-gray-600">Order Date:</strong> {new Date(orderDetails.created_at).toLocaleDateString()}</p>
+            <p className="mb-2"><strong className="text-gray-600">Weight:</strong> {orderDetails.total_weight}grams</p>
+            <p className="mb-2"><strong className="text-gray-600">Amount:</strong> £{(orderDetails.payment_amount/100).toFixed(2)}</p>
+
+          </div>
+        </div>
+
       </div>
     </div>
         </div>

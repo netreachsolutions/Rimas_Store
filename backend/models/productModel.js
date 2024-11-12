@@ -2,7 +2,7 @@
 const { queryDatabase } = require('../config/pool');
 
 
-const createProduct = (db, productData, callback) => {
+const createProduct = (productData, callback) => {
     const { name, description, price, weight, stock, product_type_id } = productData;
     const query = 'INSERT INTO products (name, description, price, product_weight, stock, product_type_id) VALUES (?, ?, ?, ?, ?, ?)';
     // db.query(query, [name, description, price, weight, stock, product_type_id], callback);
@@ -12,7 +12,7 @@ const createProduct = (db, productData, callback) => {
     });
   };
   
-  const findProductById = (db, productId, callback) => {
+  const findProductById = (productId, callback) => {
     const query = 'SELECT * FROM products WHERE product_id = ?';
     // db.query(query, [productId], callback);
     queryDatabase(query, [productId], (err, results) => {
@@ -21,7 +21,7 @@ const createProduct = (db, productData, callback) => {
     });
   };
 
-  const findProductByIdWithImages = (db, productId, callback) => {
+  const findProductByIdWithImages = (productId, callback) => {
     const query = `
       SELECT products.*, product_image.image_url 
       FROM products 
@@ -63,7 +63,7 @@ const createProduct = (db, productData, callback) => {
     });
   };
 
-  const getAllProducts = (db, callback) => {
+  const getAllProducts = (callback) => {
     const query = 'SELECT * FROM products WHERE is_active = TRUE';
     db.query(query, callback);
     queryDatabase(query, [], (err, results) => {
@@ -73,7 +73,7 @@ const createProduct = (db, productData, callback) => {
   };
 
 
-  const getAllProductsWithImage = async (db, callback) => {
+  const getAllProductsWithImage = async (callback) => {
     const query = 'SELECT products.product_id, products.name, products.description, products.is_active, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MIN(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL)));';
     // Use queryDatabase and pass in a callback
     queryDatabase(query, [], (err, results) => {
@@ -82,7 +82,7 @@ const createProduct = (db, productData, callback) => {
     });
   };
 
-  const getAllActiveProductsWithImage = async (db, callback) => {
+  const getAllActiveProductsWithImage = async (callback) => {
     const query = 'SELECT products.product_id, products.name, products.description, products.price, products.stock, product_image.image_url FROM products LEFT JOIN product_image ON products.product_id = product_image.product_id AND (product_image.priority = (SELECT MIN(COALESCE(priority, -1)) FROM product_image WHERE product_image.product_id = products.product_id) OR (product_image.priority IS NULL AND NOT EXISTS (SELECT 1 FROM product_image WHERE product_image.product_id = products.product_id AND product_image.priority IS NOT NULL))) WHERE products.is_active = TRUE;';
     // Use queryDatabase and pass in a callback
     queryDatabase(query, [], (err, results) => {
@@ -94,7 +94,7 @@ const createProduct = (db, productData, callback) => {
 
 
 
- const createProductImage = (db, imageData, callback) => {
+ const createProductImage = (imageData, callback) => {
     const {productId, imageUrl} = imageData;
     const query = 'INSERT INTO product_image (product_id, image_url) VALUES (?, ?)';
     // db.query(query, [productId, imageUrl], callback)
@@ -146,7 +146,7 @@ const updateProductsActiveStatus = (productIds, isActive, callback) => {
 };
 
   
- const getProductsByCategoryId = (db, categoryId, callback) => {
+ const getProductsByCategoryId = (categoryId, callback) => {
   console.log(categoryId)
   const query = `
 SELECT 
@@ -181,7 +181,7 @@ ORDER BY
   });
 };
 
-// const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
+// const getProductsByCategoryIdsAndPriceRange = (categoryIds, minPrice, maxPrice, callback) => {
 //   // let query = `
 //   //   SELECT 
 //   //       p.product_id, 
@@ -272,7 +272,7 @@ ORDER BY
   
 // };
 
-const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
+const getProductsByCategoryIdsAndPriceRange = (categoryIds, minPrice, maxPrice, callback) => {
   // First, get the category_group_id for each selected category_id
   const getCategoryGroupsQuery = `SELECT category_id, category_group_id FROM categories WHERE category_id IN (?)`;
 

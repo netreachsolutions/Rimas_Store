@@ -3,7 +3,7 @@
 const { queryDatabase } = require('../config/pool');
 
 
-const createDelivery = (db, deliveryData, callback) => {
+const createDelivery = (deliveryData, callback) => {
     const { order_id, address_id, delivery_status } = deliveryData;
     const query = 'INSERT INTO deliveries (order_id, address_id, delivery_status) VALUES (?, ?, ?)';
     // db.query(query, [order_id, address_id, delivery_status], callback);

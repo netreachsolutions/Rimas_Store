@@ -2,6 +2,8 @@
 
 const sgMail = require('@sendgrid/mail');
 const smsClient = require('twilio')(process.env.ACC_SID, process.env.AUTH_TOKEN);
+const { parsePhoneNumberFromString } = require('libphonenumber-js');
+
 
 // Load SendGrid API key from environment variables
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
@@ -10,14 +12,25 @@ const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 sgMail.setApiKey(SENDGRID_API_KEY);
 
 const sendSMS = async (message, number) => {
-  smsClient.messages
-  .create({
+  try {
+    const phoneNumber = parsePhoneNumberFromString(number);
+    if (phoneNumber && phoneNumber.country !== 'GB') {
+      // Skip sending SMS to non-GB numbers
+      console.warn('SMS not sent: Number is not in the allowed region.');
+      // return;
+    }
+
+    const msg = await smsClient.messages.create({
       body: message,
       to: number,
       from: '+447488893475',
-  })
-  .then((message) => console.log(message.sid));
-}
+    });
+    console.log('SMS sent successfully:', msg.sid);
+  } catch (err) {
+    console.error('Error sending SMS:', err);
+    // Handle the error as needed
+  }
+};
 
 const sendEmail = async (emailData) => {
   const { to, subject, text, html } = emailData;

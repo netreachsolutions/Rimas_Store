@@ -7,6 +7,7 @@ import NewAddress from './NewAddress';
 import EditProfileField from './EditProfileField';
 import { MdPassword } from 'react-icons/md';
 import { useLogin } from '../context/LoginContext';
+import Footer from './Footer';
 
 const Profile = () => {
   const {showReset} = useLogin()
@@ -68,9 +69,9 @@ const Profile = () => {
 
   const handleSave = (newValue) => {
     setProfileData((prevData) => {
-      if (editField === "name") {
-        return { ...prevData, first_name: newValue.first_name, last_name: newValue.last_name };
-      }
+      // if (editField === "name") {
+      //   return { ...prevData, first_name: newValue.first_name, last_name: newValue.last_name };
+      // }
       return { ...prevData, [editField]: newValue };
     });
     setEditField(null); // Close the editor after saving
@@ -98,31 +99,37 @@ const Profile = () => {
       )}
       <NavBar />
       <h2 className="text-2xl font-semibold mb-3 text-gray-600 text-left pl-4 md:hidden">Profile</h2>
-      <div className="w-max flex md:flex-row flex-col md:gap-5 mx-auto bg-white shadow-md rounded-lg md:mt-7">
+      <div className="w-max flex md:flex-row flex-col md:gap-5 mx-auto bg-white shadow-md rounded-lg md:mt-7 min-h-[400px]">
         <div className=" border-gray-300 text-left md:border-[1.5px] border-t-[1.5px] md:w-auto w-screen rounded-[5px] h-max">
           {[
-            { label: "Email", field: "email" },
-            { label: "Name", field: "name", value: `${profileData.first_name} ${profileData.last_name}` },
-            { label: "Phone", field: "phone_number" },
-            { label: "Password", field: "password", value: "************" },
-          ].map(({ label, field, value }) => (
+            { label: "Name", field: "name", value: `${profileData.name}`, changeable: true},
+            { label: "Email", field: "email", changeable: false},
+            { label: "Phone", field: "phone_number", changeable: false },
+            // { label: "Password", field: "password", value: "************" },
+          ].map(({ label, field, value, changeable }) => (
             <span key={field} className="text-lg mb-2 border-b-[1.5px] px-4 py-3 flex justify-between items-center gap-10">
               <div className='flex flex-col'>
                 <strong>{label}</strong>
                 {value || profileData[field]}
               </div>
+              {changeable && (
               <button
                 className='font-normal border-[1px] rounded-[8px] w-[100px] h-[80%] border-gray-400 hover:bg-gray-100'
                 onClick={() => handleEditClick(field)}
+                disabled={!changeable}
               >
                 Edit
               </button>
+
+              )
+
+              }
             </span>
           ))}
         </div>
         {/* Addresses Section */}
         <div className="md:border-2 md:w-auto w-screen">
-          <div className='flex justify-between px-4 pt-5 items-end border-b-2 pb-2'>
+          <div className='flex justify-between gap-4 px-4 pt-5 items-end border-b-2 pb-2'>
             <h3 className="text-2xl font-semibold text-gray-700">Addresses</h3>
             <button
               className={`bg-green-500 text-white px-6 py-1 rounded hover:bg-green-600 transition duration-300`}
@@ -152,12 +159,13 @@ const Profile = () => {
       {editField && (
         <EditProfileField
           field={editField}
-          fieldLabel={editField === 'name' ? 'Name' : editField.charAt(0).toUpperCase() + editField.slice(1)}
-          initialValue={editField === 'name' ? { first_name: profileData.first_name, last_name: profileData.last_name } : profileData[editField]}
+          fieldLabel={editField.charAt(0).toUpperCase() + editField.slice(1)}
+          initialValue={profileData[editField]}
           onClose={() => setEditField(null)}
           onSave={handleSave}
         />
       )}
+      <Footer/>
     </>
   );
 };

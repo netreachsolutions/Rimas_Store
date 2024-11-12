@@ -72,10 +72,10 @@ const Products = () => {
   return (
     <>
       <AdminSideBarMobile />
-      <div className="md:ml-64">
+      <div className="md:ml-64 mt-10">
         
         {/* Tab Bar */}
-        <div className="flex justify-between py-0 w-[95%] m-auto border-b-1 mt-[50px]">
+        <div className="flex justify-between py-0 w-[95%] m-auto border-b-1 mt-[80px]">
           <div>
             <button
               className={`px-4 py-2 ${filter === "all" ? "border-b-4 text-black border-blue-500" : "text-gray-500"}`}
@@ -118,12 +118,13 @@ const Products = () => {
             {filteredProducts.map(product => (
               <React.Fragment key={product.product_id}>
                 <tr>
-                <td className="border px-4 py-2 text-center flex gap-3 sm:max-w-[1000px] max-w-[299px]">
+                <td className="border px-4 py-2 text-center flex gap-3 sm:max-w-[1000px] max-w-[299px]"
+                onClick={() => toggleProductSelection(product.product_id)}>
                     <div>
                     <input
                       type="checkbox"
                       checked={selectedProducts.includes(product.product_id)}
-                      onChange={() => toggleProductSelection(product.product_id)}
+                      // onChange={() => toggleProductSelection(product.product_id)}
                     />
                      <span className="text-sm text-gray-400">#{product.product_id}</span>
                     </div>

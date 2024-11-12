@@ -3,7 +3,7 @@
 const { queryDatabase } = require('../config/pool');
 
 
-const createCategory = (db, categoryData, callback) => {
+const createCategory = (categoryData, callback) => {
   const { name, description, image_url, type } = categoryData;
   const query =
     "INSERT INTO categories (category_name, image_url, type) VALUES (?, ?, ?);";
@@ -14,7 +14,7 @@ const createCategory = (db, categoryData, callback) => {
   });
 };
 
-const findAllCategories = (db, callback) => {
+const findAllCategories = (callback) => {
   const query = "SELECT * FROM categories";
   // db.query(query, callback);
   queryDatabase(query, [], (err, results) => {
@@ -23,7 +23,7 @@ const findAllCategories = (db, callback) => {
   });
 };
 
-const findAllCategoriesWithGroupName = (db, callback) => {
+const findAllCategoriesWithGroupName = (callback) => {
   const query = `
     SELECT categories.*, category_groups.group_name, product_type_categories.product_type_id
     FROM category_groups
@@ -39,7 +39,7 @@ const findAllCategoriesWithGroupName = (db, callback) => {
 
 
 
-const findCategoriesByType = (db, type, callback) => {
+const findCategoriesByType = (type, callback) => {
   const query = "SELECT * FROM categories WHERE type = ?";
   // db.query(query, [type], callback);
   queryDatabase(query, [type], (err, results) => {
@@ -48,7 +48,7 @@ const findCategoriesByType = (db, type, callback) => {
   });
 };
 
-const addProductsToCategory = (db, categoryId, productIds, callback) => {
+const addProductsToCategory = (categoryId, productIds, callback) => {
   // Prepare an array to store the SQL values
   const values = [];
 
@@ -80,11 +80,11 @@ const getAllCategoriesWithCount = (db,callback) =>{
   });
 }
 
-const deleteCategoriesWithProducts = (db, categoryIDs, callback) => {
+const deleteCategoriesWithProducts = (categoryIDs, callback) => {
   return callback(err, null);
 }
 
-// const deleteCategoriesWithProducts = (db, categoryIds, callback) => {
+// const deleteCategoriesWithProducts = (categoryIds, callback) => {
 //   // Create placeholders for the number of category IDs
 //   console.log("\ncategory ids:")
 //   console.log(categoryIds)
@@ -137,7 +137,7 @@ const deleteCategoriesWithProducts = (db, categoryIDs, callback) => {
 //   });
 // };
 
-const getCategoryByID = (db, categoryID, callback)=>{
+const getCategoryByID = (categoryID, callback)=>{
   const query = `SELECT category_id, category_name, image_url FROM categories WHERE category_id = ?;`;
 
   // db.query(query, categoryID,callback);
@@ -147,7 +147,7 @@ const getCategoryByID = (db, categoryID, callback)=>{
   });
 }
 
-const getCategoriesByIDs = (db, categoryIDs, callback) => {
+const getCategoriesByIDs = (categoryIDs, callback) => {
   const query = `SELECT category_id, category_name, image_url 
                  FROM categories 
                  WHERE category_id IN (?);`;
@@ -159,7 +159,7 @@ const getCategoriesByIDs = (db, categoryIDs, callback) => {
   });
 }
 
-const getAllProductsNotInCategory = (db, categoryID, callback) => {
+const getAllProductsNotInCategory = (categoryID, callback) => {
   const query = `
     SELECT p.product_id, p.name, p.price, p.stock, p.created_at
     FROM products p
@@ -176,7 +176,7 @@ const getAllProductsNotInCategory = (db, categoryID, callback) => {
 };
 
 
-const deleteSelectedProductsInCategory = (db, categoryID, productIDs, callback)=>{
+const deleteSelectedProductsInCategory = (categoryID, productIDs, callback)=>{
   const query = `DELETE FROM product_category WHERE category_id = ? AND product_id IN (?);`
 
   // db.query(query, [categoryID, productIDs], callback)
@@ -186,7 +186,7 @@ const deleteSelectedProductsInCategory = (db, categoryID, productIDs, callback)=
   });
 }
 
-const setProductCategories = (db, productId, categoryIds, callback) => {
+const setProductCategories = (productId, categoryIds, callback) => {
 
       if (typeof categoryIds === 'string') {
         categoryIds = categoryIds.split(',').map(Number); // Convert to an array of numbers

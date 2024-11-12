@@ -10,7 +10,7 @@ import ProfileMenu from "./ProfileMenu";
 import { useLogin } from "../context/LoginContext";
 
 const NavBar = (props) => {
-  const {isLoggedIn} = useLogin();
+  const {isLoggedIn, showLogin} = useLogin();
   const navigate = useNavigate();
   const [currency, setCurrency] = useState("USD");
   const [bgColor, setBgColor] = useState("transparent");
@@ -84,7 +84,9 @@ const NavBar = (props) => {
         </section>
 
         <section className="section_right flex items-center text-gray-700 md:gap-5 gap-0">
-          {isLoggedIn ? (null) : <button className="text-gray-600 md:text-[15px] text-[11px] md:block hidden">
+          {isLoggedIn ? (null) : 
+          <button className="text-gray-600 md:text-[15px] text-[11px] md:block hidden"
+          onClick={() => showLogin()}>
             Sign in
           </button>}
 

@@ -5,6 +5,7 @@ import { useAlert } from './AlertContext';
 import LoginForm from '../components/LoginForm';
 import RegisterForm from '../components/RegisterForm'; // Import RegisterForm
 import ResetPasswordForm from '../components/ResetPasswordForm'; // Import ResetPasswordForm
+import SignInForm from '../components/SignInForm';
 
 // Create the context
 const LoginContext = createContext();
@@ -97,7 +98,7 @@ export const LoginProvider = ({ children }) => {
 
       {/* Render the appropriate form based on the mode */}
       {loginState.visible && loginState.mode === 'login' && (
-        <LoginForm onClose={hideLogin} onSuccess={loginState.onSuccess} />
+        <SignInForm onClose={hideLogin} onSuccess={loginState.onSuccess} />
       )}
       {loginState.visible && loginState.mode === 'register' && (
         <RegisterForm onClose={hideLogin} onSuccess={loginState.onSuccess} />

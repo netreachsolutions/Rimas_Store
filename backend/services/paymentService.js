@@ -15,7 +15,7 @@ class PaymentService {
 
   static async calculateCartTotal(customerId) { 
     try {
-      const cartItems = await CartService.viewCart(db, customerId);
+      const cartItems = await CartService.viewCart(customerId);
       // Calculate the total amount
       let itemsAmount = 0;
       let netWeight = 0;
@@ -24,11 +24,11 @@ class PaymentService {
         netWeight += item.product_weight;
       });
 
-      let shippingCost =0;
+      let shippingCost =2000;
       if (netWeight < 2000) {
-        shippingCost = 299;
-      } else {
-        shippingCost = 499;
+        shippingCost = 500;
+      } else if (netWeight < 4000) {
+        shippingCost = 1000;
       }
 
       const totalAmount = itemsAmount + shippingCost;
@@ -40,9 +40,9 @@ class PaymentService {
     }
   }
 
-  static async createPaymentIntentFromCart(db, customerId, paymentMethodType, currency) {
+  static async createPaymentIntentFromCart(customerId, paymentMethodType, currency) {
     try {
-      const cartItems = await CartService.viewCart(db, customerId);
+      const cartItems = await CartService.viewCart(customerId);
 
       // Calculate the total amount
       let totalAmount = 0;
@@ -51,7 +51,8 @@ class PaymentService {
       });
 
       const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
-      totalAmount += shippingCost; // Add shipping cost to the total amount
+      // totalAmount += shippingCost; // Add shipping cost to the total amount
+      totalAmount =  await this.calculateCartTotal(customerId)
 
       const params = {
         payment_method_types: [paymentMethodType],
@@ -140,7 +141,7 @@ static async validatePaymentIntent(paymentIntentId) {
   return false;
 };
 
-  static async recordPayment(db, paymentIntentId, orderId, totalAmount, currency) {
+  static async recordPayment(paymentIntentId, orderId, totalAmount, currency) {
     return new Promise((resolve, reject) => {
        const paymentData = { 
         order_id: orderId, 
@@ -149,7 +150,7 @@ static async validatePaymentIntent(paymentIntentId) {
         currency, 
         paymentStatus: 'completed' 
       }
-       createPayment(db, paymentData, (err, result) => {
+       createPayment(paymentData, (err, result) => {
         if (err) {
           console.error('Error creating product image:', err);
           return reject(err); // Reject if there's an error creating the product image
@@ -166,9 +167,9 @@ static async validatePaymentIntent(paymentIntentId) {
     });
   }
 
-  static async createPaypalOrderFromCart(db, customerId) {
+  static async createPaypalOrderFromCart(customerId) {
     try {
-      const cartItems = await CartService.viewCart(db, customerId);
+      const cartItems = await CartService.viewCart(customerId);
 
       // Calculate the total amount
       let totalAmount = 0;
@@ -253,7 +254,7 @@ static async validatePaymentIntent(paymentIntentId) {
     }
   };
 
-  static async recordPaypalPayment(db, paymentIntentId, orderId, totalAmount, currency) {
+  static async recordPaypalPayment(paymentIntentId, orderId, totalAmount, currency) {
     return new Promise((resolve, reject) => {
        const paymentData = { 
         order_id: orderId, 
@@ -262,7 +263,7 @@ static async validatePaymentIntent(paymentIntentId) {
         currency, 
         paymentStatus: 'completed' 
       }
-       createPayment(db, paymentData, (err, result) => {
+       createPayment(paymentData, (err, result) => {
         if (err) {
           console.error('Error creating product image:', err);
           return reject(err); // Reject if there's an error creating the product image

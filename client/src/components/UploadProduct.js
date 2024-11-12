@@ -2,12 +2,13 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from './CropImage'; // Helper function to crop the image
 import axios from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AdminSideBar from './AdminSideBar';
 import { MdOutlineFileUpload } from "react-icons/md";
 import AdminSideBarMobile from './AdminSideBarMobile';
 import UploadImages from './UploadImages';
 import { useAlert } from '../context/AlertContext'; // import the useAlert hook
+import { PiCircleNotch } from 'react-icons/pi';
 
 
 const UploadProduct = () => {
@@ -19,6 +20,8 @@ const UploadProduct = () => {
     stock: '',
   });
 
+  const location = useLocation();
+  const [isProcessing, setIsProcessing] = useState(false);
   const {showAlert} = useAlert();
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -193,10 +196,12 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsProcessing(true);
   
     if (!productData.images) {
       showAlert('Please upload an image first', 'danger')
       // alert('Please upload an image first');
+      setIsProcessing(false);
       return;
     }
   
@@ -211,7 +216,8 @@ useEffect(() => {
         generatedName = `${brand.category_name} ${thobeWidth.category_name} ${finish.category_name}`.trim();
       } else {
         // Alert the user if any required Thobe categories are not selected
-        alert('Please select brand, width, and finish for the Thobe.');
+        showAlert('Please select brand, width, and finish for the Thobe.', 'warning');
+        setIsProcessing(false);
         return;
       }
     }
@@ -268,11 +274,16 @@ useEffect(() => {
       });
   
       showAlert('Product saved successfully', 'success')
-      navigate('/admin');
+      navigate('/admin/products');
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product.');
+      if (error.response && error.response.status === 403) {
+        // Navigate to admin login if unauthorized
+        window.location.reload();
+      } else {
+        alert('Failed to save product.');
+      }
     }
+    setIsProcessing(false);
   };
 
   const handleImagesChange = (images) => {
@@ -508,10 +519,12 @@ useEffect(() => {
 
             <button
               type="submit"
-              className="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700"
+              className="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 disabled:hover:bg-green-600"
+              disabled={isProcessing}
             >
-              Save Product
+              {isProcessing ? <PiCircleNotch className="animate-spin text-[30px] m-auto" /> : <span>Save Product</span>}
             </button>
+
           </form>
         </div>
       </div>

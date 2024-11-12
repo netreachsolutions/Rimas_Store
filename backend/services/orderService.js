@@ -12,15 +12,15 @@ const {
 } = require('../models/orderModel');
 
 class OrderService {
-    // static async createOrder(db, customerId, addressId, cartItems, totalAmount, shippingCost) {
+    // static async createOrder(customerId, addressId, cartItems, totalAmount, shippingCost) {
     //     return new Promise((resolve, reject) => {
     //         try {
     //             // Step 1: Create the order
-    //             // const [orderResult] = await createOrder(db, {
+    //             // const [orderResult] = await createOrder({
     //             //     customer_id: customerId,
     //             //     delivery_amount: shippingCost
     //             // });
-    //             createOrder(db, {
+    //             createOrder({
     //                 customer_id: customerId,
     //                 delivery_amount: shippingCost
     //             }, (err, result) => {
@@ -33,13 +33,13 @@ class OrderService {
     //             // Step 2: Create order items
     //             for (const item of cartItems) {
 
-    //                 // await createOrderItem(db, {
+    //                 // await createOrderItem({
     //                 //     order_id: orderId,
     //                 //     product_id: item.product_id,
     //                 //     quantity: item.quantity,
     //                 //     price: item.price
     //                 // });
-    //                 createOrderItem(db, {
+    //                 createOrderItem({
     //                     order_id: orderId,
     //                     product_id: item.product_id,
     //                     quantity: item.quantity,
@@ -51,11 +51,11 @@ class OrderService {
 
 
     //             // Step 3: Create delivery record
-    //             // await createDelivery(db, {
+    //             // await createDelivery({
     //             //     order_id: orderId,
     //             //     address_id: addressId
     //             // });
-    //             createDelivery(db, {
+    //             createDelivery({
     //                 order_id: orderId,
     //                 address_id: addressId
     //             }, (err, result) => {
@@ -70,10 +70,10 @@ class OrderService {
     //     });
     // }
 
-    static createOrder(db, customerId, addressId, cartItems, totalAmount, shippingCost) {
+    static createOrder(customerId, addressId, cartItems, totalAmount, shippingCost, totalWeight) {
         return new Promise((resolve, reject) => {
             // Step 1: Create the order
-            createOrder(db, { customer_id: customerId, delivery_amount: shippingCost }, (err, orderResult) => {
+            createOrder({ customer_id: customerId, delivery_amount: shippingCost, total_weight: totalWeight }, (err, orderResult) => {
                 if (err) {
                     return reject('Order creation error: ' + err);
                 }
@@ -83,7 +83,7 @@ class OrderService {
                 // Step 2: Create order items in parallel
                 let itemsProcessed = 0;
                 for (const item of cartItems) {
-                    createOrderItem(db, {
+                    createOrderItem({
                         order_id: orderId,
                         product_id: item.product_id,
                         quantity: item.quantity,
@@ -96,7 +96,7 @@ class OrderService {
                         itemsProcessed++;
                         if (itemsProcessed === cartItems.length) {
                             // Step 3: Create delivery record once all items are processed
-                            createDelivery(db, { order_id: orderId, address_id: addressId }, (err) => {
+                            createDelivery({ order_id: orderId, address_id: addressId }, (err) => {
                                 if (err) {
                                     return reject('Delivery creation error: ' + err);
                                 }
@@ -115,7 +115,7 @@ class OrderService {
     static async getAllOrders(db) {
         return new Promise((resolve, reject) => {
             console.log('attemting orders retrieval')
-        selectAllOrders(db, (err, result) => {
+        selectAllOrders((err, result) => {
             if (err) {
                 console.error('Error retrieving orders:', err);
                 return reject(err); // Reject if there's an error creating the product image
@@ -126,7 +126,7 @@ class OrderService {
         });
     }
 
-    static async updateDeliveryStatus(db, order_id, delivery_status, tracking_id, courier) {
+    static async updateDeliveryStatus(order_id, delivery_status, tracking_id, courier) {
         return new Promise((resolve, reject) => {
             console.log('Attempting to update delivery status');
             console.log("Delivery Status: "+delivery_status);
@@ -138,7 +138,7 @@ class OrderService {
             }
 
             // Call the model function to update the delivery status
-            updateDeliveryStatus(db, order_id, delivery_status, tracking_id, courier, (err, result) => {
+            updateDeliveryStatus(order_id, delivery_status, tracking_id, courier, (err, result) => {
                 if (err) {
                     console.error('Error updating delivery status:', err);
                     return reject(err); // Reject the promise on error
@@ -150,9 +150,9 @@ class OrderService {
         });
     }
 
-    static async getOrderDetails(db, orderId) {
+    static async getOrderDetails(orderId) {
         return new Promise((resolve, reject) => {
-          selectOrderDetails(db, orderId, (err, result) => {
+          selectOrderDetails(orderId, (err, result) => {
             if (err) {
               console.error('Error fetching order details:', err);
               return reject(err);
@@ -162,9 +162,9 @@ class OrderService {
         });
       }
 
-      static async getOrderItems(db, orderId) {
+      static async getOrderItems(orderId) {
         return new Promise((resolve, reject) => {
-          selectOrderItems(db, orderId, (err, result) => {
+          selectOrderItems(orderId, (err, result) => {
             if (err) {
               console.error('Error fetching order details:', err);
               return reject(err);
@@ -174,9 +174,9 @@ class OrderService {
         });
       }
 
-    static async getCustomerDetails(db, orderId) {
+    static async getCustomerDetails(orderId) {
     return new Promise((resolve, reject) => {
-        getOrderCustomer(db, orderId, (err, result) => {
+        getOrderCustomer(orderId, (err, result) => {
         if (err) {
             console.error('Error fetching customer details:', err);
             return reject(err);
