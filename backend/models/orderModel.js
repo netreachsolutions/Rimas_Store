@@ -4,14 +4,14 @@ const { queryDatabase } = require('../config/pool');
 
 
 const createOrder = (orderData, callback) => {
-  const { customer_id, delivery_amount, total_weight } = orderData;
+  const { customer_id, order_amount, shipping_cost, total_weight } = orderData;
   // Log the values to verify they're correct
   console.log('customer_id:', customer_id);
-  console.log('deliveryAmount:', delivery_amount);
+  console.log('deliveryAmount:', shipping_cost);
   console.log('totalWeight:', total_weight);
-  const query = 'INSERT INTO orders (customer_id, delivery_amount, total_weight) VALUES (?, ?, ?)';
+  const query = 'INSERT INTO orders (customer_id, order_cost, shipping_cost, total_weight) VALUES (?, ?, ?, ?)';
   // return db.query(query, [customer_id, delivery_amount]);
-  queryDatabase(query, [customer_id, delivery_amount, total_weight], (err, results) => {
+  queryDatabase(query, [customer_id, order_amount, shipping_cost, total_weight], (err, results) => {
     if (err) return callback(err, null);  // Pass error to callback
     callback(null, results);              // Pass results to callback
   });
@@ -52,7 +52,7 @@ SELECT
   orders.order_id AS orderID,
   orders.created_at AS orderDateTime,
   CONCAT(customers.name) AS customerName,
-  TRIM(TRAILING '.00' FROM FORMAT(SUM(order_items.quantity * order_items.price) + orders.delivery_amount/100, 2)) AS totalAmount,
+  TRIM(TRAILING '.00' FROM FORMAT(SUM(order_items.quantity * order_items.price) + orders.order_cost/100, 2)) AS totalAmount,
   deliveries.delivery_status AS deliveryStatus
 FROM 
   orders
@@ -98,7 +98,8 @@ const getCustomerOrders = (customerId, callback) => {
     SELECT 
       o.order_id, 
       o.customer_id, 
-      o.delivery_amount, 
+      o.order_cost, 
+      o.shipping_cost,
       o.created_at,
       oi.order_item_id, 
       oi.product_id, 
@@ -150,7 +151,7 @@ const getCustomerOrders = (customerId, callback) => {
 
 const selectOrderDetails = (orderId, callback) => {
   const query = `
-  SELECT o.order_id, o.created_at, o.delivery_amount AS total, o.customer_id, o.total_weight,
+  SELECT o.order_id, o.created_at, o.order_cost, o.shipping_cost, o.customer_id, o.total_weight,
         c.name, c.email, c.phone_number,
         d.address_id, a.first_line, a.city, a.postcode, a.country, d.delivery_status, d.courier, d.tracking_id,
         p.payment_id, p.processor_id, p.amount AS payment_amount, p.currency

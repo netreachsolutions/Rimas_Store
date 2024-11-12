@@ -21,7 +21,7 @@ class PaymentService {
       let netWeight = 0;
       cartItems.forEach(item => {
         itemsAmount += item.price*100 * item.quantity; // Assuming each item has price and quantity fields
-        netWeight += item.product_weight;
+        netWeight += item.product_weight * item.quantity;
       });
 
       let shippingCost =2000;
@@ -33,7 +33,7 @@ class PaymentService {
 
       const totalAmount = itemsAmount + shippingCost;
 
-      return totalAmount;
+      return {totalAmount, shippingCost};
     } catch (error) {
       console.error('Error creating payment intent:', error);
       throw new Error(error.message);
@@ -45,17 +45,17 @@ class PaymentService {
       const cartItems = await CartService.viewCart(customerId);
 
       // Calculate the total amount
-      let totalAmount = 0;
-      cartItems.forEach(item => {
-        totalAmount += item.price*100 * item.quantity; // Assuming each item has price and quantity fields
-      });
+      // let totalAmount = 0;
+      // cartItems.forEach(item => {
+      //   totalAmount += item.price*100 * item.quantity; // Assuming each item has price and quantity fields
+      // });
 
-      const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
+      // const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
       // totalAmount += shippingCost; // Add shipping cost to the total amount
-      totalAmount =  await this.calculateCartTotal(customerId)
+      const {totalAmount} =  await this.calculateCartTotal(customerId)
 
       const params = {
-        payment_method_types: [paymentMethodType],
+        payment_method_types: [paymentMethodType, 'paypal'],
         amount: totalAmount, // Total amount in the smallest currency unit (e.g., cents)
         currency: currency,
       };
@@ -171,14 +171,15 @@ static async validatePaymentIntent(paymentIntentId) {
     try {
       const cartItems = await CartService.viewCart(customerId);
 
-      // Calculate the total amount
-      let totalAmount = 0;
-      cartItems.forEach(item => {
-        totalAmount += item.price*100 * item.quantity; // Assuming each item has price and quantity fields
-      });
+      // // Calculate the total amount
+      // let totalAmount = 0;
+      // cartItems.forEach(item => {
+      //   totalAmount += item.price*100 * item.quantity; // Assuming each item has price and quantity fields
+      // });
 
-      const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
-      totalAmount += shippingCost; // Add shipping cost to the total amount
+      // const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
+      // totalAmount += shippingCost; // Add shipping cost to the total amount
+      const {totalAmount} = await this.calculateCartTotal(customerId);
 
 
     const accessToken = await this.generateAccessToken();

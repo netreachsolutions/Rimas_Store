@@ -272,7 +272,7 @@ ORDER BY
   
 // };
 
-const getProductsByCategoryIdsAndPriceRange = (categoryIds, minPrice, maxPrice, callback) => {
+const getProductsByCategoryIdsAndPriceRange = (db, categoryIds, minPrice, maxPrice, callback) => {
   // First, get the category_group_id for each selected category_id
   const getCategoryGroupsQuery = `SELECT category_id, category_group_id FROM categories WHERE category_id IN (?)`;
 

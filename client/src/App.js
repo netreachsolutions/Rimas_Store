@@ -26,6 +26,7 @@ import { LoginProvider } from "./context/LoginContext";
 import { CartProvider } from "./context/CartContext";
 import { HistoryProvider } from './context/HistoryContext'; // Import your new context
 import MyOrders from "./components/MyOrders";
+import PaymentConfirmation from "./components/PaymentConfirmation";
 
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
 
             {/* protected routes */}
             <Route element={<ProtectedRoute />}>
+              <Route path="/payment-confirmation" element={<PaymentConfirmation/>} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<CheckoutPage />} />

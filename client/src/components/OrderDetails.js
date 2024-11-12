@@ -107,7 +107,7 @@ const OrderDetails = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className='bg-gray-100 rounded px-4 py-2'>
         <h3 className="text-xl font-semibold mb-2 text-gray-700 ">Customer Details</h3>
-            <p className="mb-2"><strong className="text-gray-600">Name:</strong> {orderDetails.first_name} {orderDetails.last_name}</p>
+            <p className="mb-2"><strong className="text-gray-600">Name:</strong> {orderDetails.name}</p>
             <p className="mb-2"><strong className="text-gray-600">Email:</strong> {orderDetails.email}</p>
             <p className="mb-2"><strong className="text-gray-600">Phone:</strong> {orderDetails.phone_number}</p>
           </div>
@@ -118,7 +118,7 @@ const OrderDetails = () => {
             <p className="mb-2"><strong className="text-gray-600">Delivery Status:</strong> {orderDetails.delivery_status}</p>
             <p className="mb-2"><strong className="text-gray-600">Courier:</strong> {orderDetails.courier}</p>
             <p className="mb-2"><strong className="text-gray-600">Tracking Number:</strong> {orderDetails.tracking_id}</p>
-            <p className="mb-2"><strong className="text-gray-600">Delivery Amount:</strong> £{(orderDetails.total/100).toFixed(2)}</p>
+            <p className="mb-2"><strong className="text-gray-600">Delivery Amount:</strong> £{(orderDetails.shipping_cost/100).toFixed(2)}</p>
 
 
           </div>

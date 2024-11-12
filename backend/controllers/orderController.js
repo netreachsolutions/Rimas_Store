@@ -27,17 +27,17 @@ exports.createOrder = async (req, res) => {
         }
 
         // Step 3: Calculate total price of the order (including shipping)
-        const totalAmount = cartItems.reduce((total, item) => total + (item.quantity * item.price * 100), 0);
+        // const totalAmount = cartItems.reduce((total, item) => total + (item.quantity * item.price * 100), 0);
         const totalWeight = cartItems.reduce((total, item) => total + (item.quantity * item.product_weight), 0);
-        const shippingCost = await paymentService.calculateCartTotal(customerId)
-        const finalTotalAmount = totalAmount + shippingCost;
+        const {totalAmount, shippingCost} = await paymentService.calculateCartTotal(customerId)
+        console.log(`TotalAmount: ${totalAmount}`)
 
         // Step 4: Create Order in the database (transaction)
-        const orderId = await orderService.createOrder(customerId, address_id, cartItems, finalTotalAmount, shippingCost, totalWeight);
+        const orderId = await orderService.createOrder(customerId, address_id, cartItems, totalAmount, shippingCost, totalWeight);
 
 
         // Step 5: Mark payment as completed and associate with the order
-        await paymentService.recordPayment(payment_intent, orderId, finalTotalAmount, currency);
+        await paymentService.recordPayment(payment_intent, orderId, totalAmount, currency);
 
         // Step 6: Clear the cart after order creation
         await CartService.clearCart(customerId);
@@ -90,14 +90,16 @@ exports.confirmPayapalOrder = async (req, res) => {
           // Retrieve the cart items for the customer
     const cartItems = await CartService.viewCart(customerId);
 
-      // Calculate the total amount in the cart
-      let totalAmount = 0;
-      cartItems.forEach(item => {
-        totalAmount += item.price * 100 * item.quantity; // Convert price to cents and sum up
-      });
+      // // Calculate the total amount in the cart
+      // let totalAmount = 0;
+      // cartItems.forEach(item => {
+      //   totalAmount += item.price * 100 * item.quantity; // Convert price to cents and sum up
+      // });
 
-      const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
-      totalAmount = (totalAmount*100) + shippingCost; // Add shipping cost to the total amount
+      // const shippingCost = 299; // Shipping cost in cents (2.99 GBP)
+      // totalAmount = (totalAmount*100) + shippingCost; // Add shipping cost to the total amount
+      const totalWeight = cartItems.reduce((total, item) => total + (item.quantity * item.product_weight), 0);
+      const {totalAmount, shippingCost} = await paymentService.calculateCartTotal(customerId);
 
       // Step 1: Validate Payment Intent
       const isPaymentValid = await paymentService.validatePaypalOrder(paypalOrderId, accessToken, totalAmount);
@@ -109,7 +111,7 @@ exports.confirmPayapalOrder = async (req, res) => {
       await paymentService.capturePaypalPayment(paypalOrderId, accessToken);
 
       // Step 4: Create Order in the database (transaction)
-      const orderId = await orderService.createOrder(db.promise(), customerId, address_id, cartItems, totalAmount, shippingCost);
+      const orderId = await orderService.createOrder(customerId, address_id, cartItems, totalAmount, shippingCost, totalWeight);
 
       // Step 5: Mark payment as completed and associate with the order
       await paymentService.recordPayment(paypalOrderId, orderId, totalAmount, currency);

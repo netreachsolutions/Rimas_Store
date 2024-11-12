@@ -443,6 +443,7 @@ const CheckoutPage = () => {
             deliveryDetails={deliveryDetails}
             cartId={cartId}
             setPaymentSuccess={setPaymentSuccess}
+            paymentMethod={paymentMethod}
           />
         </Elements>
       )}
@@ -470,20 +471,35 @@ const CheckoutPage = () => {
                 throw new Error('Order ID not found in server response');
               }           
             }}
-            onApprove={async (data) => {
+            onApprove={async (data, actions) => {
               const token = localStorage.getItem('token');
-              const response = await axios.post(
-                '/api/orders/confirm-paypal',
-                {                  
-                  paypalOrderId: data.orderID, 
-                  address_id: deliveryDetails.address_id, 
-                  currency: 'GBP'
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              const orderData = response.data; // Access the parsed data directly
-              setPaymentSuccess(true);
-              console.log("PayPal transaction completed", orderData);
+              console.log('data.orderID:', data.orderID);
+              console.log('deliveryDetails.address_id:', deliveryDetails.address_id);
+              console.log('token:', token);
+            
+              try {
+                const response = await axios.post(
+                  '/api/orders/confirm-paypal',
+                  {
+                    paypalOrderId: data.orderID,
+                    address_id: deliveryDetails.address_id,
+                    currency: 'GBP',
+                  },
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const orderData = response.data;
+                setPaymentSuccess(true);
+                console.log('PayPal transaction completed', orderData);
+              } catch (error) {
+                console.error('Error confirming PayPal payment:', error.response);
+                setPaymentSuccess(false);
+                // Display a user-friendly error message
+                if (error.response) {
+                  showAlert(error.response.data.error || 'Payment confirmation failed.', 'error');
+                } else {
+                  showAlert('An unexpected error occurred during payment confirmation.', 'error');
+                }
+              }
             }}
           />
         </PayPalScriptProvider>

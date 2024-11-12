@@ -21,7 +21,7 @@ const CheckoutForm = ({ clientSecret, deliveryDetails, cartId, setPaymentSuccess
       // Confirm the payment
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
-        confirmParams: {},
+        confirmParams: {return_url: 'http://localhost:3000/checkout',},
         redirect: 'if_required',
       });
 

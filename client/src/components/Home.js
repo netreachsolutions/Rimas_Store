@@ -105,6 +105,8 @@ const Home = () => {
                 maxPrice: null,
               },
             });
+            console.log('response')
+            console.log(response.data)
             return {
               ...section,
               products: response.data,

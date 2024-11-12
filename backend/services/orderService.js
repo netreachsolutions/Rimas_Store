@@ -73,7 +73,7 @@ class OrderService {
     static createOrder(customerId, addressId, cartItems, totalAmount, shippingCost, totalWeight) {
         return new Promise((resolve, reject) => {
             // Step 1: Create the order
-            createOrder({ customer_id: customerId, delivery_amount: shippingCost, total_weight: totalWeight }, (err, orderResult) => {
+            createOrder({ customer_id: customerId, order_amount: totalAmount, shipping_cost: shippingCost, total_weight: totalWeight }, (err, orderResult) => {
                 if (err) {
                     return reject('Order creation error: ' + err);
                 }

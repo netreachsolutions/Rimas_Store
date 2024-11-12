@@ -140,7 +140,7 @@ exports.getAllProducts = async (req, res) => {
     const { filters } = req.body;
     console.log('attemting to retrieve products by filters')
     try {
-        const products = await ProductService.getProductsWithFilters(filters);
+        const products = await ProductService.getProductsWithFilters(db, filters);
         console.log(products)
         res.json(products);
     } catch (error) {

@@ -125,7 +125,7 @@ class ProductService {
 
   }
 // The calling function in your service/controller
-static async getProductsWithFilters(filters) {
+static async getProductsWithFilters(db, filters) {
   console.log(filters);
   const { categoryIds, minPrice, maxPrice } = filters;
   console.log(filters)
@@ -139,7 +139,7 @@ static async getProductsWithFilters(filters) {
       })
     } else {
 
-      getProductsByCategoryIdsAndPriceRange(categoryIds, minPrice, maxPrice, (err, products) => {
+      getProductsByCategoryIdsAndPriceRange(db, categoryIds, minPrice, maxPrice, (err, products) => {
         if (err) {
           return reject(err);
         }
