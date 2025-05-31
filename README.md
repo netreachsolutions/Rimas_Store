@@ -40,6 +40,9 @@ A full‑stack monorepo that powers Rimas Store – a fashion e‑commerce site 
 
 # Database Tables Overview
 
+![alt text](https://github.com/netreachsolutions/Rimas_Store/blob/main/Ecommerce_UML.jpeg?raw=true)
+
+
 Below is a concise description of each table (and one view) in the Rimas Store schema. For each, you’ll find:
 
 - **Purpose:** High-level role in the application.
